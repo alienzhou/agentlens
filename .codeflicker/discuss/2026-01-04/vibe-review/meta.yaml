@@ -1,7 +1,7 @@
 # Discussion metadata
 topic: "Code Review Refactoring for Vibe Coding Era"
 created: 2026-01-04
-current_round: 9
+current_round: 10
 
 # Stale detection configuration
 max_stale_rounds: 3
@@ -50,6 +50,12 @@ decisions:
     confirmed_at: 5  # Confirmed in R5
     doc_path: null  # Simple decision, no separate document needed
 
+  - id: D12
+    title: "Product Interaction Flow"
+    status: confirmed
+    confirmed_at: 10  # Confirmed in R10
+    doc_path: ./decisions/D05-product-interaction-flow.md
+
 # Deferred issues
 deferred:
   - id: Q3
@@ -58,8 +64,12 @@ deferred:
     reason: "MVP phase focuses on 'understanding', trust measurement needs data accumulation"
     note: "Confidence field reserved in protocol"
 
-# Pending issues (cleared - all confirmed in R9)
-pending: []
+# Pending issues
+pending:
+  - id: Q4
+    title: "Session file paths and formats for each AI IDE"
+    added_at: 10
+    note: "Needs research for Cursor, Claude Code, Gemini CLI, OpenCode"
 
 # R9 new decisions (2026-01-26)
 # See: ../2026-01-26/contributor-detection/meta.yaml
@@ -80,3 +90,19 @@ r9_decisions:
     title: "Todo Item Definition - Agent Task Breakdown"
     confirmed_at: 9
     doc_path: ../2026-01-26/contributor-detection/outline.md
+
+# R10 decisions (2026-01-27)
+r10_decisions:
+  - id: D12
+    title: "Product Interaction Flow"
+    confirmed_at: 10
+    doc_path: ./decisions/D05-product-interaction-flow.md
+    summary: |
+      - Detection: Hybrid (directory + which command)
+      - Connection: Check Hook config in platform config file
+      - Undetected: Create directory, write config anyway
+      - Supported: Cursor, Cursor CLI, Claude Code, OpenCode, Gemini CLI
+      - Data Collection: Dual-track (Hook + Session monitoring)
+      - Blame Matching: Hunk-level Levenshtein (90%/70%)
+      - Blame Display: Contributor type + Agent + Session + TODOs
+      - Terminology: "Connect" instead of "Install"

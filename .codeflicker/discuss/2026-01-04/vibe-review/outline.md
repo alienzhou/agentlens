@@ -1,14 +1,14 @@
 # Discussion: Code Review Refactoring for Vibe Coding Era
 
-> Status: Converging | Round: R9 | Date: 2026-01-26
+> Status: Confirmed | Round: R10 | Date: 2026-01-27
 
 ## 🔵 Current Focus
 
-(All issues confirmed 🎉)
+(All major decisions confirmed for R10 🎉)
 
-## 🟪 To Discuss
+## ⚪ To Discuss
 
-(No new issues)
+- [ ] Session file paths and formats for each AI IDE (needs research)
 
 ## 🏸️ Deferred
 
@@ -31,6 +31,20 @@
 | 🔌 Data Acquisition Strategy | R5 | → [D02-data-acquisition-strategy](./decisions/D02-data-acquisition-strategy.md) |
 | 🔗 Skill and Rule Collaboration | R6 | → [D03-skill-rule-collaboration](./decisions/D03-skill-rule-collaboration.md) |
 | 🚀 MVP Strategy | R7 | → [D04-mvp-strategy](./decisions/D04-mvp-strategy.md) |
+| 🔄 Product Interaction Flow | R10 | → [D05-product-interaction-flow](./decisions/D05-product-interaction-flow.md) |
+
+### R10 Decisions Summary
+
+| Decision | Details |
+|----------|---------|
+| 🔍 Detection Strategy | Hybrid detection: Directory check + `which` command |
+| 🔗 Connection Status | Check if our Hook config exists in platform config file |
+| 📦 Undetected Handling | Create directory if not exists, then write config |
+| 🔧 Supported Agents | Cursor / Cursor CLI / Claude Code / OpenCode / Gemini CLI |
+| 📦 Data Collection | Dual-track: Hook capture + Session file monitoring |
+| 🎯 Blame Matching | Hunk-level Levenshtein (90%/70% thresholds) |
+| 📊 Blame Display | Contributor type + Source Agent + Session info + TODOs |
+| 🔗 Terminology | Use "Connect" instead of "Install" (connect to AI Agent) |
 
 ## ❌ Rejected
 
@@ -104,6 +118,7 @@ Layer 1: Tool Layer ✅ Confirmed
 | R5 | Data Acquisition Strategy | Two choices → Hook+Skill Dual-Track |
 | R6 | Skill and Rule Collaboration | Confirmed collaboration approach |
 | R7 | MVP Strategy | Direct product → phased validation |
+| R10 | Product Interaction Flow | Confirmed complete VS Code plugin flow |
 
 ### Discussion History
 
@@ -118,6 +133,7 @@ Layer 1: Tool Layer ✅ Confirmed
 | R6 | Confirmed Skill and Rule collaboration approach (Rule location, trigger method, Skill granularity, version management) |
 | R7 | Confirmed MVP strategy (phased, data model, multi-Hunk combination, TODO bidirectional index) |
 | R8 | Deferred Q3 (trust measurement), added Q8 (open source strategy) |
+| R10 | Confirmed product interaction flow: detection, connection, data collection, Blame display |
 
 ---
 
@@ -131,7 +147,8 @@ Layer 1: Tool Layer ✅ Confirmed
 │   ├── D01-agent-review-protocol.md        ← Protocol detailed documentation
 │   ├── D02-data-acquisition-strategy.md    ← Data acquisition strategy
 │   ├── D03-skill-rule-collaboration.md     ← Skill and Rule collaboration
-│   └── D04-mvp-strategy.md                 ← MVP strategy
+│   ├── D04-mvp-strategy.md                 ← MVP strategy
+│   └── D05-product-interaction-flow.md     ← Product interaction flow (R10)
 └── notes/
     └── README.md                           ← Technical solution overview
 ```
