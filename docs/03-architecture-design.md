@@ -2,7 +2,7 @@
 
 **Document Version**: v1.0  
 **Created Date**: 2026-01-04  
-**Last Updated**: 2026-01-04
+**Last Updated**: 2026-01-26
 
 ---
 
@@ -95,6 +95,7 @@ interface GitIntegration {
   getDiff(commitHash?: string): GitDiff[];
   getFileHistory(filePath: string): FileHistory[];
   getBranchInfo(): BranchInfo;
+  getBlame(filePath: string): BlameInfo[];
 }
 ```
 
@@ -102,6 +103,54 @@ interface GitIntegration {
 - Provides structured Git data
 - Good cross-platform compatibility
 - Simple and easy-to-use API
+
+#### 2.2.4 Contributor Detection Module
+
+Based on Hunk-level similarity matching to determine code contributor (AI generated vs human written).
+
+**Configuration Constants**:
+```typescript
+// config/similarity.ts
+export const SIMILARITY_CONFIG = {
+  THRESHOLD_PURE_AI: 0.90,        // >= 90% determined as pure AI generation
+  THRESHOLD_AI_MODIFIED: 0.70,    // 70-90% determined as AI generation but human modified
+  MATCHING_GRANULARITY: 'hunk' as const,
+  ALGORITHM: 'levenshtein' as const,
+};
+```
+
+**Detection Interface**:
+```typescript
+interface ContributorDetector {
+  detect(hunk: GitHunk, agentRecords: AgentRecord[]): ContributorResult;
+  batchDetect(hunks: GitHunk[], agentRecords: AgentRecord[]): ContributorResult[];
+}
+
+interface ContributorResult {
+  hunkId: string;
+  contributor: 'ai' | 'ai_modified' | 'human';
+  similarity: number;
+  matchedRecord?: AgentRecord;
+  confidence: number;
+}
+
+interface SimilarityMatcher {
+  calculate(source: string, target: string): number;
+  algorithm: 'levenshtein' | 'cosine' | 'jaccard';
+}
+```
+
+**Detection Flow**:
+```mermaid
+graph TD
+    A["Git Hunk"] --> B["Get Agent Records"]
+    B --> C["Similarity Calculation"]
+    C --> D{"Similarity >= 90%?"}
+    D -->|"Yes"| E["AI Generated"]
+    D -->|"No"| F{"Similarity >= 70%?"}
+    F -->|"Yes"| G["AI + Human Modified"]
+    F -->|"No"| H["Human Contribution"]
+```
 
 ### 2.3 Data Flow Design
 
@@ -407,6 +456,46 @@ interface StandalonePanel {
 - React + TypeScript
 - Electron (desktop application)
 - Web version (browser)
+
+#### 5.2.5 MVP Interaction Design
+
+Based on **floating window display + command hints** approach for MVP phase:
+
+```typescript
+interface FloatingWindow {
+  show(position: Position, content: ContributorInfo): void;
+  hide(): void;
+  getCommandHints(agent: string): CommandHint[];
+}
+
+interface ContributorInfo {
+  source: SessionSource;
+  contributor: ContributorResult;
+  todoContext?: string;
+  commandHints: CommandHint[];
+}
+
+interface CommandHint {
+  agent: string;
+  command: string;
+  description: string;
+}
+```
+
+**Floating Window Content**:
+```
+┌─────────────────────────────────────┐
+│ 📍 Source: Cursor Session #abc123   │
+│ 📝 Conversation: Round #3           │
+│ 🎯 TODO: Implement login verification│
+│                                     │
+│ 💡 Jump Commands:                   │
+│ Cursor: Ctrl+K → @history abc...    │
+│ Claude: /goto conversation abc...   │
+└─────────────────────────────────────┘
+```
+
+**Note**: Direct jump not implemented in MVP, users can manually execute commands based on hints.
 
 ---
 

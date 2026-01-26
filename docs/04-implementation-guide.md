@@ -2,7 +2,7 @@
 
 **Document Version**: v1.0  
 **Created Date**: 2026-01-04  
-**Last Updated**: 2026-01-04
+**Last Updated**: 2026-01-26
 
 ---
 
@@ -170,6 +170,30 @@ export interface TodoReference {
   context: string;
   lineNumber?: number;
 }
+
+// Contributor Detection Types
+export interface AgentRecord {
+  sessionId: string;
+  hunks: GitHunk[];
+  timestamp: number;
+  agent: string;
+}
+
+export interface ContributorResult {
+  hunkId: string;
+  contributor: 'ai' | 'ai_modified' | 'human';
+  similarity: number;
+  matchedRecord?: AgentRecord;
+  confidence: number;
+}
+
+// Similarity Configuration
+export const SIMILARITY_CONFIG = {
+  THRESHOLD_PURE_AI: 0.90,        // >= 90% determined as pure AI generation
+  THRESHOLD_AI_MODIFIED: 0.70,    // 70-90% determined as AI generation but human modified
+  MATCHING_GRANULARITY: 'hunk' as const,
+  ALGORITHM: 'levenshtein' as const,
+};
 ```
 
 #### 2.1.2 Data Storage
@@ -337,6 +361,124 @@ export class CursorAdapter implements AgentAdapter {
       });
     }
   }
+}
+```
+
+#### 2.2.3 Contributor Detector
+
+```typescript
+// packages/hook/src/detection/ContributorDetector.ts
+
+import { SIMILARITY_CONFIG, ContributorResult, AgentRecord, GitHunk } from '@vibe-review/core';
+
+export class ContributorDetector {
+  private matcher: SimilarityMatcher;
+
+  constructor(matcher?: SimilarityMatcher) {
+    this.matcher = matcher || new LevenshteinMatcher();
+  }
+
+  detect(hunk: GitHunk, agentRecords: AgentRecord[]): ContributorResult {
+    let bestMatch: { record: AgentRecord; similarity: number } | null = null;
+
+    for (const record of agentRecords) {
+      for (const recordHunk of record.hunks) {
+        if (recordHunk.filePath !== hunk.filePath) continue;
+        
+        const similarity = this.matcher.calculate(hunk.content, recordHunk.content);
+        
+        if (!bestMatch || similarity > bestMatch.similarity) {
+          bestMatch = { record, similarity };
+        }
+      }
+    }
+
+    if (!bestMatch) {
+      return {
+        hunkId: this.generateHunkId(hunk),
+        contributor: 'human',
+        similarity: 0,
+        confidence: 1.0,
+      };
+    }
+
+    const { record, similarity } = bestMatch;
+    
+    let contributor: 'ai' | 'ai_modified' | 'human';
+    if (similarity >= SIMILARITY_CONFIG.THRESHOLD_PURE_AI) {
+      contributor = 'ai';
+    } else if (similarity >= SIMILARITY_CONFIG.THRESHOLD_AI_MODIFIED) {
+      contributor = 'ai_modified';
+    } else {
+      contributor = 'human';
+    }
+
+    return {
+      hunkId: this.generateHunkId(hunk),
+      contributor,
+      similarity,
+      matchedRecord: contributor !== 'human' ? record : undefined,
+      confidence: this.calculateConfidence(similarity),
+    };
+  }
+
+  batchDetect(hunks: GitHunk[], agentRecords: AgentRecord[]): ContributorResult[] {
+    return hunks.map(hunk => this.detect(hunk, agentRecords));
+  }
+
+  private generateHunkId(hunk: GitHunk): string {
+    return `${hunk.filePath}:${hunk.newStart}-${hunk.newLines}`;
+  }
+
+  private calculateConfidence(similarity: number): number {
+    // Higher similarity = higher confidence
+    if (similarity >= 0.95) return 1.0;
+    if (similarity >= 0.85) return 0.9;
+    if (similarity >= 0.75) return 0.8;
+    return 0.7;
+  }
+}
+
+// Levenshtein Edit Distance Similarity Matcher
+export class LevenshteinMatcher implements SimilarityMatcher {
+  algorithm = 'levenshtein' as const;
+
+  calculate(source: string, target: string): number {
+    if (source === target) return 1.0;
+    if (source.length === 0 || target.length === 0) return 0;
+
+    const matrix: number[][] = [];
+
+    for (let i = 0; i <= target.length; i++) {
+      matrix[i] = [i];
+    }
+    for (let j = 0; j <= source.length; j++) {
+      matrix[0][j] = j;
+    }
+
+    for (let i = 1; i <= target.length; i++) {
+      for (let j = 1; j <= source.length; j++) {
+        if (target.charAt(i - 1) === source.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j - 1] + 1, // substitution
+            matrix[i][j - 1] + 1,     // insertion
+            matrix[i - 1][j] + 1      // deletion
+          );
+        }
+      }
+    }
+
+    const distance = matrix[target.length][source.length];
+    const maxLength = Math.max(source.length, target.length);
+    return 1 - distance / maxLength;
+  }
+}
+
+interface SimilarityMatcher {
+  algorithm: 'levenshtein' | 'cosine' | 'jaccard';
+  calculate(source: string, target: string): number;
 }
 ```
 

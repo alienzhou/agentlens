@@ -2,7 +2,7 @@
 
 **Document Version**: v1.0  
 **Created Date**: 2026-01-04  
-**Last Updated**: 2026-01-04
+**Last Updated**: 2026-01-26
 
 ---
 
@@ -200,18 +200,198 @@ Adopt **Phased Strategy**:
 
 ---
 
-## Pending Decisions
+## ADR-005: Open Source Strategy
 
-### Open Source Strategy (ADR-005)
-**Status**: ❓ **To Be Confirmed**
+### Status
+✅ **Decided** (2026-01-26)
 
-**Question**: Should the Product Delivery Layer be open source?
+### Context
+Vibe Review is positioned as an open standard and tool, needing to determine open source scope and license selection to promote community adoption.
 
-**Proposed Approach**:
-- Open Source: Protocol specification, Tool Layer, Product Core Layer
-- To Be Confirmed: Product Delivery Layer (VS Code plugin, GitLens integration, etc.)
+### Decision Content
+- **License**: MIT
+- **Scope**: Full open source (all 4 layers)
 
-**Impact**: Affects business model and community ecosystem development
+| Layer | Description | Open Source |
+|-------|-------------|-------------|
+| Protocol Specification | Agent Review Protocol v0.3 | ✅ Yes |
+| Tool Layer | Collection tools, CLI utilities | ✅ Yes |
+| Product Core Layer | Core business logic, data processing | ✅ Yes |
+| Product Delivery Layer | VSCode extension, UI components | ✅ Yes |
+
+### Alternatives
+1. **Partial Open Source**: Only open source protocol specification and tool layer
+2. **Dual License**: Core open source, commercial license for enterprise features
+3. **Delayed Decision**: Wait for community growth before deciding
+
+### Decision Rationale
+1. **Community Adoption**: MIT license is business-friendly, beneficial for ecosystem building
+2. **Transparency**: Full open source allows community to audit and contribute
+3. **Ecosystem Growth**: Encourages other Agent products to integrate with the protocol
+4. **Early Stage**: Project is in early stage, community building is more important than commercial considerations
+
+### Impact
+- **Positive Impact**:
+  - Accelerate community adoption
+  - Build ecosystem trust
+  - Attract more contributors
+- **Negative Impact**:
+  - Future commercial model may be limited
+  - Need to maintain complete codebase publicly
+
+---
+
+## ADR-006: Contributor Detection Mechanism
+
+### Status
+✅ **Decided** (2026-01-26)
+
+### Context
+Git author information is unreliable (all commits are from human accounts), need to establish a mechanism to distinguish whether code is AI-generated or human-written based on code content similarity matching.
+
+### Decision Content
+Use **Hunk-level similarity matching** to determine code contributor:
+
+**Detection Process**:
+```
+Step 1: Get Git blame (line-level precision)
+        → Get commit info for each line
+Step 2: For hunks involved in commit
+        → Similarity match with collected Agent generation records
+Step 3: Decision logic
+        ├─ Similarity >= 90%  → "AI Generated"
+        ├─ Similarity 70-90% → "AI Generated (Human Modified)"
+        ├─ Similarity < 70%  → "Human Contribution"
+        └─ No matching record → "Human Contribution"
+```
+
+**Configuration**:
+| Decision Item | Choice | Notes |
+|---------------|--------|-------|
+| Matching Granularity | **Hunk Level** | Aligns with Git diff, balances precision and performance |
+| Similarity Algorithm | **Levenshtein Edit Distance** | Simple and reliable, can be upgraded later |
+| Threshold Configuration | **Configurable**, set fixed defaults | 90% (Pure AI) / 70% (AI+Modified) |
+| Boundary Display | Distinguish "Pure AI" and "AI+Human Modified" | Provide users with clear contributor info |
+
+### Alternatives
+1. **Line-Level Matching**: Higher precision but more complex, prone to noise interference
+2. **File-Level Matching**: Simpler but too coarse-grained, can't distinguish partial modifications
+3. **AST-Based Matching**: Semantic-level matching, higher complexity but more accurate
+
+### Decision Rationale
+1. **Git Alignment**: Hunk is the natural unit in Git diff
+2. **Performance Balance**: Hunk-level is more efficient than line-level, more precise than file-level
+3. **Simplicity**: Levenshtein algorithm is simple and reliable, easy to implement and debug
+4. **Iterability**: Threshold configuration supports later adjustments and optimization
+
+### Impact
+- **Positive Impact**:
+  - Clearly distinguish AI/human code contributions
+  - Provide accurate contribution statistics
+  - Help Review focus on appropriate content
+- **Negative Impact**:
+  - Similarity algorithm may have edge case errors
+  - Need to store Agent generation records for comparison
+
+---
+
+## ADR-007: MVP Interaction Strategy
+
+### Status
+✅ **Decided** (2026-01-26)
+
+### Context
+Different Agent products (Cursor, Claude Code, Windsurf, etc.) have different jump methods, need to determine interaction approach for MVP phase.
+
+### Decision Content
+MVP phase adopts **floating window display + command hints** approach:
+
+```
+Click on AI-generated code line → Pop up floating window
+┌─────────────────────────────────────┐
+│ 📍 Source: Cursor Session #abc123   │
+│ 📝 Conversation: Round #3           │
+│ 🎯 TODO: Implement login verification│
+│                                     │
+│ 💡 Jump Commands:                   │
+│ Cursor: Ctrl+K → @history abc...    │
+│ Claude: /goto conversation abc...   │
+└─────────────────────────────────────┘
+```
+
+| Decision Item | Choice | Notes |
+|---------------|--------|-------|
+| MVP Jump | **Do Not Implement Direct Jump** | Different product jump methods not unified |
+| Interaction Method | **Floating Window Display Info + Command Hints** | Provide users with enough info to jump manually |
+| Command Template System | **Implement After MVP** | Currently focus on core features |
+
+### Alternatives
+1. **Direct Jump Implementation**: Support jump for each Agent product
+2. **Only Display Info**: No command hints provided
+3. **Plugin System**: Let community implement jump plugins for each Agent
+
+### Decision Rationale
+1. **Product Diversity**: Different Agent products have very different jump methods
+2. **MVP Focus**: MVP phase should focus on core features (collection + display)
+3. **User Empowerment**: Provide sufficient context information, let users decide how to trace
+
+### Impact
+- **Positive Impact**:
+  - Reduce MVP development complexity
+  - Maintain flexibility for different Agent products
+- **Negative Impact**:
+  - Users need manual operations for jumping
+  - Experience is not as smooth as direct jump
+
+---
+
+## ADR-008: Todo Item Definition
+
+### Status
+✅ **Decided** (2026-01-26)
+
+### Context
+Need to clarify what "Todo items" mean in the context of Vibe Review system.
+
+### Decision Content
+**Confirmed**: Todo items refer to **task breakdown generated by Agent itself**
+
+| Agent | Representation Form |
+|-------|---------------------|
+| Cursor | Task breakdown list, step planning |
+| Claude | Step-by-step execution plan |
+| Other Agents | Similar task decomposition output |
+
+**Example**:
+When an Agent receives a task like "Implement user login", it may break it down to:
+```
+1. Create login form component
+2. Add form validation logic
+3. Implement API call to auth endpoint
+4. Handle success/error responses
+5. Add session storage
+```
+
+These breakdown items are what we call "Todo items".
+
+### Alternatives
+1. **User-defined TODO**: TODO comments marked by users in code
+2. **Review TODO**: Pending items generated during Review process
+3. **Mixed Definition**: Include all of the above
+
+### Decision Rationale
+1. **Source Clarity**: Clearly associate with Agent execution context
+2. **Traceability**: Can trace back to original conversation and session
+3. **Scope Definition**: Avoid confusion with traditional TODO concepts
+
+### Impact
+- **Positive Impact**:
+  - Clear data model definition
+  - Easy to trace Agent execution flow
+  - Provide context for Review
+- **Negative Impact**:
+  - Need to parse Agent's task breakdown output
+  - Different Agent output formats need adaptation
 
 ---
 

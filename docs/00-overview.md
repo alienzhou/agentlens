@@ -4,7 +4,7 @@
 **Project Type**: Code Review Tool  
 **Development Stage**: Design Completed, Ready for Implementation  
 **Document Version**: v1.0  
-**Last Updated**: 2026-01-04
+**Last Updated**: 2026-01-26
 
 ---
 
@@ -37,6 +37,8 @@ A combination of product features + tools + standard specifications, providing a
 - **Hook + Skill Dual-Track System**: Passive collection of execution chain + active generation of protocol content
 - **ReviewUnit Concept**: Multi-hunk combination + annotations + TODO association
 - **TODO Bidirectional Index**: Support click-to-navigate to conversations
+- **Contributor Detection**: Hunk-level similarity matching (Levenshtein algorithm, 90%/70% thresholds)
+- **Open Source Strategy**: MIT license, full 4-layer open source
 
 ### Technical Architecture
 4-layer architecture design:

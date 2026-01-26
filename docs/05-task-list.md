@@ -2,7 +2,7 @@
 
 **Document Version**: v1.0  
 **Created Date**: 2026-01-04  
-**Last Updated**: 2026-01-04
+**Last Updated**: 2026-01-26
 
 ---
 
@@ -95,9 +95,45 @@ Establish data collection and fusion capabilities, providing unified data interf
 **Owner**: TBD  
 **Dependencies**: 2.2 Cursor Adapter
 
-#### 3. Skill System Implementation (Week 2)
+#### 3. Contributor Detection System (Week 2)
 
-**3.1 Skill Core**
+**3.1 Similarity Matcher**
+- [ ] Implement `LevenshteinMatcher` class
+- [ ] Implement similarity calculation algorithm
+- [ ] Support configurable thresholds (90%/70%)
+- [ ] Write similarity calculation unit tests
+
+**Priority**: P0  
+**Estimated Time**: 2 days  
+**Owner**: TBD  
+**Dependencies**: 1.2 Core Data Model
+
+**3.2 Contributor Detector**
+- [ ] Implement `ContributorDetector` class
+- [ ] Implement Hunk-level matching logic
+- [ ] Support batch detection
+- [ ] Integrate with Git blame data
+- [ ] Write contributor detection tests
+
+**Priority**: P0  
+**Estimated Time**: 3 days  
+**Owner**: TBD  
+**Dependencies**: 3.1 Similarity Matcher, 1.3 Git Integration
+
+**3.3 Agent Record Storage**
+- [ ] Design Agent record storage format
+- [ ] Implement record indexing for fast lookup
+- [ ] Support record expiration and cleanup
+- [ ] Write storage tests
+
+**Priority**: P1  
+**Estimated Time**: 2 days  
+**Owner**: TBD  
+**Dependencies**: 1.2 Core Data Model
+
+#### 4. Skill System Implementation (Week 2-3)
+
+**4.1 Skill Core**
 - [ ] Implement `vibe-review-core` Skill template
 - [ ] Implement `ProtocolValidator` validator
 - [ ] Support Agent Skills protocol format
@@ -108,7 +144,7 @@ Establish data collection and fusion capabilities, providing unified data interf
 **Owner**: TBD  
 **Dependencies**: 1.2 Core Data Model
 
-**3.2 Protocol Parser**
+**4.2 Protocol Parser**
 - [ ] Implement Markdown protocol parsing
 - [ ] Support Agent Review Protocol v0.3 format
 - [ ] Implement protocol content validation
@@ -117,9 +153,9 @@ Establish data collection and fusion capabilities, providing unified data interf
 **Priority**: P0  
 **Estimated Time**: 3 days  
 **Owner**: TBD  
-**Dependencies**: 3.1 Skill Core
+**Dependencies**: 4.1 Skill Core
 
-**3.3 Optional Skills**
+**4.3 Optional Skills**
 - [ ] Implement `vibe-review-impact` Skill
 - [ ] Implement `vibe-review-alternatives` Skill
 - [ ] Design Skill dependency management
@@ -128,11 +164,11 @@ Establish data collection and fusion capabilities, providing unified data interf
 **Priority**: P2  
 **Estimated Time**: 2 days  
 **Owner**: TBD  
-**Dependencies**: 3.2 Protocol Parser
+**Dependencies**: 4.2 Protocol Parser
 
-#### 4. Data Fusion Engine (Week 2-3)
+#### 5. Data Fusion Engine (Week 3)
 
-**4.1 Fusion Core Logic**
+**5.1 Fusion Core Logic**
 - [ ] Implement `DataFusion` class
 - [ ] Implement conflict detection algorithms
 - [ ] Implement conflict resolution strategies
@@ -141,9 +177,9 @@ Establish data collection and fusion capabilities, providing unified data interf
 **Priority**: P0  
 **Estimated Time**: 4 days  
 **Owner**: TBD  
-**Dependencies**: 2.1 Hook Core, 3.2 Protocol Parser
+**Dependencies**: 2.1 Hook Core, 4.2 Protocol Parser
 
-**4.2 Data Validation**
+**5.2 Data Validation**
 - [ ] Implement data integrity checks
 - [ ] Implement data consistency validation
 - [ ] Add data quality scoring
@@ -152,22 +188,23 @@ Establish data collection and fusion capabilities, providing unified data interf
 **Priority**: P1  
 **Estimated Time**: 2 days  
 **Owner**: TBD  
-**Dependencies**: 4.1 Fusion Core Logic
+**Dependencies**: 5.1 Fusion Core Logic
 
-#### 5. Terminal Output (Week 3)
+#### 6. Terminal Output (Week 3)
 
-**5.1 Basic Renderer**
+**6.1 Basic Renderer**
 - [ ] Implement `TerminalDiffRenderer` class
 - [ ] Support colored output and formatting
 - [ ] Implement ReviewUnit rendering
+- [ ] **Add contributor info display** (AI/AI+Modified/Human)
 - [ ] Write renderer tests
 
 **Priority**: P0  
 **Estimated Time**: 3 days  
 **Owner**: TBD  
-**Dependencies**: 4.1 Fusion Core Logic
+**Dependencies**: 5.1 Fusion Core Logic, 3.2 Contributor Detector
 
-**5.2 Output Format Support**
+**6.2 Output Format Support**
 - [ ] Implement Markdown output format
 - [ ] Implement JSON output format
 - [ ] Support output to file
@@ -176,7 +213,7 @@ Establish data collection and fusion capabilities, providing unified data interf
 **Priority**: P1  
 **Estimated Time**: 2 days  
 **Owner**: TBD  
-**Dependencies**: 5.1 Basic Renderer
+**Dependencies**: 6.1 Basic Renderer
 
 ### 🔄 Temporary Tasks
 
@@ -215,6 +252,7 @@ Validate data model effectiveness and helpfulness of data to Review through CLI 
 - [ ] Implement `vibe-review diff --annotated` command
 - [ ] Support multiple output formats (terminal/markdown/json)
 - [ ] Add filtering and search functionality
+- [ ] **Display contributor info (AI/AI+Modified/Human) in diff output**
 - [ ] Write diff command tests
 
 **1.3 review command**
@@ -223,15 +261,29 @@ Validate data model effectiveness and helpfulness of data to Review through CLI 
 - [ ] Add approve/reject/comment functionality
 - [ ] Write review command tests
 
-#### 2. Data Validation
+#### 2. Contributor Detection Validation
 
-**2.1 Real Data Testing**
+**2.1 Detection Accuracy Testing**
+- [ ] Test contributor detection on real AI-generated code
+- [ ] Verify threshold settings (90%/70%) effectiveness
+- [ ] Measure false positive/negative rates
+- [ ] Tune thresholds based on test results
+
+**2.2 Edge Case Testing**
+- [ ] Test partial code modifications
+- [ ] Test code reformatting scenarios
+- [ ] Test multi-round editing scenarios
+- [ ] Document edge case handling
+
+#### 3. Data Validation
+
+**3.1 Real Data Testing**
 - [ ] Test data collection in real projects
 - [ ] Verify protocol content accuracy
 - [ ] Collect user feedback and improvement suggestions
 - [ ] Record data quality metrics
 
-**2.2 Performance Testing**
+**3.2 Performance Testing**
 - [ ] Test data processing performance for large projects
 - [ ] Optimize data storage and query efficiency
 - [ ] Add performance monitoring and reporting
