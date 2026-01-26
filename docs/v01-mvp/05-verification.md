@@ -35,7 +35,7 @@ This checklist records key points identified during design and development that 
 
 **Timer/Listener Cleanup**
 - [ ] Are event listeners in Hook system cleaned up when session ends
-- [ ] Are event listeners in VS Code plugin cleaned up when plugin uninstalls
+- [ ] Are event listeners in VS Code plugin cleaned up when plugin disconnects
 - [ ] Are scheduled tasks (such as data synchronization) properly stopped
 - [ ] Are WebSocket connections (if any) properly closed
 
@@ -120,7 +120,7 @@ This checklist records key points identified during design and development that 
 **Repeated Operations**
 - [ ] Idempotency of repeatedly executing same command
 - [ ] Deduplication when generating same ReviewUnit repeatedly
-- [ ] Handling of repeated plugin installation
+- [ ] Handling of repeated agent connection
 - [ ] Behavior of repeated project initialization
 
 **Interrupt Recovery**

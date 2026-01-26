@@ -2,7 +2,7 @@
 
 **Document Version**: v1.0  
 **Created Date**: 2026-01-04  
-**Last Updated**: 2026-01-26
+**Last Updated**: 2026-01-27
 
 ---
 
@@ -131,40 +131,38 @@ Establish data collection and fusion capabilities, providing unified data interf
 **Owner**: TBD  
 **Dependencies**: 1.2 Core Data Model
 
-#### 4. Skill System Implementation (Week 2-3)
+#### 4. Session Monitoring (Week 2-3)
 
-**4.1 Skill Core**
-- [ ] Implement `vibe-review-core` Skill template
-- [ ] Implement `ProtocolValidator` validator
-- [ ] Support Agent Skills protocol format
-- [ ] Write Skill parsing tests
+**4.1 Session File Watcher**
+- [ ] Implement session file detection for each platform
+- [ ] Implement file change watcher
+- [ ] Parse session file format (JSON/JSONL)
+- [ ] Write session parsing tests
 
 **Priority**: P0  
 **Estimated Time**: 3 days  
 **Owner**: TBD  
-**Dependencies**: 1.2 Core Data Model
+**Dependencies**: 2.1 Hook Core
 
-**4.2 Protocol Parser**
-- [ ] Implement Markdown protocol parsing
-- [ ] Support Agent Review Protocol v0.3 format
-- [ ] Implement protocol content validation
+**4.2 Session Data Parser**
+- [ ] Parse conversation history
+- [ ] Extract TODO items from session
+- [ ] Extract tool call records
 - [ ] Write parser tests
 
 **Priority**: P0  
-**Estimated Time**: 3 days  
-**Owner**: TBD  
-**Dependencies**: 4.1 Skill Core
-
-**4.3 Optional Skills**
-- [ ] Implement `vibe-review-impact` Skill
-- [ ] Implement `vibe-review-alternatives` Skill
-- [ ] Design Skill dependency management
-- [ ] Write optional Skills documentation
-
-**Priority**: P2  
 **Estimated Time**: 2 days  
 **Owner**: TBD  
-**Dependencies**: 4.2 Protocol Parser
+**Dependencies**: 4.1 Session File Watcher
+
+> **Post-MVP: Skill System**
+> 
+> The following tasks are deferred to Post-MVP phase:
+> - `vibe-review-core` Skill template (protocol generation)
+> - `vibe-review-impact` Skill (impact analysis)
+> - `vibe-review-alternatives` Skill (alternative suggestions)
+> - Agent Skills protocol integration
+> - Skill dependency management
 
 #### 5. Data Fusion Engine (Week 3)
 
@@ -230,6 +228,14 @@ Establish data collection and fusion capabilities, providing unified data interf
 #### External Coordination
 - [ ] **Contact Cursor Team**: Understand latest progress of AGENTS framework
 - [ ] **Community Research**: Research implementation approaches of other AI Code Review tools
+
+#### Research Items (R10 Pending)
+- [ ] **Session File Paths**: Research session file paths and formats for each AI IDE
+  - Cursor: Session file location and format
+  - Claude Code: Session file location and format
+  - OpenCode: Session file location and format
+  - Gemini CLI: Session file location and format
+  - Priority: P1 (Required for dual-track data collection)
 
 ---
 
@@ -350,7 +356,57 @@ Provide multiple product forms, including VS Code plugin, GitLens integration, e
 
 ### 📋 Development Tasks
 
-#### 1. VS Code Plugin
+#### 1. VS Code Plugin (R10 Confirmed)
+
+**1.1 Agent Detection System**
+- [ ] Implement `AgentDetector` class with hybrid detection (directory + `which` command)
+- [ ] Support detection for: Cursor, Cursor CLI, Claude Code, OpenCode, Gemini CLI
+- [ ] Implement connection status checking
+- [ ] Write detection tests
+
+**Priority**: P0  
+**Estimated Time**: 3 days  
+**Owner**: TBD  
+**Dependencies**: None
+
+**1.2 Agent Connection System**
+- [ ] Implement `AgentConnector` class
+- [ ] Write Hook config to platform config files
+- [ ] Create config directories if not exist
+- [ ] Support Connect/Disconnect operations
+- [ ] Write connection tests
+
+**Priority**: P0  
+**Estimated Time**: 3 days  
+**Owner**: TBD  
+**Dependencies**: 1.1 Agent Detection
+
+**1.3 Dual-Track Data Collection**
+- [ ] Implement Hook capture for file edits
+- [ ] Implement Session file monitoring
+- [ ] Merge data from both tracks
+- [ ] Store data in `.vibe-review/data/`
+- [ ] Write data collection tests
+
+**Priority**: P0  
+**Estimated Time**: 4 days  
+**Owner**: TBD  
+**Dependencies**: 1.2 Agent Connection
+
+**1.4 Blame View Display**
+- [ ] Implement GitLens-style Blame view
+- [ ] Show contributor type (AI / AI+Modified / Human)
+- [ ] Display source Agent and session info
+- [ ] Show related TODO items
+- [ ] Implement floating window with command hints
+- [ ] Write display tests
+
+**Priority**: P0  
+**Estimated Time**: 5 days  
+**Owner**: TBD  
+**Dependencies**: 1.3 Dual-Track Data Collection, Contributor Detection
+
+**1.5 VS Code Extension Infrastructure**
 - [ ] Develop VS Code extension
 - [ ] Implement sidebar panel
 - [ ] Add inline code annotations
@@ -464,8 +520,8 @@ Provide multiple product forms, including VS Code plugin, GitLens integration, e
 | Milestone | Target Date | Status | Key Deliverables |
 |-----------|-------------|--------|------------------|
 | M1: Project Infrastructure Complete | 2026-01-11 | ⏳ Not Started | Monorepo, CI/CD, data models |
-| M2: Hook System Complete | 2026-01-18 | ⏳ Not Started | HookCore, CursorAdapter |
-| M3: Skill System Complete | 2026-01-21 | ⏳ Not Started | vibe-review-core Skill |
+| M2: Hook System Complete | 2026-01-18 | ⏳ Not Started | HookCore, Adapters |
+| M3: Session Monitoring Complete | 2026-01-21 | ⏳ Not Started | Session file watcher, parser |
 | M4: Data Fusion Complete | 2026-01-25 | ⏳ Not Started | DataFusion, terminal output |
 | M5: CLI Tool Complete | 2026-02-08 | ⏳ Not Started | diff/review commands |
 | M6: Data Validation Complete | 2026-02-15 | ⏳ Not Started | Real project testing |
@@ -479,7 +535,7 @@ Provide multiple product forms, including VS Code plugin, GitLens integration, e
 
 **Week 2 (2026-01-13 ~ 2026-01-19)**
 - [ ] Complete Hook system core functionality
-- [ ] Start Skill system development
+- [ ] Start Session monitoring development
 - [ ] Complete Cursor adapter
 
 **Week 3 (2026-01-20 ~ 2026-01-26)**
