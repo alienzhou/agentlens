@@ -1,0 +1,10 @@
+node_modules/
+dist/
+coverage/
+*.log
+.DS_Store
+*.tsbuildinfo
+.vibe-review/
+.env
+.env.local
+*.vsix

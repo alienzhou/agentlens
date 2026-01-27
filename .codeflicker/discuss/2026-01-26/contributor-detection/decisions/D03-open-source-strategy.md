@@ -22,9 +22,9 @@ All layers of the project will be open sourced:
 
 ## Rationale
 
-1. **Community Adoption**: MIT 协议对商业使用友好，有利于生态建设
-2. **Transparency**: 完全开源让社区可以审查和贡献
-3. **Ecosystem Growth**: 鼓励其他 Agent 产品接入协议
+1. **Community Adoption**: MIT license is business-friendly and conducive to ecosystem building
+2. **Transparency**: Full open source allows the community to review and contribute
+3. **Ecosystem Growth**: Encourages other Agent products to adopt the protocol
 
 ---
 

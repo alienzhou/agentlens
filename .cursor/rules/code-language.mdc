@@ -1,0 +1,31 @@
+---
+description: Code uses English, conversation uses Chinese
+alwaysApply: true
+---
+
+# Language Convention
+
+## Code & Files (English Only)
+
+All generated code should use English for:
+- Comments
+- Variable/function names
+- Log messages
+- Error messages
+- Documentation strings
+
+```typescript
+// ❌ BAD
+// 获取用户信息
+const 用户名 = "test";
+logger.error('获取失败');
+
+// ✅ GOOD
+// Get user info
+const username = "test";
+logger.error('Failed to fetch user');
+```
+
+## Conversation (Chinese)
+
+Reply to user in Chinese (中文回复).

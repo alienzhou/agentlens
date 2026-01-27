@@ -264,7 +264,7 @@ $ vibe-review diff --annotated
   
   [U2] Save username on login
   ├─ 🎯 Goal: Save/clear username based on checkbox status when login succeeds
-  ├─ 💡 Decision: Actively clear when unchecked to avoid残留
+  ├─ 💡 Decision: Actively clear when unchecked to avoid residue
   ├─ ✅ Verify: Unchecked → Login → Refresh → Username should be empty
   └─ ❓ TODO: #T2 Confirm if username encryption is needed
   

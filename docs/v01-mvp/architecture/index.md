@@ -57,13 +57,25 @@ vibe-review/
 
 ```mermaid
 graph TD
-    A["@vibe-review/core"] --> B["@vibe-review/hook"]
-    A --> D["@vibe-review/cli"]
-    A --> E["@vibe-review/vscode"]
-    B --> G["simple-git"]
-    D --> K["commander"]
-    D --> L["chalk"]
-    E --> M["vscode"]
+    CLI["@vibe-review/cli"]
+    VSCode["@vibe-review/vscode"]
+    Hook["@vibe-review/hook"]
+    Core["@vibe-review/core"]
+    
+    CLI --> Core
+    CLI --> Hook
+    CLI --> Commander["commander"]
+    CLI --> Chalk["chalk"]
+    
+    VSCode --> Core
+    VSCode --> Hook
+    VSCode --> VSCodeAPI["vscode API"]
+    
+    Hook --> Core
+    Hook --> Chokidar["chokidar"]
+    
+    Core --> SimpleGit["simple-git"]
+    Core --> Levenshtein["fast-levenshtein"]
 ```
 
 ---

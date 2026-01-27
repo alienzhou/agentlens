@@ -31,9 +31,9 @@ Click on AI-generated code line → Pop up floating window
 
 ## Rationale
 
-1. **Product Diversity**: Cursor, Claude Code, Windsurf 等不同 Agent 产品的跳转方式各不相同
-2. **MVP Focus**: 在 MVP 阶段应聚焦核心功能（采集 + 展示），交互优化后置
-3. **User Empowerment**: 通过提供足够的上下文信息，让用户自行决定如何追溯
+1. **Product Diversity**: Different Agent products like Cursor, Claude Code, Windsurf have different jump methods
+2. **MVP Focus**: MVP phase should focus on core features (collection + display), interaction optimization deferred
+3. **User Empowerment**: Provide sufficient context information for users to decide how to trace back
 
 ---
 

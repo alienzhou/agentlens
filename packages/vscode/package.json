@@ -1,0 +1,69 @@
+{
+  "name": "@vibe-review/vscode",
+  "version": "0.1.0",
+  "displayName": "Vibe Review",
+  "description": "VS Code extension for AI-assisted Code Review",
+  "publisher": "alienzhou",
+  "main": "./dist/extension.js",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "workspaceContains:.git"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "vibe-review.showBlame",
+        "title": "Vibe Review: Show Blame"
+      },
+      {
+        "command": "vibe-review.connectAgent",
+        "title": "Vibe Review: Connect Agent"
+      },
+      {
+        "command": "vibe-review.disconnectAgent",
+        "title": "Vibe Review: Disconnect Agent"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "vibe-review",
+          "title": "Vibe Review",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "vibe-review": [
+        {
+          "id": "vibe-review.agents",
+          "name": "Connected Agents"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "pnpm run build",
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@vibe-review/core": "workspace:*",
+    "@vibe-review/hook": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "license": "MIT"
+}

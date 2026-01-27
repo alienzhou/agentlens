@@ -1,0 +1,47 @@
+{
+  "name": "vibe-review",
+  "version": "0.1.0",
+  "description": "Code Review tool redesigned for the Vibe Coding era",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.5.0",
+  "engines": {
+    "node": ">=22.15.1",
+    "pnpm": ">=9.5.0"
+  },
+  "scripts": {
+    "build": "pnpm -r run build",
+    "dev": "pnpm -r --parallel run dev",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint packages --ext .ts,.tsx",
+    "lint:fix": "eslint packages --ext .ts,.tsx --fix",
+    "format": "prettier --write \"packages/**/*.{ts,tsx,json,md}\"",
+    "format:check": "prettier --check \"packages/**/*.{ts,tsx,json,md}\"",
+    "typecheck": "tsc --noEmit",
+    "clean": "pnpm -r run clean && rimraf node_modules"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@types/node": "^22.10.0",
+    "@vitest/coverage-v8": "^2.1.8",
+    "eslint": "^9.17.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.4.2",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.0",
+    "vitest": "^2.1.8"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alienzhou/vibe-review.git"
+  },
+  "author": "alienzhou",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/alienzhou/vibe-review/issues"
+  },
+  "homepage": "https://github.com/alienzhou/vibe-review#readme"
+}
