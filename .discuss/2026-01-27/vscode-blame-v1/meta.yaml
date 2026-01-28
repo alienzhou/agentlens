@@ -1,0 +1,27 @@
+topic: vscode-blame-v1
+created: '2026-01-28'
+current_round: 3
+config:
+  stale_threshold: 3
+decisions:
+- path: decisions/D01-mvp-scope.md
+  name: D01-mvp-scope.md
+  last_modified: '2026-01-28T18:48:36.597820+00:00'
+  last_updated_round: 2
+- path: decisions/D02-tech-approach.md
+  name: D02-tech-approach.md
+  last_modified: '2026-01-28T18:48:48.722447+00:00'
+  last_updated_round: 2
+- path: decisions/D03-output-format.md
+  name: D03-output-format.md
+  last_modified: '2026-01-28T18:48:56.206954+00:00'
+  last_updated_round: 2
+- path: decisions/D04-file-structure.md
+  name: D04-file-structure.md
+  last_modified: '2026-01-28T18:49:06.294492+00:00'
+  last_updated_round: 2
+notes:
+- path: notes/gitlens-architecture.md
+  name: gitlens-architecture.md
+  last_modified: '2026-01-28T18:49:34.068971+00:00'
+  last_updated_round: 2
