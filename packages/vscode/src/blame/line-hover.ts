@@ -1,6 +1,10 @@
 import * as vscode from 'vscode';
+import * as path from 'node:path';
 import { BlameService } from './blame-service.js';
 import { ContributorService } from './contributor-service.js';
+import { createModuleLogger } from '../utils/logger.js';
+
+const log = createModuleLogger('line-hover');
 
 /**
  * Line Hover Provider - Shows detailed information on hover
@@ -27,8 +31,15 @@ export class LineHoverProvider implements vscode.HoverProvider {
     }
 
     const filePath = document.fileName;
+    const fileName = path.basename(filePath);
     const line = position.line;
     const lineText = document.lineAt(line).text;
+
+    log.debug('Hover requested', {
+      file: fileName,
+      line,
+      isDirty: document.isDirty,
+    });
 
     // Check if file is dirty (uncommitted changes)
     if (document.isDirty) {

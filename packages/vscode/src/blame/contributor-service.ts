@@ -1,5 +1,7 @@
 import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
+import { exec } from 'node:child_process';
+import { promisify } from 'node:util';
 import {
   type AgentRecord,
   type ContributorType,
@@ -11,6 +13,10 @@ import {
   SIMILARITY_CONFIG,
   DATA_DIR_NAME,
 } from '@agent-blame/core';
+import { createModuleLogger } from '../utils/logger.js';
+
+const execAsync = promisify(exec);
+const log = createModuleLogger('contributor-service');
 
 /**
  * Contributor detection result for a line
@@ -25,6 +31,8 @@ export interface LineContributorResult {
     userPrompt?: string;
     timestamp: number;
   };
+  /** 标记这行内容在 HEAD 中存在（未被真正修改） */
+  unchanged?: boolean;
 }
 
 /**
@@ -50,12 +58,47 @@ export class ContributorService {
   async detectLineContributor(
     filePath: string,
     lineContent: string,
-    _lineNumber: number
+    lineNumber: number
   ): Promise<LineContributorResult | null> {
+    const fileName = path.basename(filePath);
+    log.debug('Detecting contributor', {
+      file: fileName,
+      line: lineNumber,
+      content: lineContent.substring(0, 50),
+    });
+
     // Get agent records for this file
     const agentRecords = await this.getAgentRecordsForFile(filePath);
     if (agentRecords.length === 0) {
+      log.debug('No agent records for file', { file: fileName });
       return null;
+    }
+
+    log.debug('Agent records found', {
+      file: fileName,
+      count: agentRecords.length,
+    });
+
+    // Check if this line at this position has unchanged content from git HEAD
+    // If content is the same at the same line number, it's not modified
+    const isUnchangedFromHead = await this.lineUnchangedFromHead(filePath, lineContent, lineNumber);
+
+    // If line content is unchanged at the same position, it's not a modified line
+    // Return a special result indicating the line is unchanged
+    if (isUnchangedFromHead) {
+      log.debug('Line unchanged from HEAD', {
+        file: fileName,
+        line: lineNumber,
+        content: lineContent.substring(0, 30),
+      });
+      return {
+        contributor: 'human',
+        similarity: 0,
+        confidence: 1,
+        matchedRecord: undefined,
+        // Special flag to indicate this line exists in HEAD (unchanged content)
+        unchanged: true,
+      };
     }
 
     // Find best matching record by comparing line content
@@ -77,7 +120,25 @@ export class ContributorService {
     const thresholdPureAi = SIMILARITY_CONFIG.THRESHOLD_PURE_AI;
     const thresholdAiModified = SIMILARITY_CONFIG.THRESHOLD_AI_MODIFIED;
 
+    // Log match result with environment context
+    log.debug('Similarity match result', {
+      file: fileName,
+      line: lineNumber,
+      content: lineContent.substring(0, 30),
+      similarity: bestSimilarity.toFixed(3),
+      thresholdAi: thresholdPureAi,
+      thresholdModified: thresholdAiModified,
+      hasMatch: !!bestMatch,
+      matchedAgent: bestMatch?.sessionSource.agent,
+    });
+
     if (bestSimilarity >= thresholdPureAi) {
+      log.info('Contributor detected: AI', {
+        file: fileName,
+        line: lineNumber,
+        similarity: bestSimilarity.toFixed(3),
+        agent: bestMatch?.sessionSource.agent,
+      });
       return {
         contributor: 'ai',
         similarity: bestSimilarity,
@@ -94,6 +155,12 @@ export class ContributorService {
     }
 
     if (bestSimilarity >= thresholdAiModified) {
+      log.info('Contributor detected: AI Modified', {
+        file: fileName,
+        line: lineNumber,
+        similarity: bestSimilarity.toFixed(3),
+        agent: bestMatch?.sessionSource.agent,
+      });
       return {
         contributor: 'ai_modified',
         similarity: bestSimilarity,
@@ -108,6 +175,12 @@ export class ContributorService {
           : undefined,
       };
     }
+
+    log.debug('Contributor detected: Human', {
+      file: fileName,
+      line: lineNumber,
+      similarity: bestSimilarity.toFixed(3),
+    });
 
     return {
       contributor: 'human',
@@ -205,19 +278,40 @@ export class ContributorService {
         }
       }
 
+      log.debug('Agent records loaded from file', {
+        dataPath: path.relative(this.workspaceRoot, dataPath),
+        totalRecords: records.length,
+        files: [...new Set(records.map(r => path.basename(r.filePath)))],
+        agents: [...new Set(records.map(r => r.sessionSource.agent))],
+      });
+
       return records;
-    } catch {
+    } catch (error) {
       // File doesn't exist or can't be read
+      log.debug('No agent records file found', {
+        dataPath: path.relative(this.workspaceRoot, dataPath),
+        error: String(error),
+      });
       return [];
     }
   }
 
   /**
    * Calculate added lines by diffing oldContent and newContent
+   *
+   * For Write tool (no oldContent), we try to get the git HEAD version of the file
+   * to compare against. This ensures we only mark truly NEW lines as AI-added.
    */
   private calculateAddedLines(oldContent: string, newContent: string): string[] {
-    const oldLines = oldContent.split('\n');
     const newLines = newContent.split('\n');
+
+    // If no oldContent (Write tool), return all non-empty lines
+    // The actual filtering will be done at match time using git HEAD comparison
+    if (!oldContent || oldContent.trim() === '') {
+      return newLines.filter((line) => line.trim() !== '');
+    }
+
+    const oldLines = oldContent.split('\n');
 
     // Simple line-by-line diff
     const addedLines: string[] = [];
@@ -256,6 +350,86 @@ export class ContributorService {
     }
 
     return addedLines;
+  }
+
+  /**
+   * Get file content from git HEAD (last commit)
+   * Returns null if file doesn't exist in HEAD or git command fails
+   */
+  private async getGitHeadContent(filePath: string): Promise<string | null> {
+    try {
+      // Convert absolute path to relative path for git command
+      const relativePath = path.relative(this.workspaceRoot, filePath);
+      const { stdout } = await execAsync(`git show HEAD:"${relativePath}"`, {
+        cwd: this.workspaceRoot,
+      });
+      return stdout;
+    } catch {
+      // File doesn't exist in HEAD or git error
+      return null;
+    }
+  }
+
+  /**
+   * Check if a line at a specific line number has the same content in git HEAD
+   * This helps distinguish between "AI wrote this new line" vs "AI kept this existing line unchanged"
+   */
+  private gitHeadCache: Map<string, string[]> = new Map();
+
+  private async lineUnchangedFromHead(
+    filePath: string,
+    lineContent: string,
+    lineNumber: number
+  ): Promise<boolean> {
+    const fileName = path.basename(filePath);
+
+    // Get or build cache for this file
+    if (!this.gitHeadCache.has(filePath)) {
+      const headContent = await this.getGitHeadContent(filePath);
+      if (headContent) {
+        const lines = headContent.split('\n');
+        this.gitHeadCache.set(filePath, lines);
+        log.debug('HEAD content cached', { file: fileName, lines: lines.length });
+      } else {
+        // File is new, no lines exist in HEAD
+        this.gitHeadCache.set(filePath, []);
+        log.debug('File not in HEAD (new file)', { file: fileName });
+      }
+    }
+
+    const headLines = this.gitHeadCache.get(filePath)!;
+
+    // Check if the same line number exists in HEAD and has the same content
+    if (lineNumber >= 0 && lineNumber < headLines.length) {
+      const headLineContent = headLines[lineNumber];
+      const isUnchanged = headLineContent?.trim() === lineContent.trim();
+
+      // Log comparison for debugging environment issues
+      if (isUnchanged) {
+        log.debug('HEAD comparison: unchanged', {
+          file: fileName,
+          line: lineNumber,
+          content: lineContent.substring(0, 30),
+        });
+      } else {
+        log.debug('HEAD comparison: changed', {
+          file: fileName,
+          line: lineNumber,
+          headContent: headLineContent?.substring(0, 30),
+          currentContent: lineContent.substring(0, 30),
+        });
+      }
+
+      return isUnchanged;
+    }
+
+    // Line doesn't exist at this position in HEAD
+    log.debug('Line not in HEAD (new line)', {
+      file: fileName,
+      line: lineNumber,
+      headLines: headLines.length,
+    });
+    return false;
   }
 
   /**
@@ -300,6 +474,7 @@ export class ContributorService {
   clearCache(): void {
     this.cache.clear();
     this.cacheTimestamp = 0;
+    this.gitHeadCache.clear();
   }
 
   /**

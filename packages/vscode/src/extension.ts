@@ -18,14 +18,16 @@ import { LineBlameController } from './blame/line-blame.js';
 import { ContributorService } from './blame/contributor-service.js';
 import { LineHoverProvider } from './blame/line-hover.js';
 import { BlameService } from './blame/blame-service.js';
+import { createLogger, getLoggerConfig, disposeLogger, createModuleLogger } from './utils/logger.js';
+
+// Module logger for extension entry
+const log = createModuleLogger('extension');
 
 /**
  * Extension activation entry point
  */
 export function activate(context: vscode.ExtensionContext): void {
-  console.log('Agent Blame extension is now active');
-
-  // Get workspace root
+  // Get workspace root first (needed for logger)
   const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
   if (!workspaceFolder) {
     console.warn('No workspace folder found');
@@ -34,9 +36,23 @@ export function activate(context: vscode.ExtensionContext): void {
 
   const workspaceRoot = workspaceFolder.uri.fsPath;
 
+  // Initialize logger
+  const outputChannel = vscode.window.createOutputChannel('Agent Blame');
+  context.subscriptions.push(outputChannel);
+
+  const loggerConfig = getLoggerConfig();
+  createLogger(outputChannel, workspaceRoot, loggerConfig);
+
+  log.info('Extension activating', {
+    workspaceRoot,
+    logLevel: loggerConfig.level,
+    logToFile: loggerConfig.logToFile,
+  });
+
   // Initialize services
   const blameService = new BlameService();
   const contributorService = new ContributorService(workspaceRoot);
+  log.info('Services initialized');
 
   // Initialize line blame controller
   const lineBlameController = new LineBlameController(contributorService);
@@ -52,13 +68,16 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // Update status bar
   updateStatusBar(context);
+
+  log.info('Extension activated successfully');
 }
 
 /**
  * Extension deactivation
  */
 export function deactivate(): void {
-  console.log('Agent Blame extension is now deactivated');
+  log.info('Extension deactivating');
+  disposeLogger();
 }
 
 /**
@@ -196,9 +215,12 @@ function getAgentDisplayName(agent: string): string {
  * Connect to an AI Agent
  */
 async function connectAgent(agent: string): Promise<void> {
+  log.info('Connect agent requested', { agent });
+
   const adapter = getAdapter(agent);
 
   if (!adapter) {
+    log.warn('Unknown agent requested', { agent });
     vscode.window.showErrorMessage(`Unknown agent: ${agent}`);
     return;
   }
@@ -208,6 +230,7 @@ async function connectAgent(agent: string): Promise<void> {
 
     // Detect if Agent is installed
     const detection = await adapter.detect();
+    log.debug('Agent detection result', { agent, detected: detection.detected, method: detection.method });
 
     if (!detection.detected) {
       const proceed = await vscode.window.showWarningMessage(
@@ -217,6 +240,7 @@ async function connectAgent(agent: string): Promise<void> {
       );
 
       if (proceed !== 'Yes') {
+        log.info('Agent connection cancelled by user', { agent });
         return;
       }
     } else {
@@ -228,6 +252,7 @@ async function connectAgent(agent: string): Promise<void> {
     // Check if already connected
     const isConnected = await adapter.isConnected();
     if (isConnected) {
+      log.info('Agent already connected', { agent });
       vscode.window.showInformationMessage(`Already connected to ${adapter.config.name}.`);
       return;
     }
@@ -236,11 +261,13 @@ async function connectAgent(agent: string): Promise<void> {
     const hookCore = getHookCore();
     await adapter.connect(hookCore);
 
+    log.info('Agent connected successfully', { agent });
     vscode.window.showInformationMessage(
       `Successfully connected to ${adapter.config.name}`,
       'View Status'
     );
   } catch (error) {
+    log.error('Failed to connect agent', error, { agent });
     const errorMessage = error instanceof Error ? error.message : String(error);
     vscode.window.showErrorMessage(`Failed to connect to ${agent}: ${errorMessage}`);
   }

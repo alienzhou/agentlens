@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import * as readline from 'node:readline';
 import * as path from 'node:path';
+import * as fs from 'node:fs/promises';
 import { diffLines } from 'diff';
 import { SUPPORTED_AGENTS, AGENT_CONFIGS, FileStorage } from '@agent-blame/core';
 import { CursorAdapter, ClaudeAdapter } from '@vibe-x/agent-blame';
@@ -432,9 +433,19 @@ async function handlePostToolUse(input: ClaudePostToolUseInput, agent: string): 
     return;
   }
 
-  const oldContent = input.tool_input.old_string ?? '';
-  const newContent = input.tool_input.new_string ?? input.tool_input.content ?? '';
   const absolutePath = getAbsolutePath(filePath, input.cwd);
+  const newContent = input.tool_input.new_string ?? input.tool_input.content ?? '';
+  
+  // For Write tool, old_string is not provided, so we need to read the old content from file
+  // Note: This is called AFTER the tool execution, so the file already contains new content
+  // We can only get oldContent for Edit tool which provides old_string
+  let oldContent = input.tool_input.old_string ?? '';
+  
+  // For Write tool (content provided but no old_string), the file was overwritten
+  // We cannot recover the old content after the fact, so we leave oldContent empty
+  // This means Write tool creates will show all lines as "added"
+  // This is a known limitation - only true "edits" can accurately track changes
+  
   const { addedLines, removedLines } = calculateLineChanges(oldContent, newContent);
 
   // Record code change event

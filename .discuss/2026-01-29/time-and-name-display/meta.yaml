@@ -1,0 +1,13 @@
+topic: time-and-name-display
+created: 2026-01-29
+status: active
+summary: 讨论 blame 显示中时间和名称的获取逻辑
+current_round: 2
+config:
+  stale_threshold: 3
+decisions:
+- path: decisions/D01-display-format.md
+  name: D01-display-format.md
+  last_modified: '2026-01-29T11:27:22.387099+00:00'
+  last_updated_round: 2
+notes: []

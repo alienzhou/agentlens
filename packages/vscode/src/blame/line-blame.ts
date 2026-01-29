@@ -1,6 +1,18 @@
 import * as vscode from 'vscode';
+import * as path from 'node:path';
 import { BlameService, BlameInfo } from './blame-service.js';
 import { ContributorService } from './contributor-service.js';
+import { createModuleLogger } from '../utils/logger.js';
+
+const log = createModuleLogger('line-blame');
+
+/**
+ * Display information for blame decoration
+ */
+interface BlameDisplayInfo {
+  text: string; // Short text displayed at end of line
+  hoverMessage: vscode.MarkdownString; // Detailed information shown on hover
+}
 
 /**
  * Line blame controller - handles cursor tracking and decoration rendering
@@ -83,6 +95,7 @@ export class LineBlameController {
   private async updateBlameDecoration(editor: vscode.TextEditor): Promise<void> {
     const scheme = editor.document.uri.scheme;
     const filePath = editor.document.fileName;
+    const fileName = path.basename(filePath);
     const isDirty = editor.document.isDirty;
     const line = editor.selection.active.line;
 
@@ -91,18 +104,27 @@ export class LineBlameController {
       return;
     }
 
+    log.debug('Updating blame decoration', {
+      file: fileName,
+      line,
+      isDirty,
+    });
+
     try {
-      let blameText: string;
+      let displayInfo: BlameDisplayInfo;
+      let displaySource = ''; // For logging what path was taken
 
       if (isDirty) {
         // File has unsaved changes - use contributor detection
         if (this.contributorService) {
           const lineText = editor.document.lineAt(line).text;
           const result = await this.contributorService.detectLineContributor(filePath, lineText, line);
-          blameText = await this.formatUncommittedText(result);
+          displayInfo = await this.formatUncommittedText(result, filePath, lineText);
+          displaySource = `dirty:${result?.contributor ?? 'no-match'}${result?.unchanged ? ':unchanged' : ''}`;
         } else {
           const userName = await this.blameService.getGitUserName();
-          blameText = `👤 ${userName}, just now`;
+          displayInfo = this.createHumanDisplayInfo(userName);
+          displaySource = 'dirty:no-service';
         }
       } else {
         // File is saved - check git blame
@@ -113,10 +135,12 @@ export class LineBlameController {
           if (this.contributorService) {
             const lineText = editor.document.lineAt(line).text;
             const result = await this.contributorService.detectLineContributor(filePath, lineText, line);
-            blameText = await this.formatUncommittedText(result);
+            displayInfo = await this.formatUncommittedText(result, filePath, lineText);
+            displaySource = `no-blame:${result?.contributor ?? 'no-match'}`;
           } else {
             const userName = await this.blameService.getGitUserName();
-            blameText = `👤 ${userName}, just now`;
+            displayInfo = this.createHumanDisplayInfo(userName);
+            displaySource = 'no-blame:no-service';
           }
         } else {
           // Check if this line is uncommitted (saved but not git committed)
@@ -128,21 +152,31 @@ export class LineBlameController {
             // Uncommitted line - use contributor detection
             const lineText = editor.document.lineAt(line).text;
             const result = await this.contributorService.detectLineContributor(filePath, lineText, line);
-            blameText = await this.formatUncommittedText(result);
+            displayInfo = await this.formatUncommittedText(result, filePath, lineText);
+            displaySource = `uncommitted:${result?.contributor ?? 'no-match'}${result?.unchanged ? ':unchanged' : ''}`;
           } else {
             // Committed line - use git blame info
-            blameText = await this.formatBlameText(blameInfo);
+            displayInfo = await this.formatBlameText(blameInfo);
+            displaySource = `committed:${blameInfo.author}`;
           }
         }
       }
+
+      log.debug('Decoration applied', {
+        file: fileName,
+        line,
+        source: displaySource,
+        text: displayInfo.text.substring(0, 40),
+      });
 
       // Create decoration
       const range = new vscode.Range(line, Number.MAX_SAFE_INTEGER, line, Number.MAX_SAFE_INTEGER);
       const decoration: vscode.DecorationOptions = {
         range,
+        hoverMessage: displayInfo.hoverMessage,
         renderOptions: {
           after: {
-            contentText: blameText,
+            contentText: displayInfo.text,
           },
         },
       };
@@ -150,7 +184,11 @@ export class LineBlameController {
       // Apply decoration
       editor.setDecorations(this.decorationType, [decoration]);
     } catch (error) {
-      console.error('Failed to update blame decoration:', error);
+      log.error('Failed to update blame decoration', error, {
+        file: fileName,
+        line,
+        isDirty,
+      });
       this.clearDecorations(editor);
     }
   }
@@ -159,7 +197,7 @@ export class LineBlameController {
    * Format blame text: {author}, {relative_time} • {commit_message}
    * For uncommitted lines: show Git user name
    */
-  private async formatBlameText(blameInfo: BlameInfo): Promise<string> {
+  private async formatBlameText(blameInfo: BlameInfo): Promise<BlameDisplayInfo> {
     // Check if this is an uncommitted line (commit hash is all zeros or starts with ^)
     const isUncommitted =
       blameInfo.commitHash === '0000000000000000000000000000000000000000' ||
@@ -167,35 +205,115 @@ export class LineBlameController {
 
     if (isUncommitted) {
       const userName = await this.blameService.getGitUserName();
-      return `👤 ${userName}, just now`;
+      return this.createHumanDisplayInfo(userName);
     }
 
     const relativeTime = this.formatRelativeTime(blameInfo.timestamp);
-    return `${blameInfo.author}, ${relativeTime} • ${blameInfo.commitMessage}`;
+    const shortHash = blameInfo.commitHash.substring(0, 7);
+    const text = `${blameInfo.author}, ${relativeTime} • ${blameInfo.commitMessage}`;
+
+    // Create hover message (same format as LineHoverProvider)
+    const markdown = new vscode.MarkdownString();
+    markdown.appendMarkdown(`**${blameInfo.author}**, ${relativeTime}\n\n`);
+    if (blameInfo.commitMessage) {
+      markdown.appendMarkdown(`${blameInfo.commitMessage}\n\n`);
+    }
+    markdown.appendMarkdown(`\`${shortHash}\``);
+    markdown.isTrusted = true;
+
+    return {
+      text,
+      hoverMessage: markdown,
+    };
   }
 
   /**
    * Format text for uncommitted code based on contributor detection
    */
   private async formatUncommittedText(
-    result: import('./contributor-service.js').LineContributorResult | null
-  ): Promise<string> {
+    result: import('./contributor-service.js').LineContributorResult | null,
+    filePath?: string,
+    lineContent?: string
+  ): Promise<BlameDisplayInfo> {
+    // Special case: line exists in HEAD (content unchanged)
+    // Try to get historical blame info from HEAD
+    if (result?.unchanged && filePath && lineContent) {
+      const headBlame = await this.blameService.getBlameForLineAtRevision(filePath, lineContent, 'HEAD');
+      if (headBlame && headBlame.author) {
+        const relativeTime = this.formatRelativeTime(headBlame.timestamp);
+        const shortHash = headBlame.commitHash.substring(0, 7);
+        const text = `${headBlame.author}, ${relativeTime} • ${headBlame.commitMessage}`;
+
+        // Create hover message (same format as LineHoverProvider)
+        const markdown = new vscode.MarkdownString();
+        markdown.appendMarkdown(`**${headBlame.author}**, ${relativeTime}\n\n`);
+        if (headBlame.commitMessage) {
+          markdown.appendMarkdown(`${headBlame.commitMessage}\n\n`);
+        }
+        markdown.appendMarkdown(`\`${shortHash}\``);
+        markdown.isTrusted = true;
+
+        return {
+          text,
+          hoverMessage: markdown,
+        };
+      }
+    }
+
     if (!result || result.contributor === 'human') {
       // Human edit - show Git user name
       const userName = await this.blameService.getGitUserName();
-      return `👤 ${userName}, just now`;
+      return this.createHumanDisplayInfo(userName);
     }
 
     // AI-generated or AI-modified code
     if (result.matchedRecord) {
       const agentName = this.contributorService!.getAgentDisplayName(result.matchedRecord.agent);
       const relativeTime = this.formatRelativeTime(result.matchedRecord.timestamp);
-      return `🤖 ${agentName}, ${relativeTime}`;
+      const text = `🤖 ${agentName}, ${relativeTime}`;
+
+      // Create hover message (same format as LineHoverProvider)
+      const markdown = new vscode.MarkdownString();
+      markdown.appendMarkdown(`🤖 **${agentName}**\n\n`);
+
+      if (result.matchedRecord.sessionId) {
+        const shortSessionId = result.matchedRecord.sessionId.substring(0, 13);
+        markdown.appendMarkdown(`Session: \`${shortSessionId}\`\n\n`);
+      }
+
+      if (result.matchedRecord.userPrompt) {
+        markdown.appendMarkdown(`Prompt: "${result.matchedRecord.userPrompt}"`);
+      }
+
+      markdown.isTrusted = true;
+
+      return {
+        text,
+        hoverMessage: markdown,
+      };
     }
 
     // Fallback to human edit
     const userName = await this.blameService.getGitUserName();
-    return `👤 ${userName}, just now`;
+    return this.createHumanDisplayInfo(userName);
+  }
+
+  /**
+   * Create display info for human-edited code
+   */
+  private createHumanDisplayInfo(userName: string): BlameDisplayInfo {
+    const text = `👤 ${userName}, uncommitted`;
+
+    // Create hover message (same format as LineHoverProvider)
+    const markdown = new vscode.MarkdownString();
+    markdown.appendMarkdown(`👤 **Human Edit**\n\n`);
+    markdown.appendMarkdown(`Not committed yet`);
+    markdown.isTrusted = true;
+
+    return {
+      text,
+      hoverMessage: markdown,
+    };
   }
 
   /**

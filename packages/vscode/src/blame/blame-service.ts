@@ -1,8 +1,11 @@
 import * as vscode from 'vscode';
+import * as path from 'node:path';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
+import { createModuleLogger } from '../utils/logger.js';
 
 const execFileAsync = promisify(execFile);
+const log = createModuleLogger('blame-service');
 
 /**
  * Blame information for a single line
@@ -56,19 +59,93 @@ export class BlameService {
   }
 
   /**
+   * Get blame information for a line in a specific revision (e.g., HEAD)
+   * Used for lines that exist in HEAD but appear as uncommitted due to file rewrite
+   */
+  async getBlameForLineAtRevision(
+    filePath: string,
+    lineContent: string,
+    revision: string = 'HEAD'
+  ): Promise<BlameInfo | null> {
+    try {
+      // Find workspace folder for this file
+      const workspaceFolder = this.workspaceFolders.find((folder) =>
+        filePath.startsWith(folder.uri.fsPath)
+      );
+      if (!workspaceFolder) {
+        return null;
+      }
+
+      // Get relative path from workspace root
+      const relativePath = path.relative(workspaceFolder.uri.fsPath, filePath);
+
+      // Execute: git blame --root --incremental <revision> -- <file>
+      const { stdout } = await execFileAsync(
+        'git',
+        ['blame', '--root', '--incremental', revision, '--', relativePath],
+        {
+          cwd: workspaceFolder.uri.fsPath,
+          maxBuffer: 10 * 1024 * 1024, // 10MB
+        }
+      );
+
+      // Parse and find the line with matching content
+      const blame = this.parseIncrementalOutput(stdout);
+
+      // Get file content at revision to match line content
+      const { stdout: fileContent } = await execFileAsync(
+        'git',
+        ['show', `${revision}:${relativePath}`],
+        {
+          cwd: workspaceFolder.uri.fsPath,
+          maxBuffer: 10 * 1024 * 1024,
+        }
+      );
+
+      // Find line number in HEAD that matches the content
+      const headLines = fileContent.split('\n');
+      const trimmedContent = lineContent.trim();
+      for (let i = 0; i < headLines.length; i++) {
+        if (headLines[i]!.trim() === trimmedContent) {
+          return blame.lines[i] || null;
+        }
+      }
+
+      return null;
+    } catch (error) {
+      log.error('Failed to get blame at revision', error, {
+        file: path.basename(filePath),
+        revision,
+        lineContent: lineContent.substring(0, 30),
+      });
+      return null;
+    }
+  }
+
+  /**
    * Get full file blame (with cache)
    */
   private async getBlame(filePath: string): Promise<FileBlame | null> {
     // Check cache first
     const cached = this.cache.get(filePath);
     if (cached) {
+      log.debug('Cache hit for git blame', { file: path.basename(filePath), lines: cached.lines.length });
       return cached;
     }
+
+    log.debug('Cache miss, executing git blame', { file: path.basename(filePath) });
 
     // Execute git blame
     const blame = await this.executeGitBlame(filePath);
     if (blame) {
       this.cache.set(filePath, blame);
+      // Collect unique commit hashes for context
+      const commitHashes = [...new Set(blame.lines.map(l => l?.commitHash?.substring(0, 10)).filter(Boolean))];
+      log.debug('Git blame completed', {
+        file: path.basename(filePath),
+        lines: blame.lines.length,
+        commits: commitHashes,
+      });
     }
 
     return blame;
@@ -88,7 +165,7 @@ export class BlameService {
       }
 
       // Get relative path from workspace root
-      const relativePath = filePath.substring(workspaceFolder.uri.fsPath.length + 1);
+      const relativePath = path.relative(workspaceFolder.uri.fsPath, filePath);
 
       // Execute: git blame --root --incremental <file>
       const { stdout } = await execFileAsync(
@@ -103,7 +180,7 @@ export class BlameService {
       // Parse incremental format output
       return this.parseIncrementalOutput(stdout);
     } catch (error) {
-      console.error(`Failed to execute git blame for ${filePath}:`, error);
+      log.error('Failed to execute git blame', error, { file: path.basename(filePath) });
       return null;
     }
   }
@@ -255,11 +332,12 @@ export class BlameService {
       const userName = stdout.trim();
       if (userName) {
         this.gitUserNameCache = userName;
+        log.debug('Git user name retrieved', { userName });
         return userName;
       }
     } catch (error) {
       // Git config command failed or user.name not set
-      console.error('Failed to get git user name:', error);
+      log.warn('Failed to get git user name, using fallback', { error: String(error) });
     }
 
     // Fallback to default
