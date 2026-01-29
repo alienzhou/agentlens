@@ -1,11 +1,11 @@
 /**
- * Vibe Review core constants
+ * Agent Blame core constants
  */
 
 /**
  * Default data directory name
  */
-export const DATA_DIR_NAME = '.vibe-review';
+export const DATA_DIR_NAME = '.agent-blame';
 
 /**
  * Subdirectory names within the data directory

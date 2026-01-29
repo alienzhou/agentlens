@@ -2,8 +2,8 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
-import type { AgentType } from '@vibe-review/core';
-import { AGENT_CONFIGS } from '@vibe-review/core';
+import type { AgentType } from '@agent-blame/core';
+import { AGENT_CONFIGS } from '@agent-blame/core';
 import type { HookCore } from '../core/hook-core.js';
 import type {
   AgentAdapterConfig,
@@ -15,9 +15,9 @@ import { BaseAgentAdapter } from './adapter-interface.js';
 const execAsync = promisify(exec);
 
 /**
- * Vibe Review identifier in configuration
+ * Agent Blame identifier in configuration
  */
-const VIBE_REVIEW_HOOK_MARKER = 'vibe-review hook';
+const AGENT_BLAME_HOOK_MARKER = 'agent-blame hook';
 
 /**
  * Cursor adapter for integrating with Cursor AI IDE
@@ -106,16 +106,18 @@ export class CursorAdapter extends BaseAgentAdapter {
       const content = await fs.readFile(configPath, 'utf-8');
       const config = JSON.parse(content) as CursorHooksConfig;
 
-      // Check if vibe-review hook config exists
-      if (!config.hooks) return false;
+      // Check if agent-blame hook config exists
+      if (Object.keys(config.hooks).length === 0) {
+        return false;
+      }
 
-      // Check if any hook event contains vibe-review command
+      // Check if any hook event contains agent-blame command
       const hookEvents = ['afterFileEdit', 'sessionStart', 'sessionEnd', 'postToolUse'] as const;
       for (const eventName of hookEvents) {
         const eventHooks = config.hooks[eventName];
         if (Array.isArray(eventHooks)) {
           for (const hook of eventHooks) {
-            if (hook.command?.includes(VIBE_REVIEW_HOOK_MARKER)) {
+            if (hook.command && hook.command.includes(AGENT_BLAME_HOOK_MARKER)) {
               return true;
             }
           }
@@ -139,9 +141,11 @@ export class CursorAdapter extends BaseAgentAdapter {
 
     try {
       const content = await fs.readFile(configPath, 'utf-8');
-      config = JSON.parse(content) as CursorHooksConfig;
-      config.version = config.version ?? 1;
-      config.hooks = config.hooks ?? {};
+      const parsedConfig = JSON.parse(content) as Partial<CursorHooksConfig>;
+      config = {
+        version: parsedConfig.version ?? 1,
+        hooks: parsedConfig.hooks ?? {},
+      };
     } catch {
       // File doesn't exist, use default
     }
@@ -150,7 +154,7 @@ export class CursorAdapter extends BaseAgentAdapter {
     config.hooks.postToolUse = this.mergeHooks(
       config.hooks.postToolUse,
       {
-        command: 'vibe-review hook posttooluse --agent cursor',
+        command: 'agent-blame hook posttooluse --agent cursor',
         matcher: 'Write', // In Cursor, Edit maps to Write
       }
     );
@@ -159,7 +163,7 @@ export class CursorAdapter extends BaseAgentAdapter {
     config.hooks.afterFileEdit = this.mergeHooks(
       config.hooks.afterFileEdit,
       {
-        command: 'vibe-review hook afterfileedit --agent cursor',
+        command: 'agent-blame hook afterfileedit --agent cursor',
       }
     );
 
@@ -167,7 +171,7 @@ export class CursorAdapter extends BaseAgentAdapter {
     config.hooks.sessionStart = this.mergeHooks(
       config.hooks.sessionStart,
       {
-        command: 'vibe-review hook sessionstart --agent cursor',
+        command: 'agent-blame hook sessionstart --agent cursor',
       }
     );
 
@@ -175,7 +179,7 @@ export class CursorAdapter extends BaseAgentAdapter {
     config.hooks.sessionEnd = this.mergeHooks(
       config.hooks.sessionEnd,
       {
-        command: 'vibe-review hook sessionend --agent cursor',
+        command: 'agent-blame hook sessionend --agent cursor',
       }
     );
 
@@ -192,18 +196,20 @@ export class CursorAdapter extends BaseAgentAdapter {
       const content = await fs.readFile(configPath, 'utf-8');
       const config = JSON.parse(content) as CursorHooksConfig;
 
-      if (config.hooks) {
-        // Remove hooks containing vibe-review command
-        const hookEvents = ['afterFileEdit', 'sessionStart', 'sessionEnd', 'postToolUse'] as const;
+      // Remove hooks containing agent-blame command
+      const hookEvents = ['afterFileEdit', 'sessionStart', 'sessionEnd', 'postToolUse'] as const;
+      if (Object.keys(config.hooks).length > 0) {
         for (const eventName of hookEvents) {
           const eventHooks = config.hooks[eventName];
           if (Array.isArray(eventHooks)) {
-            config.hooks[eventName] = eventHooks.filter(
-              (hook) => !hook.command?.includes(VIBE_REVIEW_HOOK_MARKER)
+            const filteredHooks = eventHooks.filter(
+              (hook) => !(hook.command && hook.command.includes(AGENT_BLAME_HOOK_MARKER))
             );
-            // If no hooks left for this event, delete the entire event
-            if (config.hooks[eventName]?.length === 0) {
+            if (filteredHooks.length === 0) {
+              // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
               delete config.hooks[eventName];
+            } else {
+              config.hooks[eventName] = filteredHooks;
             }
           }
         }
@@ -269,9 +275,9 @@ export class CursorAdapter extends BaseAgentAdapter {
   ): CursorHookEntry[] {
     const hooks = existing ?? [];
 
-    // Check if vibe-review hook already exists
+    // Check if agent-blame hook already exists
     const existingIndex = hooks.findIndex(
-      (h) => h.command?.includes(VIBE_REVIEW_HOOK_MARKER)
+      (h) => h.command && h.command.includes(AGENT_BLAME_HOOK_MARKER)
     );
 
     if (existingIndex >= 0) {

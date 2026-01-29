@@ -1,5 +1,5 @@
 /**
- * Git-related type definitions for Vibe Review
+ * Git-related type definitions for Agent Blame
  */
 
 /**

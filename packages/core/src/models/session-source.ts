@@ -1,10 +1,10 @@
 /**
- * Known agent types supported by Vibe Review
+ * Known agent types supported by Agent Blame
  */
 export type KnownAgentType = 'cursor' | 'cursor-cli' | 'claude-code' | 'opencode' | 'gemini-cli' | 'unknown';
 
 /**
- * Agent types supported by Vibe Review (extensible)
+ * Agent types supported by Agent Blame (extensible)
  */
 export type AgentType = KnownAgentType | (string & Record<never, never>);
 

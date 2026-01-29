@@ -28,7 +28,7 @@ This checklist records key points identified during design and development that 
 - [ ] Does memory accumulate in long-running CLI commands
 
 **File Handle Management**
-- [ ] Are file reads/writes in `.vibe-review/data/` directory properly closed
+- [ ] Are file reads/writes in `.agent-blame/data/` directory properly closed
 - [ ] Are Git repository operations properly releasing resources
 - [ ] Are log file writes properly closed
 - [ ] Are temporary files cleaned up in time
@@ -43,7 +43,7 @@ This checklist records key points identified during design and development that 
 
 **Race Conditions**
 - [ ] Data consistency when multiple Agents operate simultaneously
-- [ ] Safety of concurrent reads/writes to `.vibe-review/data/` directory
+- [ ] Safety of concurrent reads/writes to `.agent-blame/data/` directory
 - [ ] Thread safety of Hook event concurrent processing
 - [ ] Conflict handling when multiple CLI commands execute simultaneously
 
@@ -282,8 +282,8 @@ This checklist records key points identified during design and development that 
 ### Response Time (P1)
 
 **Command Execution Performance**
-- [ ] `vibe-review diff` command < 2s
-- [ ] `vibe-review review` command < 3s
+- [ ] `agent-blame diff` command < 2s
+- [ ] `agent-blame review` command < 3s
 - [ ] Data loading and rendering < 1s
 - [ ] Configuration read and validation < 500ms
 

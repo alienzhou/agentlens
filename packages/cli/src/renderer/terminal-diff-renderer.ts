@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import type { GitDiff, GitFileDiff, GitHunk, ContributorType } from '@vibe-review/core';
+import type { GitDiff, GitFileDiff, GitHunk, ContributorType } from '@agent-blame/core';
 
 /**
  * Terminal diff renderer options

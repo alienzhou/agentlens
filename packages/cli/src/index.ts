@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Vibe Review CLI - Entry point
+ * Agent Blame CLI - Entry point
  */
 import { program } from 'commander';
 import { diffCommand } from './commands/diff.js';
@@ -13,8 +13,8 @@ import { hookCommand } from './commands/hook.js';
 const VERSION = '0.1.0';
 
 program
-  .name('vibe-review')
-  .description('Code Review tool redesigned for the Vibe Coding era')
+  .name('agent-blame')
+  .description('Agent Blame - Track and identify AI agent contributions in code')
   .version(VERSION);
 
 // Register commands

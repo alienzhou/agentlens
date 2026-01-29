@@ -1,4 +1,5 @@
-import type { AgentType } from '@vibe-review/core';
+import * as path from 'node:path';
+import type { AgentType } from '@agent-blame/core';
 import type { HookCore } from '../core/hook-core.js';
 
 /**
@@ -187,13 +188,13 @@ export abstract class BaseAgentAdapter implements AgentAdapter {
    * Get the full path to the config directory
    */
   protected getConfigDirPath(): string {
-    return `${this.homeDir}/${this.config.configDir}`;
+    return path.join(this.homeDir, this.config.configDir);
   }
 
   /**
    * Get the full path to the config file
    */
   protected getConfigFilePath(): string {
-    return `${this.getConfigDirPath()}/${this.config.configFile}`;
+    return path.join(this.getConfigDirPath(), this.config.configFile);
   }
 }

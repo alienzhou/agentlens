@@ -145,7 +145,7 @@ In the Vibe Coding era, AI Agents participate extensively in code generation, an
 #### 3.1.4 Review Display Function
 - **Requirement**: Display protocol content and code changes in user-friendly way
 - **Display Methods**:
-  - CLI tool: `vibe-review diff --annotated`
+  - CLI tool: `agent-blame diff --annotated`
   - IDE plugin: Display protocol content next to code
   - Standalone panel: Dedicated Review interface
 

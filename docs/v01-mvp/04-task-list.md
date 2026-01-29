@@ -250,19 +250,19 @@ Validate data model effectiveness and helpfulness of data to Review through CLI 
 
 **1.1 Basic CLI Framework**
 - [ ] Use Commander.js to build CLI framework
-- [ ] Implement `vibe-review` main command
+- [ ] Implement `agent-blame` main command
 - [ ] Add global configuration and help information
 - [ ] Write CLI basic tests
 
 **1.2 diff command**
-- [ ] Implement `vibe-review diff --annotated` command
+- [ ] Implement `agent-blame diff --annotated` command
 - [ ] Support multiple output formats (terminal/markdown/json)
 - [ ] Add filtering and search functionality
 - [ ] **Display contributor info (AI/AI+Modified/Human) in diff output**
 - [ ] Write diff command tests
 
 **1.3 review command**
-- [ ] Implement `vibe-review review` command
+- [ ] Implement `agent-blame review` command
 - [ ] Support interactive Review workflow
 - [ ] Add approve/reject/comment functionality
 - [ ] Write review command tests
@@ -385,7 +385,7 @@ Provide multiple product forms, including VS Code plugin, GitLens integration, e
 - [ ] Implement Hook capture for file edits
 - [ ] Implement Session file monitoring
 - [ ] Merge data from both tracks
-- [ ] Store data in `.vibe-review/data/`
+- [ ] Store data in `.agent-blame/data/`
 - [ ] Write data collection tests
 
 **Priority**: P0  

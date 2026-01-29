@@ -16,14 +16,14 @@ Provide product forms that users directly use, including various clients and int
 
 ```bash
 # Basic commands
-vibe-review diff --annotated
-vibe-review review --format=markdown
-vibe-review todos --interactive
+agent-blame diff --annotated
+agent-blame review --format=markdown
+agent-blame todos --interactive
 
 # Advanced commands
-vibe-review analyze --session=latest
-vibe-review export --format=json --output=report.json
-vibe-review config --set agent=cursor
+agent-blame analyze --session=latest
+agent-blame export --format=json --output=report.json
+agent-blame config --set agent=cursor
 ```
 
 **Features**:
@@ -111,7 +111,7 @@ Based on **floating window display + command hints** approach for MVP phase:
 │     Track 1: Hook Capture (File edits + TODOs)                          │
 │     Track 2: Session File Monitoring (Operation history)                │
 │     ↓                                                                   │
-│  6. Store Locally (.vibe-review/data/)                                  │
+│  6. Store Locally (.agent-blame/data/)                                  │
 │     ↓                                                                   │
 │  7. Blame View Display                                                  │
 │     Matching: Hunk-level Levenshtein (90% pure AI / 70% modified)       │

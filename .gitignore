@@ -4,7 +4,8 @@ coverage/
 *.log
 .DS_Store
 *.tsbuildinfo
-.vibe-review/
+.agent-blame/
 .env
 .env.local
 *.vsix
+.pnpm-store/

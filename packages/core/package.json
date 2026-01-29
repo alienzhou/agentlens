@@ -1,14 +1,16 @@
 {
-  "name": "@vibe-review/core",
+  "name": "@agent-blame/core",
   "version": "0.1.0",
-  "description": "Core library for Vibe Review - data models, protocols, and utilities",
+  "description": "Core library for Agent Blame - data models, protocols, and utilities",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
     }
   },
   "files": [

@@ -52,7 +52,7 @@ This decision documents the complete VS Code plugin interaction flow, including 
 │     │  Track 2: Session File Monitoring (Operation history)        │   │
 │     └───────────────────────────────────────────────────────────────┘   │
 │     ↓                                                                   │
-│  6. Store Locally (.vibe-review/data/)                                  │
+│  6. Store Locally (.agent-blame/data/)                                  │
 │     ↓                                                                   │
 │  7. Blame View Display                                                  │
 │     ┌───────────────────────────────────────────────────────────────┐   │

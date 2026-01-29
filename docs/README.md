@@ -1,6 +1,6 @@
-# Vibe Review Documentation
+# Agent Blame Documentation
 
-This directory contains versioned documentation for the Vibe Review project.
+This directory contains versioned documentation for the Agent Blame project.
 
 ## Current Versions
 
@@ -41,4 +41,4 @@ v{version}/
 ## Related Resources
 
 - [Original Discussion](./../.codeflicker/discuss/) - Technical discussions and decision process
-- [Repository](https://github.com/alienzhou/vibe-review)
+- [Repository](https://github.com/alienzhou/agent-blame)

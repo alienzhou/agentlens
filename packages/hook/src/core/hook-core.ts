@@ -1,5 +1,5 @@
-import type { AgentType, SessionSource } from '@vibe-review/core';
-import { createSessionSource } from '@vibe-review/core';
+import type { AgentType, SessionSource } from '@agent-blame/core';
+import { createSessionSource } from '@agent-blame/core';
 import type {
   HookEvent,
   HookEventHandler,

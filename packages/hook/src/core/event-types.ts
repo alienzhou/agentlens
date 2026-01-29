@@ -1,4 +1,4 @@
-import type { AgentType, SessionSource } from '@vibe-review/core';
+import type { AgentType, SessionSource } from '@agent-blame/core';
 
 /**
  * Code change event - emitted when Agent modifies a file

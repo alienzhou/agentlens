@@ -1,25 +1,51 @@
 /**
- * Vibe Review VS Code Extension
+ * Agent Blame VS Code Extension
  *
  * Features:
  * 1. Provide Blame view to display code contributor information (AI vs Human)
  * 2. Provide command palette shortcuts
- *
- * Note: Data capture is done by CLI hooks, not implemented in the extension.
- * - Claude Code: Native hooks support
- * - Cursor: Compatible with Claude Code hooks (requires enabling Third-party skills)
+ * 3. Direct Agent connection management (no CLI dependency)
  *
  * References:
  * - Claude Code Hooks: https://docs.anthropic.com/en/docs/claude-code/hooks
  * - Cursor Third Party Hooks: https://cursor.com/cn/docs/agent/third-party-hooks
  */
 import * as vscode from 'vscode';
+import { CursorAdapter, ClaudeAdapter, getHookCore } from '@vibe-x/agent-blame';
+import type { AgentAdapter } from '@vibe-x/agent-blame';
+import { SUPPORTED_AGENTS } from '@agent-blame/core';
+import { LineBlameController } from './blame/line-blame.js';
+import { ContributorService } from './blame/contributor-service.js';
+import { LineHoverProvider } from './blame/line-hover.js';
+import { BlameService } from './blame/blame-service.js';
 
 /**
  * Extension activation entry point
  */
 export function activate(context: vscode.ExtensionContext): void {
-  console.log('Vibe Review extension is now active');
+  console.log('Agent Blame extension is now active');
+
+  // Get workspace root
+  const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+  if (!workspaceFolder) {
+    console.warn('No workspace folder found');
+    return;
+  }
+
+  const workspaceRoot = workspaceFolder.uri.fsPath;
+
+  // Initialize services
+  const blameService = new BlameService();
+  const contributorService = new ContributorService(workspaceRoot);
+
+  // Initialize line blame controller
+  const lineBlameController = new LineBlameController(contributorService);
+  context.subscriptions.push(lineBlameController);
+
+  // Register hover provider
+  const hoverProvider = new LineHoverProvider(blameService, contributorService);
+  const hoverDisposable = vscode.languages.registerHoverProvider('*', hoverProvider);
+  context.subscriptions.push(hoverDisposable);
 
   // Register commands
   registerCommands(context);
@@ -32,7 +58,7 @@ export function activate(context: vscode.ExtensionContext): void {
  * Extension deactivation
  */
 export function deactivate(): void {
-  console.log('Vibe Review extension is now deactivated');
+  console.log('Agent Blame extension is now deactivated');
 }
 
 /**
@@ -40,7 +66,7 @@ export function deactivate(): void {
  */
 function registerCommands(context: vscode.ExtensionContext): void {
   // Show Blame view
-  const showBlameCmd = vscode.commands.registerCommand('vibe-review.showBlame', async () => {
+  const showBlameCmd = vscode.commands.registerCommand('agent-blame.showBlame', () => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       vscode.window.showWarningMessage('No active editor');
@@ -48,60 +74,85 @@ function registerCommands(context: vscode.ExtensionContext): void {
     }
 
     // TODO: Implement Blame view display
-    vscode.window.showInformationMessage('Vibe Review Blame view - Coming soon!');
+    vscode.window.showInformationMessage('Agent Blame view - Coming soon!');
   });
 
-  // Connect Agent (prompt user to use CLI)
-  const connectAgentCmd = vscode.commands.registerCommand('vibe-review.connectAgent', async () => {
-    const result = await vscode.window.showInformationMessage(
-      'To connect an AI Agent, use the CLI command in terminal:',
-      'Copy Command'
-    );
+  // Connect Agent - directly call hook adapter
+  const connectAgentCmd = vscode.commands.registerCommand('agent-blame.connectAgent', async () => {
+    // Let user select agent
+    const agentOptions = SUPPORTED_AGENTS.map((agent) => ({
+      label: agent,
+      description: getAgentDisplayName(agent),
+    }));
 
-    if (result === 'Copy Command') {
-      await vscode.env.clipboard.writeText('vibe-review hook connect claude-code');
-      vscode.window.showInformationMessage('Command copied! Paste in terminal to run.');
+    const selected = await vscode.window.showQuickPick(agentOptions, {
+      placeHolder: 'Select an AI Agent to connect',
+    });
+
+    if (!selected) {
+      return;
     }
+
+    const agent = selected.label;
+    await connectAgent(agent);
   });
 
-  // Disconnect Agent (prompt user to use CLI)
+  // Disconnect Agent - directly call hook adapter
   const disconnectAgentCmd = vscode.commands.registerCommand(
-    'vibe-review.disconnectAgent',
+    'agent-blame.disconnectAgent',
     async () => {
-      const result = await vscode.window.showInformationMessage(
-        'To disconnect an AI Agent, use the CLI command in terminal:',
-        'Copy Command'
-      );
+      // Let user select agent
+      const agentOptions = SUPPORTED_AGENTS.map((agent) => ({
+        label: agent,
+        description: getAgentDisplayName(agent),
+      }));
 
-      if (result === 'Copy Command') {
-        await vscode.env.clipboard.writeText('vibe-review hook disconnect claude-code');
-        vscode.window.showInformationMessage('Command copied! Paste in terminal to run.');
+      const selected = await vscode.window.showQuickPick(agentOptions, {
+        placeHolder: 'Select an AI Agent to disconnect',
+      });
+
+      if (!selected) {
+        return;
       }
+
+      const agent = selected.label;
+      await disconnectAgent(agent);
     }
   );
 
+  // Show Agent connection status
+  const showStatusCmd = vscode.commands.registerCommand('agent-blame.showStatus', async () => {
+    await showAgentStatus();
+  });
+
   // Show help information
-  const showHelpCmd = vscode.commands.registerCommand('vibe-review.showHelp', () => {
+  const showHelpCmd = vscode.commands.registerCommand('agent-blame.showHelp', () => {
     const helpText = `
-Vibe Review - AI Code Review Tool
+Agent Blame - AI Code Tracking Tool
+
+Features:
+- Connect/Disconnect AI Agents directly from VS Code
+- View code contributor information (AI vs Human)
+- Hover to see detailed blame information
 
 Setup:
-1. Install CLI: npm install -g @vibe-review/cli
-2. Connect Agent: vibe-review hook connect claude-code
-3. For Cursor: Enable "Third-party skills" in Settings
+1. Use "Agent Blame: Connect Agent" command to connect
+2. For Cursor: Enable "Third-party skills" in Settings
 
-The hooks work with both Claude Code and Cursor (via compatibility).
-
-Commands:
-- vibe-review hook status    : Check connection status
-- vibe-review hook list      : List supported agents
-- vibe-review diff           : Show AI-generated code changes
+Supported Agents:
+${SUPPORTED_AGENTS.map((agent) => `- ${getAgentDisplayName(agent)}`).join('\n')}
     `.trim();
 
     vscode.window.showInformationMessage(helpText, { modal: true });
   });
 
-  context.subscriptions.push(showBlameCmd, connectAgentCmd, disconnectAgentCmd, showHelpCmd);
+  context.subscriptions.push(
+    showBlameCmd,
+    connectAgentCmd,
+    disconnectAgentCmd,
+    showStatusCmd,
+    showHelpCmd
+  );
 }
 
 /**
@@ -109,10 +160,151 @@ Commands:
  */
 function updateStatusBar(context: vscode.ExtensionContext): void {
   const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-  statusBarItem.text = '$(eye) Vibe Review';
-  statusBarItem.tooltip = 'Vibe Review - AI Code Tracking\nClick for help';
-  statusBarItem.command = 'vibe-review.showHelp';
+  statusBarItem.text = '$(eye) Agent Blame';
+  statusBarItem.tooltip = 'Agent Blame - AI Code Tracking\nClick for help';
+  statusBarItem.command = 'agent-blame.showHelp';
   statusBarItem.show();
 
   context.subscriptions.push(statusBarItem);
+}
+
+/**
+ * Get adapter for an agent type
+ */
+function getAdapter(agent: string): AgentAdapter | null {
+  switch (agent.toLowerCase()) {
+    case 'cursor':
+    case 'cursor-cli':
+      return new CursorAdapter();
+    case 'claude':
+    case 'claude-code':
+      return new ClaudeAdapter();
+    default:
+      return null;
+  }
+}
+
+/**
+ * Get agent display name
+ */
+function getAgentDisplayName(agent: string): string {
+  const adapter = getAdapter(agent);
+  return adapter?.config.name || agent;
+}
+
+/**
+ * Connect to an AI Agent
+ */
+async function connectAgent(agent: string): Promise<void> {
+  const adapter = getAdapter(agent);
+
+  if (!adapter) {
+    vscode.window.showErrorMessage(`Unknown agent: ${agent}`);
+    return;
+  }
+
+  try {
+    vscode.window.showInformationMessage(`Connecting to ${adapter.config.name}...`);
+
+    // Detect if Agent is installed
+    const detection = await adapter.detect();
+
+    if (!detection.detected) {
+      const proceed = await vscode.window.showWarningMessage(
+        `${adapter.config.name} not detected on this system. Create configuration anyway?`,
+        'Yes',
+        'No'
+      );
+
+      if (proceed !== 'Yes') {
+        return;
+      }
+    } else {
+      vscode.window.showInformationMessage(
+        `${adapter.config.name} detected (${detection.method})`
+      );
+    }
+
+    // Check if already connected
+    const isConnected = await adapter.isConnected();
+    if (isConnected) {
+      vscode.window.showInformationMessage(`Already connected to ${adapter.config.name}.`);
+      return;
+    }
+
+    // Connect
+    const hookCore = getHookCore();
+    await adapter.connect(hookCore);
+
+    vscode.window.showInformationMessage(
+      `Successfully connected to ${adapter.config.name}`,
+      'View Status'
+    );
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    vscode.window.showErrorMessage(`Failed to connect to ${agent}: ${errorMessage}`);
+  }
+}
+
+/**
+ * Disconnect from an AI Agent
+ */
+async function disconnectAgent(agent: string): Promise<void> {
+  const adapter = getAdapter(agent);
+
+  if (!adapter) {
+    vscode.window.showErrorMessage(`Unknown agent: ${agent}`);
+    return;
+  }
+
+  try {
+    const isConnected = await adapter.isConnected();
+    if (!isConnected) {
+      vscode.window.showInformationMessage(`Not connected to ${adapter.config.name}.`);
+      return;
+    }
+
+    await adapter.disconnect();
+
+    vscode.window.showInformationMessage(`Successfully disconnected from ${adapter.config.name}`);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    vscode.window.showErrorMessage(`Failed to disconnect from ${agent}: ${errorMessage}`);
+  }
+}
+
+/**
+ * Show Agent connection status
+ */
+async function showAgentStatus(): Promise<void> {
+  const adapters: AgentAdapter[] = [new CursorAdapter(), new ClaudeAdapter()];
+  const statusItems: string[] = [];
+
+  for (const adapter of adapters) {
+    try {
+      const detection = await adapter.detect();
+      const isConnected = await adapter.isConnected();
+
+      let statusIcon: string;
+      let statusText: string;
+
+      if (isConnected) {
+        statusIcon = '✓';
+        statusText = 'Connected';
+      } else if (detection.detected) {
+        statusIcon = '○';
+        statusText = 'Detected (not connected)';
+      } else {
+        statusIcon = '✗';
+        statusText = 'Not detected';
+      }
+
+      statusItems.push(`${statusIcon} ${adapter.config.name}: ${statusText}`);
+    } catch {
+      statusItems.push(`✗ ${adapter.config.name}: Error checking status`);
+    }
+  }
+
+  const statusText = `Agent Connection Status\n\n${statusItems.join('\n')}`;
+  vscode.window.showInformationMessage(statusText, { modal: true });
 }

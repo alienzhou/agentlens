@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { GitIntegration, FileStorage } from '@vibe-review/core';
+import { GitIntegration, FileStorage } from '@agent-blame/core';
 import { TerminalDiffRenderer } from '../renderer/terminal-diff-renderer.js';
 
 /**
@@ -43,8 +43,8 @@ async function executeReview(options: ReviewOptions): Promise<void> {
   // Initialize storage if needed
   const isInitialized = await storage.isInitialized();
   if (!isInitialized) {
-    console.log(chalk.yellow('Vibe Review not initialized in this project.'));
-    console.log(chalk.dim('Run "vibe-review config --init" to initialize.'));
+    console.log(chalk.yellow('Agent Blame not initialized in this project.'));
+    console.log(chalk.dim('Run "agent-blame config --init" to initialize.'));
     console.log();
   }
 
@@ -65,7 +65,7 @@ async function executeReview(options: ReviewOptions): Promise<void> {
     reviewUnits = reviewUnits.filter((unit) => unit.createdAt >= sinceDate);
   }
 
-  console.log(chalk.blue.bold('📋 Vibe Review - Code Review Session'));
+  console.log(chalk.blue.bold('📋 Agent Blame - Code Review Session'));
   console.log(chalk.dim('─'.repeat(50)));
   console.log();
 

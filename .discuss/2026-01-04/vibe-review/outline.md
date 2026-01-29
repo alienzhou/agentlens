@@ -93,7 +93,7 @@ Layer 2: Data Layer ✅ Confirmed
 ├─ SessionSource: Session source tracing
 ├─ ReviewUnit: Multi-Hunk combination + annotations + TODO association
 ├─ Todo: Separate storage, bidirectional index
-└─ Storage: .vibe-review/data/
+└─ Storage: .agent-blame/data/
 
 Layer 1: Tool Layer ✅ Confirmed
 ├─ Agent Hook: AGENTS framework API + adapter layer

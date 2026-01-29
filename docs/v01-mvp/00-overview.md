@@ -1,6 +1,6 @@
-# Vibe Review v0.1 (MVP) - Project Overview
+# Agent Blame v0.1 (MVP) - Project Overview
 
-**Project Name**: Vibe Review  
+**Project Name**: Agent Blame  
 **Version**: v0.1 (MVP)  
 **Project Type**: Code Review Tool  
 **Development Stage**: Design Completed, Ready for Implementation  
@@ -10,7 +10,7 @@
 
 ## Project Introduction
 
-**Vibe Review** is a Code Review tool redesigned for the Vibe Coding era, aimed at addressing the fundamental issues where traditional review methods cannot effectively review AI-generated code.
+**Agent Blame** is a Code Review tool redesigned for the Vibe Coding era, aimed at addressing the fundamental issues where traditional review methods cannot effectively review AI-generated code.
 
 ### Core Philosophy
 The essence of Review is not "checking code," but "establishing understanding and trust in code."
@@ -128,7 +128,7 @@ Using "industrial-era human review rituals" to review "post-industrial era machi
 
 | Resource | Link |
 |----------|------|
-| Repository | [GitHub](https://github.com/alienzhou/vibe-review) |
+| Repository | [GitHub](https://github.com/alienzhou/agent-blame) |
 | Original Discussion | [.codeflicker/discuss/](../../.codeflicker/discuss/) |
 | MIT License | [LICENSE](../../LICENSE) |
 

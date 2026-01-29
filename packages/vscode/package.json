@@ -1,8 +1,8 @@
 {
-  "name": "@vibe-review/vscode",
+  "name": "@vibe-x/agent-blame-vscode",
   "version": "0.1.0",
-  "displayName": "Vibe Review",
-  "description": "VS Code extension for AI-assisted Code Review",
+  "displayName": "Agent Blame",
+  "description": "VS Code extension for Agent Blame - Track AI agent contributions",
   "publisher": "alienzhou",
   "main": "./dist/extension.js",
   "engines": {
@@ -17,31 +17,35 @@
   "contributes": {
     "commands": [
       {
-        "command": "vibe-review.showBlame",
-        "title": "Vibe Review: Show Blame"
+        "command": "agent-blame.showBlame",
+        "title": "Agent Blame: Show Blame"
       },
       {
-        "command": "vibe-review.connectAgent",
-        "title": "Vibe Review: Connect Agent"
+        "command": "agent-blame.connectAgent",
+        "title": "Agent Blame: Connect Agent"
       },
       {
-        "command": "vibe-review.disconnectAgent",
-        "title": "Vibe Review: Disconnect Agent"
+        "command": "agent-blame.disconnectAgent",
+        "title": "Agent Blame: Disconnect Agent"
+      },
+      {
+        "command": "agent-blame.showStatus",
+        "title": "Agent Blame: Show Agent Status"
       }
     ],
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "vibe-review",
-          "title": "Vibe Review",
+          "id": "agent-blame",
+          "title": "Agent Blame",
           "icon": "resources/icon.svg"
         }
       ]
     },
     "views": {
-      "vibe-review": [
+      "agent-blame": [
         {
-          "id": "vibe-review.agents",
+          "id": "agent-blame.agents",
           "name": "Connected Agents"
         }
       ]
@@ -56,8 +60,8 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@vibe-review/core": "workspace:*",
-    "@vibe-review/hook": "workspace:*"
+    "@agent-blame/core": "workspace:*",
+    "@vibe-x/agent-blame": "workspace:*"
   },
   "devDependencies": {
     "@types/vscode": "^1.85.0",

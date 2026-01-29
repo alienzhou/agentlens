@@ -1,12 +1,12 @@
 {
-  "name": "@vibe-review/cli",
+  "name": "@vibe-x/agent-blame-cli",
   "version": "0.1.0",
-  "description": "Command line tool for Vibe Review",
+  "description": "Agent Blame CLI - Command line tool for agent blame system",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "vibe-review": "./dist/index.js"
+    "agent-blame": "./dist/index.js"
   },
   "files": [
     "dist"
@@ -19,12 +19,14 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@vibe-review/core": "workspace:*",
-    "@vibe-review/hook": "workspace:*",
+    "@agent-blame/core": "workspace:*",
+    "@vibe-x/agent-blame": "workspace:*",
     "chalk": "^5.3.0",
-    "commander": "^12.1.0"
+    "commander": "^12.1.0",
+    "diff": "^7.0.0"
   },
   "devDependencies": {
+    "@types/diff": "^5.2.3",
     "rimraf": "^6.0.1",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"

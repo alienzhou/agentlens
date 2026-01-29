@@ -1,0 +1,24 @@
+topic: hover-vs-inline-annotation
+created: 2026-01-29
+status: completed
+decisions:
+- path: decisions/D01-interaction-strategy.md
+  name: D01-interaction-strategy.md
+  last_modified: '2026-01-29T07:06:42.105342+00:00'
+  last_updated_round: 9
+- path: decisions/D02-data-flow.md
+  name: D02-data-flow.md
+  last_modified: '2026-01-29T08:16:56.667820+00:00'
+  last_updated_round: 10
+- path: decisions/D03-mvp-scope.md
+  name: D03-mvp-scope.md
+  last_modified: '2026-01-29T07:06:53.382607+00:00'
+  last_updated_round: 9
+- path: decisions/D04-hover-content.md
+  name: D04-hover-content.md
+  last_modified: '2026-01-29T07:06:59.252463+00:00'
+  last_updated_round: 9
+current_round: 11
+config:
+  stale_threshold: 3
+notes: []

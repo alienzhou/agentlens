@@ -35,7 +35,7 @@ Vibe Review adopts 4-layer architecture (Tool Layer / Data Layer / Product Core 
 │  └─ Data fusion logic                                   │
 │                                             │
 │  Phase 1: Data Layer Validation (2-3 weeks)           │
-│  ├─ Terminal tool: vibe-review diff --annotated              │
+│  ├─ Terminal tool: agent-blame diff --annotated              │
 │  ├─ Verify if data model is correct                             │
 │  └─ Verify if data is helpful for Review                            │
 │                                             │
@@ -189,7 +189,7 @@ interface VibeReviewData {
 ### 3. Storage Structure
 
 ```
-.vibe-review/
+.agent-blame/
 ├── data/
 │   ├── review-{timestamp}.json    # Complete Review data
 │   └── todos.json                 # TODOs separate storage (supports cross-Review)
@@ -231,7 +231,7 @@ interface VibeReviewData {
 ### 4. Terminal Output Format
 
 ```bash
-$ vibe-review diff --annotated
+$ agent-blame diff --annotated
 
 ╭──────────────────────────────────────────────────────╮
 │  Vibe Review Report                                 │

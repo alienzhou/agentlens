@@ -8,7 +8,7 @@
 
 ## Overview
 
-Vibe Review adopts **4-layer architecture design**, forming a complete technology stack from bottom-level tools to top-level products:
+Agent Blame adopts **4-layer architecture design**, forming a complete technology stack from bottom-level tools to top-level products:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -42,25 +42,25 @@ Vibe Review adopts **4-layer architecture design**, forming a complete technolog
 The project uses **Monorepo** architecture:
 
 ```
-vibe-review/
+agent-blame/
 ├── packages/
 │   ├── core/           # Core library (data models, protocols)
-│   ├── hook/           # Hook system (adapters, event capture)
+│   ├── hook/           # Agent blame system (adapters, event capture)
 │   ├── cli/            # Command line tool
 │   ├── vscode/         # VS Code plugin
 │   └── web/            # Web interface (Post-MVP)
 ├── docs/               # Technical documentation
-└── .vibe-review/       # Local data directory
+└── .agent-blame/       # Local data directory
 ```
 
 **Package Dependency Graph**:
 
 ```mermaid
 graph TD
-    CLI["@vibe-review/cli"]
-    VSCode["@vibe-review/vscode"]
-    Hook["@vibe-review/hook"]
-    Core["@vibe-review/core"]
+    CLI["@vibe-x/agent-blame-cli"]
+    VSCode["@vibe-x/agent-blame-vscode"]
+    Hook["@vibe-x/agent-blame"]
+    Core["@agent-blame/core"]
     
     CLI --> Core
     CLI --> Hook

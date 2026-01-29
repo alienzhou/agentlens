@@ -53,8 +53,8 @@ In the Vibe Review system, we need to make Agents automatically generate protoco
 ### Vibe Review Protocol
 Generate code change descriptions using Vibe Review protocol.
 
-- Rule file: `.vibe-review/rule.yaml`
-- Skill files: `.vibe-review/skills/`
+- Rule file: `.agent-blame/rule.yaml`
+- Skill files: `.agent-blame/skills/`
 - Protocol version: 0.3
 
 When task completes, must call `vibe-review-core` Skill to generate protocol content.
@@ -63,7 +63,7 @@ When task completes, must call `vibe-review-core` Skill to generate protocol con
 #### vibe-review.rule.yaml Example
 
 ```yaml
-# .vibe-review/rule.yaml
+# .agent-blame/rule.yaml
 name: vibe-review-protocol
 version: 0.3.0
 description: Vibe Review protocol rule definition
@@ -126,7 +126,7 @@ skills:
 │     └─ Read AGENTS.md, discover need to follow Vibe Review protocol        │
 │                                                     │
 │  2. Agent reads rules                                │
-│     └─ Load .vibe-review/rule.yaml                       │
+│     └─ Load .agent-blame/rule.yaml                       │
 │                                                     │
 │  3. Agent executes task                               │
 │     ├─ Call various tools                          │
@@ -179,7 +179,7 @@ skills:
 │      └─ SKILL.md                                            │
 │                                                     │
 │  Or Project-level Skills:                                         │
-│  .vibe-review/skills/                    # Project-level Skills    │
+│  .agent-blame/skills/                    # Project-level Skills    │
 │  ├─ vibe-review-core/SKILL.md                               │
 │  └─ ...                                                     │
 │                                                     │
@@ -430,7 +430,7 @@ Analyze **impact scope** of code changes, including side effects and affected mo
 #### Version Check Mechanism
 
 ```yaml
-# .vibe-review/rule.yaml
+# .agent-blame/rule.yaml
 name: vibe-review-protocol
 version: 0.3.0
 
@@ -441,7 +441,7 @@ skills:
 ```
 
 ```yaml
-# .vibe-review/skills/vibe-review-core/skill.yaml
+# .agent-blame/skills/vibe-review-core/skill.yaml
 name: vibe-review-core
 version: 0.3.0  # Must match version declared in Rule
 
@@ -470,7 +470,7 @@ Please upgrade your skills:
 ```
 my-project/
 ├─ AGENTS.md                    # Declare use of Vibe Review
-├─ .vibe-review/
+├─ .agent-blame/
 │   ├─ rule.yaml                # Rule definition
 │   └─ skills/                  # Project-level Skills (optional)
 │       ├─ vibe-review-core/
@@ -497,7 +497,7 @@ User: "Add remember me function to login page"
 
 Agent executes:
 1. Read AGENTS.md → Discover Vibe Review protocol
-2. Read .vibe-review/rule.yaml → Understand protocol requirements
+2. Read .agent-blame/rule.yaml → Understand protocol requirements
 3. Execute task → Modify 3 files
 4. Task completes → Autonomously call Skill
    ├─ Call vibe-review-core → Generate required fields

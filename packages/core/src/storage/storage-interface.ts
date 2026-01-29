@@ -3,7 +3,7 @@ import type { Todo } from '../models/todo.js';
 import type { SessionSource } from '../models/session-source.js';
 
 /**
- * Storage interface for Vibe Review data
+ * Storage interface for Agent Blame data
  */
 export interface StorageInterface {
   // Session operations

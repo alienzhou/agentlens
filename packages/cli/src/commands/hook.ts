@@ -1,15 +1,17 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import * as readline from 'node:readline';
-import { SUPPORTED_AGENTS, AGENT_CONFIGS, FileStorage } from '@vibe-review/core';
-import { CursorAdapter, ClaudeAdapter } from '@vibe-review/hook';
-import type { AgentAdapter } from '@vibe-review/hook';
-import { getHookCore } from '@vibe-review/hook';
+import * as path from 'node:path';
+import { diffLines } from 'diff';
+import { SUPPORTED_AGENTS, AGENT_CONFIGS, FileStorage } from '@agent-blame/core';
+import { CursorAdapter, ClaudeAdapter } from '@vibe-x/agent-blame';
+import type { AgentAdapter } from '@vibe-x/agent-blame';
+import { getHookCore } from '@vibe-x/agent-blame';
 import type {
   ClaudePostToolUseInput,
   ClaudeSessionStartInput,
   ClaudeSessionEndInput,
-} from '@vibe-review/hook';
+} from '@vibe-x/agent-blame';
 
 // ==================== Cursor Hook Type Definitions ====================
 
@@ -37,25 +39,6 @@ interface CursorAfterFileEditInput extends Partial<CursorHookInputBase> {
     old_string?: string;
     new_string?: string;
   }>;
-}
-
-/**
- * Cursor postToolUse input
- */
-interface CursorPostToolUseInput extends Partial<CursorHookInputBase> {
-  tool_name: string;
-  tool_input?: {
-    file_path?: string;
-    content?: string;
-    old_string?: string;
-    new_string?: string;
-    command?: string;
-    [key: string]: unknown;
-  };
-  tool_output?: string;
-  tool_use_id?: string;
-  cwd?: string;
-  duration?: number;
 }
 
 /**
@@ -99,7 +82,7 @@ export const hookCommand = new Command('hook').description('Manage AI Agent hook
  */
 hookCommand
   .command('connect <agent>')
-  .description('Connect Vibe Review to an AI Agent')
+  .description('Connect Agent Blame to an AI Agent')
   .action(async (agent: string) => {
     try {
       await connectAgent(agent);
@@ -114,7 +97,7 @@ hookCommand
  */
 hookCommand
   .command('disconnect <agent>')
-  .description('Disconnect Vibe Review from an AI Agent')
+  .description('Disconnect Agent Blame from an AI Agent')
   .action(async (agent: string) => {
     try {
       await disconnectAgent(agent);
@@ -307,7 +290,8 @@ async function readStdinJson<T>(): Promise<T> {
     });
 
     rl.on('error', (err) => {
-      reject(new Error(`Failed to read stdin: ${err.message}`));
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      reject(new Error(`Failed to read stdin: ${errorMessage}`));
     });
 
     // Set timeout to avoid infinite waiting
@@ -448,15 +432,20 @@ async function handlePostToolUse(input: ClaudePostToolUseInput, agent: string): 
     return;
   }
 
+  const oldContent = input.tool_input.old_string ?? '';
+  const newContent = input.tool_input.new_string ?? input.tool_input.content ?? '';
+  const absolutePath = getAbsolutePath(filePath, input.cwd);
+  const { addedLines, removedLines } = calculateLineChanges(oldContent, newContent);
+
   // Record code change event
   hookCore.onCodeChange(
-    agent as 'cursor' | 'claude-code',
     input.session_id,
     filePath,
-    input.tool_input.old_string ?? '',
-    input.tool_input.new_string ?? input.tool_input.content ?? '',
-    calculateLines(input.tool_input.new_string ?? input.tool_input.content ?? ''),
-    calculateLines(input.tool_input.old_string ?? '')
+    absolutePath,
+    newContent,
+    addedLines,
+    removedLines,
+    oldContent
   );
 
   // Store to local
@@ -497,7 +486,7 @@ async function handleSessionStart(input: ClaudeSessionStartInput, agent: string)
 /**
  * Handle SessionEnd event
  */
-async function handleSessionEnd(input: ClaudeSessionEndInput, agent: string): Promise<void> {
+async function handleSessionEnd(input: ClaudeSessionEndInput, _agent: string): Promise<void> {
   const hookCore = getHookCore();
   const storage = new FileStorage(input.cwd);
 
@@ -520,21 +509,29 @@ async function handleCursorAfterFileEdit(input: CursorAfterFileEditInput, agent:
   const hookCore = getHookCore();
 
   // Get working directory (Cursor common field)
-  const cwd = (input as CursorHookInputBase).workspace_roots?.[0] ?? process.cwd();
+  const workspaceRoots = (input as CursorHookInputBase).workspace_roots;
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  const cwd = (workspaceRoots && workspaceRoots.length > 0 && workspaceRoots[0]) || process.cwd();
   const storage = new FileStorage(cwd);
 
   // Record code change event
-  const sessionId = (input as CursorHookInputBase).conversation_id ?? `cursor_${Date.now()}`;
+  const conversationId = input.conversation_id;
+  const sessionId = conversationId ?? `cursor_${String(Date.now())}`;
+  const absolutePath = getAbsolutePath(input.file_path, cwd);
 
   for (const edit of input.edits ?? []) {
+    const oldContent = edit.old_string ?? '';
+    const newContent = edit.new_string ?? '';
+    const { addedLines, removedLines } = calculateLineChanges(oldContent, newContent);
+
     hookCore.onCodeChange(
-      agent as 'cursor' | 'claude-code',
       sessionId,
       input.file_path,
-      edit.old_string ?? '',
-      edit.new_string ?? '',
-      calculateLines(edit.new_string ?? ''),
-      calculateLines(edit.old_string ?? '')
+      absolutePath,
+      newContent,
+      addedLines,
+      removedLines,
+      oldContent
     );
 
     // Store to local
@@ -552,48 +549,6 @@ async function handleCursorAfterFileEdit(input: CursorAfterFileEditInput, agent:
 }
 
 /**
- * Handle Cursor postToolUse event (similar to Claude Code)
- */
-async function handleCursorPostToolUse(input: CursorPostToolUseInput, agent: string): Promise<void> {
-  const hookCore = getHookCore();
-
-  const cwd = input.workspace_roots?.[0] ?? input.cwd ?? process.cwd();
-  const storage = new FileStorage(cwd);
-
-  // Extract file path
-  const filePath = input.tool_input?.file_path;
-
-  if (!filePath) {
-    return;
-  }
-
-  const sessionId = input.conversation_id ?? `cursor_${Date.now()}`;
-
-  // Record code change event
-  hookCore.onCodeChange(
-    agent as 'cursor' | 'claude-code',
-    sessionId,
-    filePath,
-    input.tool_input?.old_string ?? '',
-    input.tool_input?.new_string ?? input.tool_input?.content ?? '',
-    calculateLines(input.tool_input?.new_string ?? input.tool_input?.content ?? ''),
-      calculateLines(input.tool_input?.old_string ?? '')
-    );
-
-    // Store to local
-    await storage.appendCodeChange({
-    sessionId,
-    agent,
-    timestamp: Date.now(),
-    toolName: input.tool_name,
-    filePath,
-    oldContent: input.tool_input?.old_string,
-    newContent: input.tool_input?.new_string ?? input.tool_input?.content,
-    success: true,
-  });
-}
-
-/**
  * Handle Cursor sessionStart event
  */
 async function handleCursorSessionStart(input: CursorSessionStartInput, agent: string): Promise<void> {
@@ -603,11 +558,12 @@ async function handleCursorSessionStart(input: CursorSessionStartInput, agent: s
   const storage = new FileStorage(cwd);
 
   // Record session start
-  hookCore.onSessionStart(agent as 'cursor' | 'claude-code', input.session_id ?? input.conversation_id);
+  const sessionId = input.session_id ?? input.conversation_id ?? `cursor_${String(Date.now())}`;
+  hookCore.onSessionStart(agent as 'cursor' | 'claude-code', sessionId);
 
   // Store session info
   await storage.saveHookSession({
-    sessionId: input.session_id ?? input.conversation_id,
+    sessionId,
     agent,
     startedAt: Date.now(),
     source: 'startup',
@@ -619,13 +575,16 @@ async function handleCursorSessionStart(input: CursorSessionStartInput, agent: s
 /**
  * Handle Cursor sessionEnd event
  */
-async function handleCursorSessionEnd(input: CursorSessionEndInput, agent: string): Promise<void> {
+async function handleCursorSessionEnd(input: CursorSessionEndInput, _agent: string): Promise<void> {
   const hookCore = getHookCore();
 
   const cwd = input.workspace_roots?.[0] ?? process.cwd();
   const storage = new FileStorage(cwd);
 
   const sessionId = input.session_id ?? input.conversation_id;
+  if (!sessionId) {
+    return; // No session ID, skip
+  }
 
   // Record session end
   hookCore.onSessionEnd(sessionId);
@@ -640,13 +599,13 @@ async function handleCursorSessionEnd(input: CursorSessionEndInput, agent: strin
 /**
  * Handle Cursor stop event
  */
-async function handleCursorStop(input: CursorStopInput, agent: string): Promise<void> {
+async function handleCursorStop(input: CursorStopInput, _agent: string): Promise<void> {
   const hookCore = getHookCore();
 
   const cwd = input.workspace_roots?.[0] ?? process.cwd();
   const storage = new FileStorage(cwd);
 
-  const sessionId = input.conversation_id ?? `cursor_${Date.now()}`;
+  const sessionId = input.conversation_id ?? `cursor_${String(Date.now())}`;
 
   // If status is error or aborted, record session end
   if (input.status === 'error' || input.status === 'aborted') {
@@ -662,9 +621,61 @@ async function handleCursorStop(input: CursorStopInput, agent: string): Promise<
 // ==================== Helper Functions ====================
 
 /**
- * Calculate number of lines in text
+ * Calculate added and removed lines using diff algorithm
+ * Uses jsdiff library for accurate line-by-line comparison
+ * 
+ * Handles edge cases:
+ * - Empty content
+ * - Different line endings (\n, \r\n, \r)
+ * - Trailing newlines
+ * - Preserves empty lines that are meaningful (not just trailing)
  */
-function calculateLines(content: string): number {
-  if (!content) return 0;
-  return content.split('\n').length;
+function calculateLineChanges(oldContent: string, newContent: string): {
+  addedLines: string[];
+  removedLines: string[];
+} {
+  if (!oldContent && !newContent) {
+    return { addedLines: [], removedLines: [] };
+  }
+
+  const changes = diffLines(oldContent || '', newContent || '');
+  const addedLines: string[] = [];
+  const removedLines: string[] = [];
+
+  for (const change of changes) {
+    if (change.added) {
+      // Split by newline, preserving all lines including empty ones
+      const lines = change.value.split(/\r?\n/);
+      // Remove trailing empty line if content doesn't end with newline
+      // (split always creates an extra empty element when content ends with newline)
+      if (lines.length > 0 && lines[lines.length - 1] === '' && !change.value.endsWith('\n') && !change.value.endsWith('\r\n')) {
+        lines.pop();
+      }
+      // Filter out only truly empty trailing lines, preserve meaningful empty lines
+      addedLines.push(...lines);
+    } else if (change.removed) {
+      const lines = change.value.split(/\r?\n/);
+      // Same handling for removed lines
+      if (lines.length > 0 && lines[lines.length - 1] === '' && !change.value.endsWith('\n') && !change.value.endsWith('\r\n')) {
+        lines.pop();
+      }
+      removedLines.push(...lines);
+    }
+  }
+
+  return { addedLines, removedLines };
+}
+
+/**
+ * Calculate absolute path from relative path and cwd
+ * Handles edge cases like already absolute paths, empty paths, etc.
+ */
+function getAbsolutePath(filePath: string, cwd: string): string {
+  if (!filePath) {
+    return cwd;
+  }
+  if (path.isAbsolute(filePath)) {
+    return path.normalize(filePath);
+  }
+  return path.normalize(path.join(cwd, filePath));
 }

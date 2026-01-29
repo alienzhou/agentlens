@@ -1,14 +1,14 @@
-# Vibe Review
+# Agent Blame
 
 > Code Review tool redesigned for the Vibe Coding era
 
-[![CI](https://github.com/alienzhou/vibe-review/actions/workflows/ci.yml/badge.svg)](https://github.com/alienzhou/vibe-review/actions)
+[![CI](https://github.com/alienzhou/agent-blame/actions/workflows/ci.yml/badge.svg)](https://github.com/alienzhou/agent-blame/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Status: MVP Development](https://img.shields.io/badge/Status-MVP%20Development-orange.svg)](https://github.com/alienzhou/vibe-review)
+[![Status: MVP Development](https://img.shields.io/badge/Status-MVP%20Development-orange.svg)](https://github.com/alienzhou/agent-blame)
 
 ## 📋 Overview
 
-Vibe Review is a Code Review tool designed specifically for the era of AI-assisted coding. It addresses the fundamental challenge of reviewing AI-generated code by providing:
+Agent Blame is a Code Review tool designed specifically for the era of AI-assisted coding. It addresses the fundamental challenge of reviewing AI-generated code by providing:
 
 - **Dual-Track Data Collection**: Captures both Hook events and session files from AI Agents
 - **Contributor Detection**: Identifies whether code was written by AI or humans using hunk-level similarity matching
@@ -27,7 +27,7 @@ In the Vibe Coding era:
 
 ### The Solution
 
-Vibe Review provides:
+Agent Blame provides:
 1. **Agent Traceability**: Track which AI Agent generated which code
 2. **Session Context**: Link code changes to the original conversation and task breakdown
 3. **Contributor Classification**: Automatically detect AI vs. human contributions
@@ -35,7 +35,7 @@ Vibe Review provides:
 
 ## 🏗️ Architecture
 
-Vibe Review uses a 4-layer architecture:
+Agent Blame uses a 4-layer architecture:
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -65,8 +65,8 @@ Vibe Review uses a 4-layer architecture:
 
 ```bash
 # Clone the repository
-git clone git@github.com:alienzhou/vibe-review.git
-cd vibe-review
+git clone git@github.com:alienzhou/agent-blame.git
+cd agent-blame
 
 # Install dependencies
 pnpm install
@@ -77,14 +77,14 @@ pnpm build
 
 ### Basic Usage
 
-#### 1. Initialize Vibe Review in Your Project
+#### 1. Initialize Agent Blame in Your Project
 
 ```bash
 cd your-project
-vibe-review config --init
+agent-blame config --init
 ```
 
-This creates a `.vibe-review/` directory with:
+This creates a `.agent-blame/` directory with:
 - `data/sessions/` - Session data
 - `data/review-units/` - Review unit data
 - `data/todos.json` - TODO items
@@ -94,68 +94,68 @@ This creates a `.vibe-review/` directory with:
 
 ```bash
 # Connect to Cursor
-vibe-review hook connect cursor
+agent-blame hook connect cursor
 
 # Connect to Claude Code
-vibe-review hook connect claude-code
+agent-blame hook connect claude-code
 
 # Check connection status
-vibe-review hook status
+agent-blame hook status
 ```
 
 #### 3. View Annotated Diff
 
 ```bash
 # Show working tree changes with contributor info
-vibe-review diff --annotated
+agent-blame diff --annotated
 
 # Show staged changes
-vibe-review diff --staged
+agent-blame diff --staged
 
 # Output to markdown
-vibe-review diff --format markdown -o report.md
+agent-blame diff --format markdown -o report.md
 ```
 
 #### 4. Start a Review Session
 
 ```bash
 # Interactive review session
-vibe-review review
+agent-blame review
 
 # Filter by session
-vibe-review review --session abc123
+agent-blame review --session abc123
 
 # Export to file
-vibe-review review --format markdown -o review-report.md
+agent-blame review --format markdown -o review-report.md
 ```
 
 #### 5. Manage TODOs
 
 ```bash
 # List all TODOs
-vibe-review todos
+agent-blame todos
 
 # Filter by status
-vibe-review todos --status pending
+agent-blame todos --status pending
 
 # Output as JSON
-vibe-review todos --format json
+agent-blame todos --format json
 ```
 
 ## 📦 Packages
 
 This monorepo contains:
 
-- **@vibe-review/core** - Core data models, Git integration, contributor detection
-- **@vibe-review/hook** - Hook system for AI Agent integration
-- **@vibe-review/cli** - Command-line interface
-- **@vibe-review/vscode** - VS Code extension (coming soon)
+- **@agent-blame/core** - Core data models, Git integration, contributor detection
+- **@vibe-x/agent-blame** - Agent blame system for AI Agent integration
+- **@vibe-x/agent-blame-cli** - Command-line interface
+- **@vibe-x/agent-blame-vscode** - VS Code extension (coming soon)
 
 ## 🔍 How It Works
 
 ### Contributor Detection
 
-Vibe Review uses **hunk-level Levenshtein similarity matching** to determine code authorship:
+Agent Blame uses **hunk-level Levenshtein similarity matching** to determine code authorship:
 
 1. **Capture**: Hook system captures code changes from AI Agents
 2. **Compare**: Compare Git hunks with captured Agent records
@@ -178,7 +178,7 @@ Vibe Review uses **hunk-level Levenshtein similarity matching** to determine cod
 ### Project Structure
 
 ```
-vibe-review/
+agent-blame/
 ├── packages/
 │   ├── core/          # Core library
 │   ├── hook/          # Hook system
@@ -218,7 +218,7 @@ pnpm clean            # Remove build artifacts and node_modules
 pnpm test:run
 
 # Run tests for specific package
-pnpm --filter @vibe-review/core test
+pnpm --filter @agent-blame/core test
 
 # Generate coverage report
 pnpm test:coverage
@@ -267,7 +267,7 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 ## 📧 Contact
 
 - Author: [alienzhou](https://github.com/alienzhou)
-- Issues: [GitHub Issues](https://github.com/alienzhou/vibe-review/issues)
+- Issues: [GitHub Issues](https://github.com/alienzhou/agent-blame/issues)
 - Documentation: [docs/](./docs/)
 
 ---

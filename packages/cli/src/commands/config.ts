@@ -1,13 +1,14 @@
+import * as path from 'node:path';
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { FileStorage } from '@vibe-review/core';
+import { FileStorage, DATA_DIR_NAME, DATA_SUBDIRS, DATA_FILES } from '@agent-blame/core';
 
 /**
- * config command - Configure Vibe Review settings
+ * config command - Configure Agent Blame settings
  */
 export const configCommand = new Command('config')
-  .description('Configure Vibe Review settings')
-  .option('--init', 'Initialize Vibe Review in the current project')
+  .description('Configure Agent Blame settings')
+  .option('--init', 'Initialize Agent Blame in the current project')
   .option('--show', 'Show current configuration')
   .option('--set <key=value>', 'Set a configuration value')
   .option('--reset', 'Reset configuration to defaults')
@@ -54,7 +55,7 @@ async function initializeProject(storage: FileStorage): Promise<void> {
   const isInitialized = await storage.isInitialized();
 
   if (isInitialized) {
-    console.log(chalk.yellow('Vibe Review is already initialized in this project.'));
+    console.log(chalk.yellow('Agent Blame is already initialized in this project.'));
     const stats = await storage.getStats();
     console.log(chalk.dim(`  Sessions: ${String(stats.sessionsCount)}`));
     console.log(chalk.dim(`  Review Units: ${String(stats.reviewUnitsCount)}`));
@@ -62,33 +63,33 @@ async function initializeProject(storage: FileStorage): Promise<void> {
     return;
   }
 
-  console.log(chalk.blue('Initializing Vibe Review...'));
+  console.log(chalk.blue('Initializing Agent Blame...'));
 
   await storage.initialize();
 
-  console.log(chalk.green('✓ Vibe Review initialized successfully!'));
+  console.log(chalk.green('✓ Agent Blame initialized successfully!'));
   console.log();
-  console.log(chalk.dim('Created .vibe-review/ directory with:'));
-  console.log(chalk.dim('  - data/sessions/    (session data)'));
-  console.log(chalk.dim('  - data/review-units/ (review unit data)'));
-  console.log(chalk.dim('  - data/todos.json    (todo items)'));
-  console.log(chalk.dim('  - config/           (configuration)'));
+  console.log(chalk.dim(`Created ${DATA_DIR_NAME}${path.posix.sep} directory with:`));
+  console.log(chalk.dim(`  - ${path.posix.join(DATA_SUBDIRS.DATA, DATA_SUBDIRS.SESSIONS)}${path.posix.sep}    (session data)`));
+  console.log(chalk.dim(`  - ${path.posix.join(DATA_SUBDIRS.DATA, DATA_SUBDIRS.REVIEW_UNITS)}${path.posix.sep} (review unit data)`));
+  console.log(chalk.dim(`  - ${path.posix.join(DATA_SUBDIRS.DATA, DATA_FILES.TODOS)}    (todo items)`));
+  console.log(chalk.dim(`  - ${DATA_SUBDIRS.CONFIG}${path.posix.sep}           (configuration)`));
   console.log();
   console.log(chalk.cyan('Next steps:'));
-  console.log(chalk.dim('  1. Connect an AI Agent: vibe-review hook connect cursor'));
+  console.log(chalk.dim('  1. Connect an AI Agent: agent-blame hook connect cursor'));
   console.log(chalk.dim('  2. Use your Agent normally'));
-  console.log(chalk.dim('  3. View changes: vibe-review diff --annotated'));
+  console.log(chalk.dim('  3. View changes: agent-blame diff --annotated'));
 }
 
 async function resetProject(storage: FileStorage): Promise<void> {
   const isInitialized = await storage.isInitialized();
 
   if (!isInitialized) {
-    console.log(chalk.yellow('Vibe Review is not initialized in this project.'));
+    console.log(chalk.yellow('Agent Blame is not initialized in this project.'));
     return;
   }
 
-  console.log(chalk.yellow('⚠️  Warning: This will delete all Vibe Review data!'));
+  console.log(chalk.yellow('⚠️  Warning: This will delete all Agent Blame data!'));
   console.log(chalk.dim('  - All session data'));
   console.log(chalk.dim('  - All review units'));
   console.log(chalk.dim('  - All TODOs'));
@@ -99,7 +100,7 @@ async function resetProject(storage: FileStorage): Promise<void> {
   // For now, we'll require an explicit flag
 
   console.log(chalk.red('This action requires manual confirmation.'));
-  console.log(chalk.dim('To reset, delete the .vibe-review/ directory manually.'));
+  console.log(chalk.dim(`To reset, delete the ${DATA_DIR_NAME}${path.posix.sep} directory manually.`));
 }
 
 function setConfig(keyValue: string): void {
@@ -117,7 +118,7 @@ function setConfig(keyValue: string): void {
 }
 
 async function showConfig(storage: FileStorage): Promise<void> {
-  console.log(chalk.blue.bold('📋 Vibe Review Configuration'));
+  console.log(chalk.blue.bold('📋 Agent Blame Configuration'));
   console.log(chalk.dim('─'.repeat(50)));
   console.log();
 
@@ -138,10 +139,10 @@ async function showConfig(storage: FileStorage): Promise<void> {
   console.log();
   console.log(chalk.white('Paths:'));
   console.log(`  Project Root: ${chalk.dim(process.cwd())}`);
-  console.log(`  Data Directory: ${chalk.dim('.vibe-review/')}`);
+  console.log(`  Data Directory: ${chalk.dim(`${DATA_DIR_NAME}${path.posix.sep}`)}`);
 
   if (!isInitialized) {
     console.log();
-    console.log(chalk.yellow('Run "vibe-review config --init" to initialize.'));
+    console.log(chalk.yellow('Run "agent-blame config --init" to initialize.'));
   }
 }

@@ -12,7 +12,7 @@ import type {
 import { generateHunkId } from '../models/git-types.js';
 
 /**
- * Git integration for Vibe Review
+ * Git integration for Agent Blame
  *
  * Provides structured Git data for diff, blame, and file history operations.
  */

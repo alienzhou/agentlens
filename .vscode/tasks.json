@@ -1,0 +1,22 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build-vscode-extension",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["--filter", "@vibe-x/agent-blame-vscode", "build"],
+      "group": "build",
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "watch-vscode-extension",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["--filter", "@vibe-x/agent-blame-vscode", "dev"],
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": ["$tsc-watch"]
+    }
+  ]
+}

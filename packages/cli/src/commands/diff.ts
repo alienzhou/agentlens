@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { GitIntegration, FileStorage } from '@vibe-review/core';
+import { GitIntegration, FileStorage } from '@agent-blame/core';
 import { TerminalDiffRenderer } from '../renderer/terminal-diff-renderer.js';
 
 /**

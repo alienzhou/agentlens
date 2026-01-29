@@ -78,7 +78,7 @@ interface Todo {
 ### Storage Structure
 
 ```
-.vibe-review/
+.agent-blame/
 ├── data/
 │   ├── sessions/
 │   │   ├── 2026-01-04/

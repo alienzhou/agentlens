@@ -98,13 +98,13 @@ interface VibeReviewHook {
 **User Installation Method**:
 ```bash
 # Install in Cursor
-vibe-review install --agent cursor
+agent-blame hook connect cursor
 
 # Install in Claude
-vibe-review install --agent claude
+agent-blame hook connect claude-code
 
 # Install in Duet
-vibe-review install --agent duet
+agent-blame hook connect duet
 ```
 
 #### 1.3 Collected Data

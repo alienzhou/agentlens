@@ -1,0 +1,118 @@
+topic: Code Review Refactoring for Vibe Coding Era
+created: 2026-01-04
+current_round: 10
+max_stale_rounds: 3
+decisions:
+- id: D1
+  title: Agent Review Protocol v0.3
+  status: confirmed
+  confirmed_at: 3
+  doc_path: ./decisions/D01-agent-review-protocol.md
+- id: D2
+  title: Data Acquisition Strategy - Hook + Skill Dual-Track
+  status: confirmed
+  confirmed_at: 5
+  doc_path: ./decisions/D02-data-acquisition-strategy.md
+- id: D3
+  title: Skill and Rule Collaboration
+  status: confirmed
+  confirmed_at: 6
+  doc_path: ./decisions/D03-skill-rule-collaboration.md
+- id: D4
+  title: MVP Strategy - Phased Implementation
+  status: confirmed
+  confirmed_at: 7
+  doc_path: ./decisions/D04-mvp-strategy.md
+- id: D5
+  title: Open Source Project Positioning
+  status: confirmed
+  confirmed_at: 4
+  doc_path: null
+- id: D6
+  title: Product Architecture - 4-Layer Architecture
+  status: confirmed
+  confirmed_at: 4
+  doc_path: null
+- id: D7
+  title: Project Naming - Vibe Review
+  status: confirmed
+  confirmed_at: 5
+  doc_path: null
+- id: D12
+  title: Product Interaction Flow
+  status: confirmed
+  confirmed_at: 10
+  doc_path: ./decisions/D05-product-interaction-flow.md
+- path: decisions/D04-mvp-strategy.md
+  name: D04-mvp-strategy.md
+  last_modified: '2026-01-29T08:17:07.118809+00:00'
+  last_updated_round: 10
+- path: decisions/D02-data-acquisition-strategy.md
+  name: D02-data-acquisition-strategy.md
+  last_modified: '2026-01-29T08:17:10.094358+00:00'
+  last_updated_round: 10
+- path: decisions/D05-product-interaction-flow.md
+  name: D05-product-interaction-flow.md
+  last_modified: '2026-01-29T08:17:12.905156+00:00'
+  last_updated_round: 10
+- path: decisions/D03-skill-rule-collaboration.md
+  name: D03-skill-rule-collaboration.md
+  last_modified: '2026-01-29T08:17:21.794342+00:00'
+  last_updated_round: 10
+deferred:
+- id: Q3
+  title: How to establish and measure trust in the new paradigm
+  deferred_at: 8
+  reason: MVP phase focuses on 'understanding', trust measurement needs data accumulation
+  note: Confidence field reserved in protocol
+pending:
+- id: Q4
+  title: Session file paths and formats for each AI IDE
+  added_at: 10
+  note: Needs research for Cursor, Claude Code, Gemini CLI, OpenCode
+r9_decisions:
+- id: D8
+  title: Contributor Detection Mechanism
+  confirmed_at: 9
+  doc_path: ../2026-01-26/contributor-detection/outline.md
+- id: D9
+  title: Display Layer Interaction Design
+  confirmed_at: 9
+  doc_path: ../2026-01-26/contributor-detection/outline.md
+- id: D10
+  title: Open Source Strategy - MIT Full Open Source
+  confirmed_at: 9
+  doc_path: ../2026-01-26/contributor-detection/outline.md
+- id: D11
+  title: Todo Item Definition - Agent Task Breakdown
+  confirmed_at: 9
+  doc_path: ../2026-01-26/contributor-detection/outline.md
+r10_decisions:
+- id: D12
+  title: Product Interaction Flow
+  confirmed_at: 10
+  doc_path: ./decisions/D05-product-interaction-flow.md
+  summary: '- Detection: Hybrid (directory + which command)
+
+    - Connection: Check Hook config in platform config file
+
+    - Undetected: Create directory, write config anyway
+
+    - Supported: Cursor, Cursor CLI, Claude Code, OpenCode, Gemini CLI
+
+    - Data Collection: Dual-track (Hook + Session monitoring)
+
+    - Blame Matching: Hunk-level Levenshtein (90%/70%)
+
+    - Blame Display: Contributor type + Agent + Session + TODOs
+
+    - Terminology: "Connect" instead of "Install"
+
+    '
+config:
+  stale_threshold: 3
+notes:
+- path: notes/README.md
+  name: README.md
+  last_modified: '2026-01-29T08:17:09.181504+00:00'
+  last_updated_round: 10

@@ -1,5 +1,5 @@
 {
-  "name": "vibe-review",
+  "name": "agent-blame",
   "version": "0.1.0",
   "description": "Code Review tool redesigned for the Vibe Coding era",
   "private": true,
@@ -36,12 +36,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alienzhou/vibe-review.git"
+    "url": "git+https://github.com/alienzhou/agent-blame.git"
   },
   "author": "alienzhou",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/alienzhou/vibe-review/issues"
+    "url": "https://github.com/alienzhou/agent-blame/issues"
   },
-  "homepage": "https://github.com/alienzhou/vibe-review#readme"
+  "homepage": "https://github.com/alienzhou/agent-blame#readme"
 }

@@ -1,14 +1,16 @@
 {
-  "name": "@vibe-review/hook",
+  "name": "@vibe-x/agent-blame",
   "version": "0.1.0",
-  "description": "Hook system for Vibe Review - Agent adapters, event capture, and session monitoring",
+  "description": "Agent blame system - Agent adapters, event capture, and session monitoring",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
     }
   },
   "files": [
@@ -22,7 +24,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@vibe-review/core": "workspace:*",
+    "@agent-blame/core": "workspace:*",
     "chokidar": "^4.0.1"
   },
   "devDependencies": {

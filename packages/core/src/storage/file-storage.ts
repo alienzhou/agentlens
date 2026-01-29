@@ -55,7 +55,7 @@ export interface HookSessionData {
 }
 
 /**
- * File-based storage implementation for Vibe Review
+ * File-based storage implementation for Agent Blame
  */
 export class FileStorage implements StorageInterface {
   private readonly basePath: string;

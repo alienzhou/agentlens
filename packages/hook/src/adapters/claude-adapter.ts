@@ -2,8 +2,8 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
-import type { AgentType } from '@vibe-review/core';
-import { AGENT_CONFIGS } from '@vibe-review/core';
+import type { AgentType } from '@agent-blame/core';
+import { AGENT_CONFIGS } from '@agent-blame/core';
 import type { HookCore } from '../core/hook-core.js';
 import type {
   AgentAdapterConfig,
@@ -15,9 +15,9 @@ import { BaseAgentAdapter } from './adapter-interface.js';
 const execAsync = promisify(exec);
 
 /**
- * Vibe Review hook identifier registered in Claude Code
+ * Agent Blame hook identifier registered in Claude Code
  */
-const VIBE_REVIEW_HOOK_MARKER = 'vibe-review hook';
+const AGENT_BLAME_HOOK_MARKER = 'agent-blame hook';
 
 /**
  * Claude Code adapter for integrating with Claude Code (Anthropic's CLI)
@@ -94,10 +94,10 @@ export class ClaudeAdapter extends BaseAgentAdapter {
       const content = await fs.readFile(configPath, 'utf-8');
       const config = JSON.parse(content) as ClaudeSettingsConfig;
 
-      // Check if vibe-review hook config exists
+      // Check if agent-blame hook config exists
       if (!config.hooks) return false;
 
-      // Check if any hook event contains vibe-review command
+      // Check if any hook event contains agent-blame command
       const hookEvents = ['PostToolUse', 'SessionStart', 'SessionEnd'] as const;
       for (const eventName of hookEvents) {
         const eventHooks = config.hooks[eventName];
@@ -105,7 +105,7 @@ export class ClaudeAdapter extends BaseAgentAdapter {
           for (const matcher of eventHooks) {
             if (Array.isArray(matcher.hooks)) {
               for (const hook of matcher.hooks) {
-                if (hook.type === 'command' && hook.command?.includes(VIBE_REVIEW_HOOK_MARKER)) {
+                if (hook.command && hook.command.includes(AGENT_BLAME_HOOK_MARKER)) {
                   return true;
                 }
               }
@@ -171,7 +171,7 @@ export class ClaudeAdapter extends BaseAgentAdapter {
       const config = JSON.parse(content) as ClaudeSettingsConfig;
 
       if (config.hooks) {
-        // Remove hooks containing vibe-review command
+        // Remove hooks containing agent-blame command
         const hookEvents = ['PostToolUse', 'SessionStart', 'SessionEnd'] as const;
         for (const eventName of hookEvents) {
           const eventHooks = config.hooks[eventName];
@@ -179,14 +179,16 @@ export class ClaudeAdapter extends BaseAgentAdapter {
             config.hooks[eventName] = eventHooks.filter((matcher) => {
               if (Array.isArray(matcher.hooks)) {
                 matcher.hooks = matcher.hooks.filter(
-                  (hook) => !(hook.type === 'command' && hook.command?.includes(VIBE_REVIEW_HOOK_MARKER))
+                  (hook) => !(hook.command && hook.command.includes(AGENT_BLAME_HOOK_MARKER))
                 );
                 return matcher.hooks.length > 0;
               }
               return true;
             });
             // If no hooks left for this event, delete the entire event
-            if (config.hooks[eventName]?.length === 0) {
+            const remainingHooks = config.hooks[eventName];
+            if (remainingHooks.length === 0) {
+              // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
               delete config.hooks[eventName];
             }
           }
@@ -209,11 +211,12 @@ export class ClaudeAdapter extends BaseAgentAdapter {
   ): ClaudeHookMatcher[] {
     const matchers = existing ?? [];
 
-    // Check if vibe-review hook with same matcher already exists
+    // Check if agent-blame hook with same matcher already exists
     const existingIndex = matchers.findIndex((m) => {
       if (m.matcher !== newMatcher.matcher) return false;
-      return m.hooks?.some(
-        (h) => h.type === 'command' && h.command?.includes(VIBE_REVIEW_HOOK_MARKER)
+      if (!Array.isArray(m.hooks)) return false;
+      return m.hooks.some(
+        (h) => h.command && h.command.includes(AGENT_BLAME_HOOK_MARKER)
       );
     });
 
@@ -238,7 +241,7 @@ export class ClaudeAdapter extends BaseAgentAdapter {
       hooks: [
         {
           type: 'command',
-          command: 'vibe-review hook posttooluse --agent claude-code',
+          command: 'agent-blame hook posttooluse --agent claude-code',
         },
       ],
     };
@@ -252,7 +255,7 @@ export class ClaudeAdapter extends BaseAgentAdapter {
       hooks: [
         {
           type: 'command',
-          command: 'vibe-review hook sessionstart --agent claude-code',
+          command: 'agent-blame hook sessionstart --agent claude-code',
         },
       ],
     };
@@ -266,7 +269,7 @@ export class ClaudeAdapter extends BaseAgentAdapter {
       hooks: [
         {
           type: 'command',
-          command: 'vibe-review hook sessionend --agent claude-code',
+          command: 'agent-blame hook sessionend --agent claude-code',
         },
       ],
     };

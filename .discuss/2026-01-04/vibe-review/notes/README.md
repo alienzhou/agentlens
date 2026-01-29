@@ -79,7 +79,7 @@ Using "industrial-era human review rituals" to review "post-industrial era machi
 
 ### Phase 1: Data Layer Validation (2-3 weeks)
 
-- [ ] Terminal tool: `vibe-review diff --annotated`
+- [ ] Terminal tool: `agent-blame diff --annotated`
 - [ ] Verify if data model is correct
 - [ ] Verify if data is helpful for Review
 
