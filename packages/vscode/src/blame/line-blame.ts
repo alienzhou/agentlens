@@ -122,8 +122,9 @@ export class LineBlameController {
           displayInfo = await this.formatUncommittedText(result, filePath, lineText);
           displaySource = `dirty:${result?.contributor ?? 'no-match'}${result?.unchanged ? ':unchanged' : ''}`;
         } else {
+          const lineText = editor.document.lineAt(line).text;
           const userName = await this.blameService.getGitUserName();
-          displayInfo = this.createHumanDisplayInfo(userName);
+          displayInfo = this.createHumanDisplayInfo(userName, lineText);
           displaySource = 'dirty:no-service';
         }
       } else {
@@ -138,8 +139,9 @@ export class LineBlameController {
             displayInfo = await this.formatUncommittedText(result, filePath, lineText);
             displaySource = `no-blame:${result?.contributor ?? 'no-match'}`;
           } else {
+            const lineText = editor.document.lineAt(line).text;
             const userName = await this.blameService.getGitUserName();
-            displayInfo = this.createHumanDisplayInfo(userName);
+            displayInfo = this.createHumanDisplayInfo(userName, lineText);
             displaySource = 'no-blame:no-service';
           }
         } else {
@@ -205,21 +207,31 @@ export class LineBlameController {
 
     if (isUncommitted) {
       const userName = await this.blameService.getGitUserName();
-      return this.createHumanDisplayInfo(userName);
+      return this.createHumanDisplayInfo(userName, '');
     }
 
     const relativeTime = this.formatRelativeTime(blameInfo.timestamp);
+    const fullTime = this.formatFullTime(blameInfo.timestamp);
     const shortHash = blameInfo.commitHash.substring(0, 7);
     const text = `${blameInfo.author}, ${relativeTime} • ${blameInfo.commitMessage}`;
 
-    // Create hover message (same format as LineHoverProvider)
+    // Create GitLens-style hover message
     const markdown = new vscode.MarkdownString();
-    markdown.appendMarkdown(`**${blameInfo.author}**, ${relativeTime}\n\n`);
+    markdown.isTrusted = true;
+    markdown.supportThemeIcons = true;
+
+    // Author + full time
+    markdown.appendMarkdown(`**${blameInfo.author}**, ${fullTime}\n\n`);
+
+    // Commit message
     if (blameInfo.commitMessage) {
       markdown.appendMarkdown(`${blameInfo.commitMessage}\n\n`);
     }
-    markdown.appendMarkdown(`\`${shortHash}\``);
-    markdown.isTrusted = true;
+
+    // Commit hash + copy button
+    const copyHashArgs = encodeURIComponent(JSON.stringify([shortHash]));
+    markdown.appendMarkdown(`\`${shortHash}\` `);
+    markdown.appendMarkdown(`[$(copy)](command:agent-blame.copyCommitHash?${copyHashArgs} "Copy commit hash")`);
 
     return {
       text,
@@ -241,17 +253,24 @@ export class LineBlameController {
       const headBlame = await this.blameService.getBlameForLineAtRevision(filePath, lineContent, 'HEAD');
       if (headBlame && headBlame.author) {
         const relativeTime = this.formatRelativeTime(headBlame.timestamp);
+        const fullTime = this.formatFullTime(headBlame.timestamp);
         const shortHash = headBlame.commitHash.substring(0, 7);
         const text = `${headBlame.author}, ${relativeTime} • ${headBlame.commitMessage}`;
 
-        // Create hover message (same format as LineHoverProvider)
+        // Create GitLens-style hover message
         const markdown = new vscode.MarkdownString();
-        markdown.appendMarkdown(`**${headBlame.author}**, ${relativeTime}\n\n`);
+        markdown.isTrusted = true;
+        markdown.supportThemeIcons = true;
+
+        markdown.appendMarkdown(`**${headBlame.author}**, ${fullTime}\n\n`);
         if (headBlame.commitMessage) {
           markdown.appendMarkdown(`${headBlame.commitMessage}\n\n`);
         }
-        markdown.appendMarkdown(`\`${shortHash}\``);
-        markdown.isTrusted = true;
+
+        // Commit hash + copy button
+        const copyHashArgs = encodeURIComponent(JSON.stringify([shortHash]));
+        markdown.appendMarkdown(`\`${shortHash}\` `);
+        markdown.appendMarkdown(`[$(copy)](command:agent-blame.copyCommitHash?${copyHashArgs} "Copy commit hash")`);
 
         return {
           text,
@@ -263,29 +282,45 @@ export class LineBlameController {
     if (!result || result.contributor === 'human') {
       // Human edit - show Git user name
       const userName = await this.blameService.getGitUserName();
-      return this.createHumanDisplayInfo(userName);
+      return this.createHumanDisplayInfo(userName, lineContent || '');
     }
 
     // AI-generated or AI-modified code
     if (result.matchedRecord) {
       const agentName = this.contributorService!.getAgentDisplayName(result.matchedRecord.agent);
       const relativeTime = this.formatRelativeTime(result.matchedRecord.timestamp);
+      const fullTime = this.formatFullTime(result.matchedRecord.timestamp);
       const text = `🤖 ${agentName}, ${relativeTime}`;
 
-      // Create hover message (same format as LineHoverProvider)
+      // Create GitLens-style hover message
       const markdown = new vscode.MarkdownString();
-      markdown.appendMarkdown(`🤖 **${agentName}**\n\n`);
+      markdown.isTrusted = true;
+      markdown.supportThemeIcons = true;
 
-      if (result.matchedRecord.sessionId) {
-        const shortSessionId = result.matchedRecord.sessionId.substring(0, 13);
-        markdown.appendMarkdown(`Session: \`${shortSessionId}\`\n\n`);
+      // Agent name + full time
+      markdown.appendMarkdown(`🤖 **${agentName}**, ${fullTime}\n\n`);
+
+      // Uncommitted changes label
+      markdown.appendMarkdown(`Uncommitted changes\n\n`);
+
+      // Simple diff preview
+      if (lineContent && lineContent.trim()) {
+        markdown.appendCodeblock(`+ ${lineContent}`, 'diff');
+        markdown.appendMarkdown('\n');
       }
 
+      // Session ID + copy button
+      if (result.matchedRecord.sessionId) {
+        const shortSessionId = result.matchedRecord.sessionId.substring(0, 13);
+        const copySessionArgs = encodeURIComponent(JSON.stringify([result.matchedRecord.sessionId]));
+        markdown.appendMarkdown(`Session: \`${shortSessionId}\` `);
+        markdown.appendMarkdown(`[$(copy)](command:agent-blame.copySessionId?${copySessionArgs} "Copy session ID")\n\n`);
+      }
+
+      // User prompt
       if (result.matchedRecord.userPrompt) {
         markdown.appendMarkdown(`Prompt: "${result.matchedRecord.userPrompt}"`);
       }
-
-      markdown.isTrusted = true;
 
       return {
         text,
@@ -295,20 +330,34 @@ export class LineBlameController {
 
     // Fallback to human edit
     const userName = await this.blameService.getGitUserName();
-    return this.createHumanDisplayInfo(userName);
+    return this.createHumanDisplayInfo(userName, lineContent || '');
   }
 
   /**
    * Create display info for human-edited code
    */
-  private createHumanDisplayInfo(userName: string): BlameDisplayInfo {
+  private createHumanDisplayInfo(userName: string, lineContent: string): BlameDisplayInfo {
     const text = `👤 ${userName}, uncommitted`;
 
-    // Create hover message (same format as LineHoverProvider)
+    // Create GitLens-style hover message
     const markdown = new vscode.MarkdownString();
-    markdown.appendMarkdown(`👤 **Human Edit**\n\n`);
-    markdown.appendMarkdown(`Not committed yet`);
     markdown.isTrusted = true;
+    markdown.supportThemeIcons = true;
+
+    // User name + "just now"
+    markdown.appendMarkdown(`👤 **${userName}**, just now\n\n`);
+
+    // Uncommitted changes label
+    markdown.appendMarkdown(`Uncommitted changes\n\n`);
+
+    // Simple diff preview
+    if (lineContent && lineContent.trim()) {
+      markdown.appendCodeblock(`+ ${lineContent}`, 'diff');
+      markdown.appendMarkdown('\n');
+    }
+
+    // Working Tree label
+    markdown.appendMarkdown(`Working Tree`);
 
     return {
       text,
@@ -317,11 +366,24 @@ export class LineBlameController {
   }
 
   /**
+   * Normalize timestamp to seconds
+   * Hook records use milliseconds (Date.now()), Git blame uses seconds (Unix timestamp)
+   */
+  private normalizeTimestamp(timestamp: number): number {
+    // If timestamp > 10^12 (around year 2001 in milliseconds), treat as milliseconds
+    if (timestamp > 1e12) {
+      return Math.floor(timestamp / 1000);
+    }
+    return timestamp;
+  }
+
+  /**
    * Format timestamp to relative time (e.g., "3 days ago")
    */
   private formatRelativeTime(timestamp: number): string {
+    const normalizedTs = this.normalizeTimestamp(timestamp);
     const now = Math.floor(Date.now() / 1000);
-    const diff = now - timestamp;
+    const diff = now - normalizedTs;
 
     const seconds = diff;
     const minutes = Math.floor(seconds / 60);
@@ -350,6 +412,24 @@ export class LineBlameController {
       return minutes === 1 ? '1 minute ago' : String(minutes) + ' minutes ago';
     }
     return 'just now';
+  }
+
+  /**
+   * Format timestamp to full time display: relative time (exact time)
+   * e.g., "yesterday (Jan 27 23:23)"
+   */
+  private formatFullTime(timestamp: number): string {
+    const normalizedTs = this.normalizeTimestamp(timestamp);
+    const relativeTime = this.formatRelativeTime(timestamp);
+    const date = new Date(normalizedTs * 1000);
+    const formattedDate = date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+    return `${relativeTime} (${formattedDate})`;
   }
 
   /**

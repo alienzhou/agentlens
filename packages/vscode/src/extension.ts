@@ -165,12 +165,32 @@ ${SUPPORTED_AGENTS.map((agent) => `- ${getAgentDisplayName(agent)}`).join('\n')}
     vscode.window.showInformationMessage(helpText, { modal: true });
   });
 
+  // Copy commit hash to clipboard
+  const copyCommitHashCmd = vscode.commands.registerCommand(
+    'agent-blame.copyCommitHash',
+    async (hash: string) => {
+      await vscode.env.clipboard.writeText(hash);
+      vscode.window.showInformationMessage(`Copied: ${hash}`);
+    }
+  );
+
+  // Copy session ID to clipboard
+  const copySessionIdCmd = vscode.commands.registerCommand(
+    'agent-blame.copySessionId',
+    async (sessionId: string) => {
+      await vscode.env.clipboard.writeText(sessionId);
+      vscode.window.showInformationMessage(`Copied: ${sessionId}`);
+    }
+  );
+
   context.subscriptions.push(
     showBlameCmd,
     connectAgentCmd,
     disconnectAgentCmd,
     showStatusCmd,
-    showHelpCmd
+    showHelpCmd,
+    copyCommitHashCmd,
+    copySessionIdCmd
   );
 }
 

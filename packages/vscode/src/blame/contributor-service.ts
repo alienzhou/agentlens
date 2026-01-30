@@ -30,9 +30,17 @@ export interface LineContributorResult {
     sessionId: string;
     userPrompt?: string;
     timestamp: number;
+    toolName?: string; // Edit/Write/MultiEdit
   };
-  /** 标记这行内容在 HEAD 中存在（未被真正修改） */
+  /** Flag indicating this line's content exists in HEAD (not actually modified) */
   unchanged?: boolean;
+}
+
+/**
+ * Extended agent record with additional metadata for display
+ */
+interface ExtendedAgentRecord extends AgentRecord {
+  toolName?: string; // Edit/Write/MultiEdit
 }
 
 /**
@@ -42,7 +50,7 @@ export interface LineContributorResult {
  * to match code lines with AI-generated records.
  */
 export class ContributorService {
-  private cache: Map<string, AgentRecord[]> = new Map();
+  private cache: Map<string, ExtendedAgentRecord[]> = new Map();
   private sessionCache: Map<string, { userPrompt?: string }> = new Map();
   private cacheTimestamp: number = 0;
   private readonly cacheTTL = 5000; // 5 seconds
@@ -102,7 +110,7 @@ export class ContributorService {
     }
 
     // Find best matching record by comparing line content
-    let bestMatch: AgentRecord | undefined;
+    let bestMatch: ExtendedAgentRecord | undefined;
     let bestSimilarity = 0;
 
     for (const record of agentRecords) {
@@ -149,6 +157,7 @@ export class ContributorService {
               sessionId: bestMatch.sessionSource.sessionId,
               userPrompt: bestMatch.sessionSource.metadata?.userPrompt,
               timestamp: bestMatch.timestamp,
+              toolName: bestMatch.toolName,
             }
           : undefined,
       };
@@ -171,6 +180,7 @@ export class ContributorService {
               sessionId: bestMatch.sessionSource.sessionId,
               userPrompt: bestMatch.sessionSource.metadata?.userPrompt,
               timestamp: bestMatch.timestamp,
+              toolName: bestMatch.toolName,
             }
           : undefined,
       };
@@ -192,7 +202,7 @@ export class ContributorService {
   /**
    * Get agent records for a specific file (with caching)
    */
-  private async getAgentRecordsForFile(filePath: string): Promise<AgentRecord[]> {
+  private async getAgentRecordsForFile(filePath: string): Promise<ExtendedAgentRecord[]> {
     const allRecords = await this.getAllAgentRecords();
     return allRecords.filter((record) => record.filePath === filePath);
   }
@@ -200,7 +210,7 @@ export class ContributorService {
   /**
    * Get all agent records from changes.jsonl (with caching)
    */
-  private async getAllAgentRecords(): Promise<AgentRecord[]> {
+  private async getAllAgentRecords(): Promise<ExtendedAgentRecord[]> {
     const now = Date.now();
     const cacheKey = 'all';
 
@@ -220,13 +230,13 @@ export class ContributorService {
   /**
    * Load agent records from changes.jsonl
    */
-  private async loadAgentRecords(): Promise<AgentRecord[]> {
+  private async loadAgentRecords(): Promise<ExtendedAgentRecord[]> {
     const dataPath = path.join(this.workspaceRoot, DATA_DIR_NAME, 'data', 'hooks', 'changes.jsonl');
 
     try {
       const content = await fs.readFile(dataPath, 'utf-8');
       const lines = content.trim().split('\n');
-      const records: AgentRecord[] = [];
+      const records: ExtendedAgentRecord[] = [];
 
       for (const line of lines) {
         if (!line.trim()) {
@@ -263,13 +273,14 @@ export class ContributorService {
             },
           };
 
-          const record: AgentRecord = {
+          const record: ExtendedAgentRecord = {
             id: `${change.sessionId}-${String(change.timestamp)}`,
             sessionSource,
             filePath: change.filePath,
             content: change.newContent,
             addedLines,
             timestamp: change.timestamp,
+            toolName: change.toolName,
           };
 
           records.push(record);
