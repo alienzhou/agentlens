@@ -71,8 +71,8 @@ log.error('Failed', error, { context });
 ```
 
 **Language:**
-- Code (comments, variables, logs): English
-- Conversation: Chinese
+- Code and documentation: English (comments, variables, logs, docs)
+- Agent conversation output: Follow user's language
 
 ## Testing
 

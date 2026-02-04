@@ -2,7 +2,6 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import * as readline from 'node:readline';
 import * as path from 'node:path';
-import * as fs from 'node:fs/promises';
 import { diffLines } from 'diff';
 import { SUPPORTED_AGENTS, AGENT_CONFIGS, FileStorage } from '@agent-blame/core';
 import { CursorAdapter, ClaudeAdapter } from '@vibe-x/agent-blame';
@@ -10,6 +9,7 @@ import type { AgentAdapter } from '@vibe-x/agent-blame';
 import { getHookCore } from '@vibe-x/agent-blame';
 import type {
   ClaudePostToolUseInput,
+  ClaudeUserPromptSubmitInput,
   ClaudeSessionStartInput,
   ClaudeSessionEndInput,
 } from '@vibe-x/agent-blame';
@@ -182,6 +182,25 @@ hookCommand
         const input = await readStdinJson<ClaudeSessionStartInput>();
         await handleSessionStart(input, options.agent);
       }
+      process.exit(0);
+    } catch (error) {
+      console.error(`Hook error: ${error instanceof Error ? error.message : String(error)}`);
+      process.exit(1);
+    }
+  });
+
+/**
+ * hook userpromptsubmit - Handle UserPromptSubmit hook event from Claude Code
+ * Captures the user's prompt before Claude processes it
+ */
+hookCommand
+  .command('userpromptsubmit')
+  .description('Handle UserPromptSubmit hook event (internal, called by Claude Code)')
+  .option('--agent <agent>', 'Agent type', 'claude-code')
+  .action(async (options: { agent: string }) => {
+    try {
+      const input = await readStdinJson<ClaudeUserPromptSubmitInput>();
+      await handleUserPromptSubmit(input, options.agent);
       process.exit(0);
     } catch (error) {
       console.error(`Hook error: ${error instanceof Error ? error.message : String(error)}`);
@@ -491,6 +510,21 @@ async function handleSessionStart(input: ClaudeSessionStartInput, agent: string)
     model: input.model,
     transcriptPath: input.transcript_path,
     cwd: input.cwd,
+  });
+}
+
+/**
+ * Handle UserPromptSubmit event
+ * Captures the user's prompt with timestamp for accurate matching with code changes
+ */
+async function handleUserPromptSubmit(input: ClaudeUserPromptSubmitInput, _agent: string): Promise<void> {
+  const storage = new FileStorage(input.cwd);
+
+  // Append prompt record with timestamp
+  await storage.appendPrompt({
+    sessionId: input.session_id,
+    prompt: input.prompt,
+    timestamp: Date.now(),
   });
 }
 

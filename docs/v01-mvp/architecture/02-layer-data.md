@@ -88,11 +88,39 @@ interface Todo {
 │   ├── review-units/
 │   │   ├── unit-001.json
 │   │   └── unit-002.json
+│   ├── hooks/
+│   │   ├── sessions.json    # Session metadata
+│   │   ├── changes.jsonl    # Code change records
+│   │   └── prompts.jsonl    # User prompt records with timestamps
 │   ├── todos.json
 │   └── metadata.json
 └── config/
     ├── settings.json
     └── adapters.json
+```
+
+### Hook Data Models
+
+```typescript
+// Code change record (captured by PostToolUse hook)
+interface CodeChangeRecord {
+  sessionId: string;
+  agent: string;
+  timestamp: number;
+  toolName: string;  // Edit, Write, MultiEdit
+  filePath: string;
+  oldContent?: string;
+  newContent?: string;
+  success: boolean;
+}
+
+// Prompt record (captured by UserPromptSubmit hook)
+// See ADR-009 for design rationale
+interface PromptRecord {
+  sessionId: string;
+  prompt: string;
+  timestamp: number;  // Enables accurate change-to-prompt matching
+}
 ```
 
 ### Data Relationships
@@ -112,3 +140,4 @@ erDiagram
 
 - [Tool Layer](./01-layer-tool.md)
 - [Product Core Layer](./03-layer-product-core.md)
+- [ADR-009: Prompt Timestamp Matching](../adr/ADR-009-prompt-timestamp-matching.md)

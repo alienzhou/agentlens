@@ -300,6 +300,15 @@ export class LineBlameController {
       // Agent name + full time
       markdown.appendMarkdown(`🤖 **${agentName}**, ${fullTime}\n\n`);
 
+      // User prompt (show task description first, as it's the most important context)
+      if (result.matchedRecord.userPrompt) {
+        // Truncate long prompts for display
+        const promptDisplay = result.matchedRecord.userPrompt.length > 200
+          ? result.matchedRecord.userPrompt.substring(0, 200) + '...'
+          : result.matchedRecord.userPrompt;
+        markdown.appendMarkdown(`**Task**: "${promptDisplay}"\n\n`);
+      }
+
       // Uncommitted changes label
       markdown.appendMarkdown(`Uncommitted changes\n\n`);
 
@@ -315,11 +324,6 @@ export class LineBlameController {
         const copySessionArgs = encodeURIComponent(JSON.stringify([result.matchedRecord.sessionId]));
         markdown.appendMarkdown(`Session: \`${shortSessionId}\` `);
         markdown.appendMarkdown(`[$(copy)](command:agent-blame.copySessionId?${copySessionArgs} "Copy session ID")\n\n`);
-      }
-
-      // User prompt
-      if (result.matchedRecord.userPrompt) {
-        markdown.appendMarkdown(`Prompt: "${result.matchedRecord.userPrompt}"`);
       }
 
       return {

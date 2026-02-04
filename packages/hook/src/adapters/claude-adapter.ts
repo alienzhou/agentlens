@@ -98,7 +98,7 @@ export class ClaudeAdapter extends BaseAgentAdapter {
       if (!config.hooks) return false;
 
       // Check if any hook event contains agent-blame command
-      const hookEvents = ['PostToolUse', 'SessionStart', 'SessionEnd'] as const;
+      const hookEvents = ['PostToolUse', 'UserPromptSubmit', 'SessionStart', 'SessionEnd'] as const;
       for (const eventName of hookEvents) {
         const eventHooks = config.hooks[eventName];
         if (Array.isArray(eventHooks)) {
@@ -145,6 +145,12 @@ export class ClaudeAdapter extends BaseAgentAdapter {
       this.createPostToolUseConfig()
     );
 
+    // Add UserPromptSubmit hook (capture user prompts)
+    config.hooks.UserPromptSubmit = this.mergeHookMatchers(
+      config.hooks.UserPromptSubmit,
+      this.createUserPromptSubmitConfig()
+    );
+
     // Add SessionStart hook (session start)
     config.hooks.SessionStart = this.mergeHookMatchers(
       config.hooks.SessionStart,
@@ -172,7 +178,7 @@ export class ClaudeAdapter extends BaseAgentAdapter {
 
       if (config.hooks) {
         // Remove hooks containing agent-blame command
-        const hookEvents = ['PostToolUse', 'SessionStart', 'SessionEnd'] as const;
+        const hookEvents = ['PostToolUse', 'UserPromptSubmit', 'SessionStart', 'SessionEnd'] as const;
         for (const eventName of hookEvents) {
           const eventHooks = config.hooks[eventName];
           if (Array.isArray(eventHooks)) {
@@ -242,6 +248,21 @@ export class ClaudeAdapter extends BaseAgentAdapter {
         {
           type: 'command',
           command: 'agent-blame hook posttooluse --agent claude-code',
+        },
+      ],
+    };
+  }
+
+  /**
+   * Create UserPromptSubmit hook configuration
+   * Captures user prompts before Claude processes them
+   */
+  private createUserPromptSubmitConfig(): ClaudeHookMatcher {
+    return {
+      hooks: [
+        {
+          type: 'command',
+          command: 'agent-blame hook userpromptsubmit --agent claude-code',
         },
       ],
     };
@@ -366,10 +387,10 @@ interface ClaudeSettingsConfig {
   hooks?: {
     PreToolUse?: ClaudeHookMatcher[];
     PostToolUse?: ClaudeHookMatcher[];
+    UserPromptSubmit?: ClaudeHookMatcher[];
     SessionStart?: ClaudeHookMatcher[];
     SessionEnd?: ClaudeHookMatcher[];
     Stop?: ClaudeHookMatcher[];
-    UserPromptSubmit?: ClaudeHookMatcher[];
     Notification?: ClaudeHookMatcher[];
     [key: string]: ClaudeHookMatcher[] | undefined;
   };
@@ -465,6 +486,14 @@ export interface ClaudeSessionEndInput extends ClaudeHookInputBase {
 }
 
 /**
+ * UserPromptSubmit Hook input
+ */
+export interface ClaudeUserPromptSubmitInput extends ClaudeHookInputBase {
+  hook_event_name: 'UserPromptSubmit';
+  prompt: string;
+}
+
+/**
  * Union type of all Claude Code Hook inputs
  */
-export type ClaudeHookInput = ClaudePostToolUseInput | ClaudeSessionStartInput | ClaudeSessionEndInput;
+export type ClaudeHookInput = ClaudePostToolUseInput | ClaudeUserPromptSubmitInput | ClaudeSessionStartInput | ClaudeSessionEndInput;

@@ -51,7 +51,7 @@ interface ExtendedAgentRecord extends AgentRecord {
  */
 export class ContributorService {
   private cache: Map<string, ExtendedAgentRecord[]> = new Map();
-  private sessionCache: Map<string, { userPrompt?: string }> = new Map();
+  private promptCache: Map<string, string | undefined> = new Map(); // key: sessionId-timestamp
   private cacheTimestamp: number = 0;
   private readonly cacheTTL = 5000; // 5 seconds
   private readonly matcher: LevenshteinMatcher;
@@ -219,6 +219,9 @@ export class ContributorService {
       return this.cache.get(cacheKey)!;
     }
 
+    // Cache expired, clear all caches including prompt cache
+    this.promptCache.clear();
+
     // Read from file
     const records = await this.loadAgentRecords();
     this.cache.set(cacheKey, records);
@@ -252,14 +255,16 @@ export class ContributorService {
           // Calculate addedLines from oldContent and newContent
           const addedLines = this.calculateAddedLines(change.oldContent || '', change.newContent);
 
-          // Try to get userPrompt from session cache
+          // Get userPrompt for this specific change using timestamp-based lookup
+          const promptCacheKey = `${change.sessionId}-${String(change.timestamp)}`;
           let userPrompt: string | undefined;
-          if (this.sessionCache.has(change.sessionId)) {
-            userPrompt = this.sessionCache.get(change.sessionId)?.userPrompt;
+
+          if (this.promptCache.has(promptCacheKey)) {
+            userPrompt = this.promptCache.get(promptCacheKey);
           } else {
-            // Try to load from session file
-            userPrompt = await this.loadUserPromptFromSession(change.sessionId);
-            this.sessionCache.set(change.sessionId, { userPrompt });
+            // Load from prompts.jsonl using timestamp-based matching
+            userPrompt = await this.loadUserPromptForChange(change.sessionId, change.timestamp);
+            this.promptCache.set(promptCacheKey, userPrompt);
           }
 
           // Convert to AgentRecord
@@ -486,14 +491,64 @@ export class ContributorService {
     this.cache.clear();
     this.cacheTimestamp = 0;
     this.gitHeadCache.clear();
+    this.promptCache.clear();
   }
 
   /**
-   * Load userPrompt from session file
+   * Load userPrompt for a specific code change using timestamp-based matching
+   * Finds the most recent prompt before the change timestamp
    */
-  private async loadUserPromptFromSession(sessionId: string): Promise<string | undefined> {
+  private async loadUserPromptForChange(
+    sessionId: string,
+    changeTimestamp: number
+  ): Promise<string | undefined> {
     try {
-      // Try to load from HookSessionData first
+      // Try to load from prompts.jsonl first (new format)
+      const promptsFile = path.join(
+        this.workspaceRoot,
+        DATA_DIR_NAME,
+        'data',
+        'hooks',
+        'prompts.jsonl'
+      );
+
+      try {
+        const content = await fs.readFile(promptsFile, 'utf-8');
+        const lines = content.trim().split('\n');
+
+        let latestPrompt: string | undefined;
+        let latestTimestamp = 0;
+
+        for (const line of lines) {
+          if (!line.trim()) {
+            continue;
+          }
+
+          try {
+            const record = JSON.parse(line) as { sessionId: string; prompt: string; timestamp: number };
+
+            // Match session and find the latest prompt before the change timestamp
+            if (
+              record.sessionId === sessionId &&
+              record.timestamp <= changeTimestamp &&
+              record.timestamp > latestTimestamp
+            ) {
+              latestTimestamp = record.timestamp;
+              latestPrompt = record.prompt;
+            }
+          } catch {
+            // Skip invalid lines
+          }
+        }
+
+        if (latestPrompt) {
+          return latestPrompt;
+        }
+      } catch {
+        // prompts.jsonl doesn't exist, try fallback
+      }
+
+      // Fallback: Try to load from HookSessionData (legacy format)
       const sessionsFile = path.join(
         this.workspaceRoot,
         DATA_DIR_NAME,
@@ -501,14 +556,14 @@ export class ContributorService {
         'hooks',
         'sessions.json'
       );
-      const content = await fs.readFile(sessionsFile, 'utf-8');
-      const sessions = JSON.parse(content) as Record<string, { userPrompt?: string }>;
+      const sessionsContent = await fs.readFile(sessionsFile, 'utf-8');
+      const sessions = JSON.parse(sessionsContent) as Record<string, { userPrompt?: string }>;
       const session = sessions[sessionId];
       if (session?.userPrompt) {
         return session.userPrompt;
       }
 
-      // Try to load from SessionSource file
+      // Fallback: Try to load from SessionSource file
       const storage = new FileStorage(this.workspaceRoot);
       const sessionSource = await storage.getSession(sessionId);
       return sessionSource?.metadata?.userPrompt;

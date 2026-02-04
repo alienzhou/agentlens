@@ -24,6 +24,7 @@ This directory contains all Architecture Decision Records (ADRs) for the Vibe Re
 | [ADR-006](./ADR-006-contributor-detection.md) | Contributor Detection Mechanism | ✅ Decided | 2026-01-26 |
 | [ADR-007](./ADR-007-interaction.md) | MVP Interaction Strategy | ✅ Decided | 2026-01-26 |
 | [ADR-008](./ADR-008-todo-definition.md) | Todo Item Definition | ✅ Decided | 2026-01-26 |
+| [ADR-009](./ADR-009-prompt-timestamp-matching.md) | Prompt Timestamp Matching | ✅ Decided | 2026-02-04 |
 
 ---
 

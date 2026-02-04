@@ -52,6 +52,21 @@ export interface HookSessionData {
   cwd?: string;
   /** End reason */
   endReason?: string;
+  /** @deprecated Use PromptRecord instead. Kept for backward compatibility. */
+  userPrompt?: string;
+}
+
+/**
+ * Prompt record (captured from UserPromptSubmit hook)
+ * Each user prompt is stored with a timestamp for accurate matching with code changes.
+ */
+export interface PromptRecord {
+  /** Session ID */
+  sessionId: string;
+  /** User prompt text */
+  prompt: string;
+  /** Timestamp when the prompt was submitted */
+  timestamp: number;
 }
 
 /**
@@ -98,6 +113,7 @@ export class FileStorage implements StorageInterface {
     await this.initializeFile(path.join(this.sessionsPath, DATA_FILES.INDEX), '[]');
     await this.initializeFile(path.join(this.hookDataPath, 'sessions.json'), '{}');
     await this.initializeFile(path.join(this.hookDataPath, 'changes.jsonl'), '');
+    await this.initializeFile(path.join(this.hookDataPath, 'prompts.jsonl'), '');
 
     this.initialized = true;
   }
@@ -558,6 +574,98 @@ export class FileStorage implements StorageInterface {
     }
 
     return changes;
+  }
+
+  // ==================== Prompt Record Operations ====================
+
+  /**
+   * Append a prompt record (from UserPromptSubmit hook)
+   */
+  async appendPrompt(record: PromptRecord): Promise<void> {
+    await this.ensureInitialized();
+
+    const promptsFile = path.join(this.hookDataPath, 'prompts.jsonl');
+    const line = JSON.stringify(record) + '\n';
+    await fs.appendFile(promptsFile, line, 'utf-8');
+  }
+
+  /**
+   * Get the latest prompt before a given timestamp for a session
+   * Used to match code changes with their triggering prompt
+   */
+  async getLatestPromptBefore(sessionId: string, beforeTimestamp: number): Promise<string | undefined> {
+    await this.ensureInitialized();
+
+    const promptsFile = path.join(this.hookDataPath, 'prompts.jsonl');
+
+    try {
+      const content = await fs.readFile(promptsFile, 'utf-8');
+      const lines = content.trim().split('\n');
+
+      let latestPrompt: string | undefined;
+      let latestTimestamp = 0;
+
+      for (const line of lines) {
+        if (!line.trim()) {
+          continue;
+        }
+
+        try {
+          const record = JSON.parse(line) as PromptRecord;
+
+          // Match session and find the latest prompt before the given timestamp
+          if (
+            record.sessionId === sessionId &&
+            record.timestamp <= beforeTimestamp &&
+            record.timestamp > latestTimestamp
+          ) {
+            latestTimestamp = record.timestamp;
+            latestPrompt = record.prompt;
+          }
+        } catch {
+          // Skip invalid lines
+        }
+      }
+
+      return latestPrompt;
+    } catch {
+      // File doesn't exist
+      return undefined;
+    }
+  }
+
+  /**
+   * Get all prompt records for a session
+   */
+  async getPromptsBySession(sessionId: string): Promise<PromptRecord[]> {
+    await this.ensureInitialized();
+
+    const promptsFile = path.join(this.hookDataPath, 'prompts.jsonl');
+    const prompts: PromptRecord[] = [];
+
+    try {
+      const content = await fs.readFile(promptsFile, 'utf-8');
+      const lines = content.trim().split('\n');
+
+      for (const line of lines) {
+        if (!line.trim()) {
+          continue;
+        }
+
+        try {
+          const record = JSON.parse(line) as PromptRecord;
+          if (record.sessionId === sessionId) {
+            prompts.push(record);
+          }
+        } catch {
+          // Skip invalid lines
+        }
+      }
+    } catch {
+      // File doesn't exist
+    }
+
+    return prompts.sort((a, b) => a.timestamp - b.timestamp);
   }
 }
 
