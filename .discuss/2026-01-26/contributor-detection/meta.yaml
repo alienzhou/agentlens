@@ -5,8 +5,8 @@ current_round: 2
 
 # Related discussions
 related_discussions:
-  - path: "../2026-01-04/vibe-review/outline.md"
-    topic: "Vibe Review Main Discussion"
+  - path: "../2026-01-04/agent-blame/outline.md"
+    topic: "Agent Blame Main Discussion"
     relation: "extends"  # This discussion extends and refines on top of main discussion
     nature: "completion+refinement"  # Fills and refines display layer issues not involved before
 

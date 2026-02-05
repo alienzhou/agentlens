@@ -8,7 +8,7 @@
 
 ## Overview
 
-This directory contains all Architecture Decision Records (ADRs) for the Vibe Review MVP. Each ADR documents a significant architectural decision, including background, decision content, alternatives, rationale, and impact analysis.
+This directory contains all Architecture Decision Records (ADRs) for the Agent Blame MVP. Each ADR documents a significant architectural decision, including background, decision content, alternatives, rationale, and impact analysis.
 
 ---
 

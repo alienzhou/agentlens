@@ -8,7 +8,7 @@
 
 ## Backlog Description
 
-This list records features and optimizations that are determined not to be implemented in **Vibe Review v0.1**, but may be implemented in future versions. Categorized by function type and priority.
+This list records features and optimizations that are determined not to be implemented in **Agent Blame v0.1**, but may be implemented in future versions. Categorized by function type and priority.
 
 **Category Description**:
 - **Feature Backlog**: Future requirements related to product features

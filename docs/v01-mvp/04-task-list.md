@@ -8,7 +8,7 @@
 
 ## Task Overview
 
-This list manages all development tasks and temporary pending items for **Vibe Review v0.1**. According to MVP strategy, development is divided into 4 Phases.
+This list manages all development tasks and temporary pending items for **Agent Blame v0.1**. According to MVP strategy, development is divided into 4 Phases.
 
 ### Current Status
 - **Current Phase**: Phase 0 (Tool Layer)
@@ -158,9 +158,9 @@ Establish data collection and fusion capabilities, providing unified data interf
 > **Post-MVP: Skill System**
 > 
 > The following tasks are deferred to Post-MVP phase:
-> - `vibe-review-core` Skill template (protocol generation)
-> - `vibe-review-impact` Skill (impact analysis)
-> - `vibe-review-alternatives` Skill (alternative suggestions)
+> - `agent-blame-core` Skill template (protocol generation)
+> - `agent-blame-impact` Skill (impact analysis)
+> - `agent-blame-alternatives` Skill (alternative suggestions)
 > - Agent Skills protocol integration
 > - Skill dependency management
 

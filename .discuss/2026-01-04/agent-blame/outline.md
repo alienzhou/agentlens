@@ -27,7 +27,7 @@
 | 📋 Agent Review Protocol v0.3 | R3 | → [D01-agent-review-protocol](./decisions/D01-agent-review-protocol.md) |
 | 🏗️ Open Source Project Positioning | R4 | Combination of product features + tools + standard specifications |
 | 📐 Product Architecture | R4 | 4-layer architecture: Tool Layer / Data Layer / Product Core Layer / Product Delivery Layer |
-| 🏷️ Project Naming | R5 | Vibe Review |
+| 🏷️ Project Naming | R5 | Agent Blame |
 | 🔌 Data Acquisition Strategy | R5 | → [D02-data-acquisition-strategy](./decisions/D02-data-acquisition-strategy.md) |
 | 🔗 Skill and Rule Collaboration | R6 | → [D03-skill-rule-collaboration](./decisions/D03-skill-rule-collaboration.md) |
 | 🚀 MVP Strategy | R7 | → [D04-mvp-strategy](./decisions/D04-mvp-strategy.md) |
@@ -100,9 +100,9 @@ Layer 1: Tool Layer ✅ Confirmed
 │   ├─ Hook Core: Unified interface
 │   └─ Adapters: Cursor / Claude / Duet
 ├─ Skill: Core Skill + optional Skills
-│   ├─ vibe-review-core (required)
-│   ├─ vibe-review-impact (optional)
-│   └─ vibe-review-alternatives (optional)
+│   ├─ agent-blame-core (required)
+│   ├─ agent-blame-impact (optional)
+│   └─ agent-blame-alternatives (optional)
 ├─ Rule: AGENTS.md declaration + independent file definition
 ├─ Git Integration: simple-git to get structured diff
 └─ Post-processing: Data fusion, conflict detection, protocol generation
@@ -114,7 +114,7 @@ Layer 1: Tool Layer ✅ Confirmed
 |--------|----------|---------|
 | R3 | Agent Review Protocol | 3 layers → 4 layers (+ IMPACT as separate layer) |
 | R4 | Open Source Project Positioning | Three choices → combination (product+tools+specifications) |
-| R5 | Project Naming | Confirmed as Vibe Review |
+| R5 | Project Naming | Confirmed as Agent Blame |
 | R5 | Data Acquisition Strategy | Two choices → Hook+Skill Dual-Track |
 | R6 | Skill and Rule Collaboration | Confirmed collaboration approach |
 | R7 | MVP Strategy | Direct product → phased validation |
@@ -129,7 +129,7 @@ Layer 1: Tool Layer ✅ Confirmed
 | R2 | Started in-depth discussion of protocol design |
 | R3 | Confirmed Agent Review Protocol v0.3 (IMPACT as separate layer, Alternatives optional, META reserved) |
 | R4 | Discussed open source project positioning and product architecture (4-layer architecture design, 4 product forms) |
-| R5 | Confirmed project naming Vibe Review + data acquisition strategy Hook+Skill Dual-Track |
+| R5 | Confirmed project naming Agent Blame + data acquisition strategy Hook+Skill Dual-Track |
 | R6 | Confirmed Skill and Rule collaboration approach (Rule location, trigger method, Skill granularity, version management) |
 | R7 | Confirmed MVP strategy (phased, data model, multi-Hunk combination, TODO bidirectional index) |
 | R8 | Deferred Q3 (trust measurement), added Q8 (open source strategy) |
@@ -140,7 +140,7 @@ Layer 1: Tool Layer ✅ Confirmed
 ## 📄 Discussion Artifacts
 
 ```
-.codeflicker/discuss/2026-01-04/vibe-review/
+.codeflicker/discuss/2026-01-04/agent-blame/
 ├── outline.md                              ← This file (discussion outline)
 ├── meta.yaml                               ← Metadata and decision tracking
 ├── decisions/

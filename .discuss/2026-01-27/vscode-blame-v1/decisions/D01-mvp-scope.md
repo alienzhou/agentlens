@@ -9,7 +9,7 @@
 ## 📋 Background
 
 ### Problem/Requirement
-vibe-review needs to display code blame information in VS Code to lay the foundation for future AI contributor identification features.
+agent-blame needs to display code blame information in VS Code to lay the foundation for future AI contributor identification features.
 
 ### Constraints
 - Need to be available quickly to validate core interactions

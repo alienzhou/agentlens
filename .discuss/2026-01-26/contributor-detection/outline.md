@@ -4,7 +4,7 @@
 
 ## 📌 Discussion Background
 
-This discussion is based on [Vibe Review Main Discussion on 2026-01-04](../2026-01-04/vibe-review/outline.md), further refining **Contributor Detection Mechanism** and **Display Interaction Design**.
+This discussion is based on [Agent Blame Main Discussion on 2026-01-04](../2026-01-04/agent-blame/outline.md), further refining **Contributor Detection Mechanism** and **Display Interaction Design**.
 
 ### Project Two-Part Overview
 
@@ -68,4 +68,4 @@ This discussion is based on [Vibe Review Main Discussion on 2026-01-04](../2026-
 
 ## 🔗 Related Discussions
 
-- [Vibe Review Main Discussion (2026-01-04)](../2026-01-04/vibe-review/outline.md) - Overall project architecture, protocol design, MVP strategy, etc.
+- [Agent Blame Main Discussion (2026-01-04)](../2026-01-04/agent-blame/outline.md) - Overall project architecture, protocol design, MVP strategy, etc.

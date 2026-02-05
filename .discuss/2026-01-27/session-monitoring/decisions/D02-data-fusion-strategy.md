@@ -9,7 +9,7 @@
 ## 📋 Background
 
 ### Problem/Requirement
-vibe-review has two data sources:
+agent-blame has two data sources:
 - **Hook Data**: Real-time, structured, captured via Agent hooks (file edits, TODOs, session events)
 - **Session Data**: Complete context, parsed from Agent session files (conversations, tool calls)
 

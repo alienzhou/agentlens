@@ -158,7 +158,7 @@ def _parse_session_file(self, session_file):
 
 ---
 
-## 5. Reference Value for vibe-review
+## 5. Reference Value for agent-blame
 
 ### 5.1 Can Be Directly Reused
 
@@ -172,9 +172,9 @@ def _parse_session_file(self, session_file):
 
 | Component | Differences |
 |------|------|
-| Tool call parsing | fast-resume excludes, vibe-review needs to retain |
+| Tool call parsing | fast-resume excludes, agent-blame needs to retain |
 | Cursor Adapter | fast-resume doesn't have it, needs to be implemented separately |
-| Monitoring mechanism | fast-resume uses scanning, vibe-review needs real-time monitoring |
+| Monitoring mechanism | fast-resume uses scanning, agent-blame needs real-time monitoring |
 
 ### 5.3 Cursor Adapter Implementation Direction
 
@@ -187,7 +187,7 @@ Reference [cursor-session-manager](https://github.com/neosun100/cursor-session-m
 
 ## 6. Technology Stack Reference
 
-| Component | fast-resume Uses | vibe-review Recommendation |
+| Component | fast-resume Uses | agent-blame Recommendation |
 |------|------------------|------------------|
 | JSON parsing | orjson (Rust, 10x faster) | Optional |
 | Search engine | Tantivy (Rust) | Not needed for now |

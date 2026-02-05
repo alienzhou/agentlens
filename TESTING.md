@@ -12,7 +12,7 @@ Ensure the following are installed:
 ## Step 1: Build Project
 
 ```bash
-cd /Users/zhouhongxuan/program/works/vibe-review
+cd /Users/zhouhongxuan/program/works/agent-blame
 pnpm build
 ```
 
@@ -109,7 +109,7 @@ cat ~/.claude/settings.json
 **Verification Points:**
 - `agent-blame hook status` shows "Connected"
 - `~/.claude/settings.json` contains hook configuration
-- Hook commands use `agent-blame` instead of `vibe-review`
+- Hook commands use `agent-blame` instead of `agent-blame`
 
 ---
 

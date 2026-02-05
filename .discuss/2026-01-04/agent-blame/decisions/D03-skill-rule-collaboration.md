@@ -13,7 +13,7 @@
 
 ## Background
 
-In the Vibe Review system, we need to make Agents automatically generate protocol content when executing tasks. This requires two mechanisms working together:
+In the Agent Blame system, we need to make Agents automatically generate protocol content when executing tasks. This requires two mechanisms working together:
 - **Rule**: Tells the Agent "what you must do"
 - **Skill**: Tells the Agent "how to do it"
 
@@ -29,11 +29,11 @@ In the Vibe Review system, we need to make Agents automatically generate protoco
 ├─────────────────────────────────────────────────────┤
 │                                                     │
 │  AGENTS.md (Declaration Layer)                        │
-│  ├─ Declare use of Vibe Review protocol                  │
+│  ├─ Declare use of Agent Blame protocol                  │
 │  ├─ Point to independent rule file                     │
 │  └─ Concise, no details                              │
 │                                                     │
-│  vibe-review.rule.yaml (Definition Layer)              │
+│  agent-blame.rule.yaml (Definition Layer)              │
 │  ├─ Protocol version                                 │
 │  ├─ Required fields                                 │
 │  ├─ Optional fields                                 │
@@ -50,23 +50,23 @@ In the Vibe Review system, we need to make Agents automatically generate protoco
 
 ## Rules
 
-### Vibe Review Protocol
-Generate code change descriptions using Vibe Review protocol.
+### Agent Blame Protocol
+Generate code change descriptions using Agent Blame protocol.
 
 - Rule file: `.agent-blame/rule.yaml`
 - Skill files: `.agent-blame/skills/`
 - Protocol version: 0.3
 
-When task completes, must call `vibe-review-core` Skill to generate protocol content.
+When task completes, must call `agent-blame-core` Skill to generate protocol content.
 ```
 
-#### vibe-review.rule.yaml Example
+#### agent-blame.rule.yaml Example
 
 ```yaml
 # .agent-blame/rule.yaml
-name: vibe-review-protocol
+name: agent-blame-protocol
 version: 0.3.0
-description: Vibe Review protocol rule definition
+description: Agent Blame protocol rule definition
 
 # Trigger timing
 triggers:
@@ -107,10 +107,10 @@ format:
 
 # Associated Skills
 skills:
-  core: vibe-review-core@0.3.0
+  core: agent-blame-core@0.3.0
   optional:
-    - vibe-review-impact@0.3.0
-    - vibe-review-alternatives@0.3.0
+    - agent-blame-impact@0.3.0
+    - agent-blame-alternatives@0.3.0
 ```
 
 ---
@@ -123,7 +123,7 @@ skills:
 ├─────────────────────────────────────────────────────┤
 │                                                     │
 │  1. Agent starts                                     │
-│     └─ Read AGENTS.md, discover need to follow Vibe Review protocol        │
+│     └─ Read AGENTS.md, discover need to follow Agent Blame protocol        │
 │                                                     │
 │  2. Agent reads rules                                │
 │     └─ Load .agent-blame/rule.yaml                       │
@@ -134,15 +134,15 @@ skills:
 │     └─ Record execution process (for Skill to use)                          │
 │                                                     │
 │  4. When task completes, Agent autonomously calls Skill                       │
-│     ├─ Call vibe-review-core (required)                        │
+│     ├─ Call agent-blame-core (required)                        │
 │     │   └─ Generate WHAT / WHY / HOW TO VERIFY                  │
 │     └─ Call optional Skills as needed                               │
-│         ├─ vibe-review-impact (if there are side effects)               │
-│         └─ vibe-review-alternatives (if there are multiple solutions)       │
+│         ├─ agent-blame-impact (if there are side effects)               │
+│         └─ agent-blame-alternatives (if there are multiple solutions)       │
 │                                                     │
 │  5. Agent output                                        │
 │     ├─ Code changes                                   │
-│     └─ Vibe Review protocol content                                 │
+│     └─ Agent Blame protocol content                                 │
 │                                                     │
 └─────────────────────────────────────────────────────┘
 ```
@@ -164,23 +164,23 @@ skills:
 ├─────────────────────────────────────────────────────┤
 │                                                     │
 │  ~/.claude/skills/                       # Global Skills      │
-│  ├─ vibe-review-core/                    [Required]             │
+│  ├─ agent-blame-core/                    [Required]             │
 │  │   ├─ SKILL.md                         # Skill definition       │
 │  │   └─ references/                      # Optional: reference docs   │
 │  │       └─ protocol-template.md                            │
 │  │                                                          │
-│  ├─ vibe-review-impact/                  [Optional]             │
+│  ├─ agent-blame-impact/                  [Optional]             │
 │  │   └─ SKILL.md                                            │
 │  │                                                          │
-│  ├─ vibe-review-alternatives/            [Optional]             │
+│  ├─ agent-blame-alternatives/            [Optional]             │
 │  │   └─ SKILL.md                                            │
 │  │                                                          │
-│  └─ vibe-review-confidence/              [Optional]             │
+│  └─ agent-blame-confidence/              [Optional]             │
 │      └─ SKILL.md                                            │
 │                                                     │
 │  Or Project-level Skills:                                         │
 │  .agent-blame/skills/                    # Project-level Skills    │
-│  ├─ vibe-review-core/SKILL.md                               │
+│  ├─ agent-blame-core/SKILL.md                               │
 │  └─ ...                                                     │
 │                                                     │
 └─────────────────────────────────────────────────────┘
@@ -208,26 +208,26 @@ According to https://agentskills.io/specification:
 - Keep SKILL.md under 500 lines
 - Put detailed reference materials in references/ directory
 
-#### vibe-review-core Skill Definition (Follows Agent Skills Protocol)
+#### agent-blame-core Skill Definition (Follows Agent Skills Protocol)
 
 ```markdown
 ---
-name: vibe-review-core
-description: Generates Vibe Review protocol content (WHAT/WHY/HOW TO VERIFY) after code changes. Use when completing coding tasks to explain intent, changes, rationale, and verification steps.
+name: agent-blame-core
+description: Generates Agent Blame protocol content (WHAT/WHY/HOW TO VERIFY) after code changes. Use when completing coding tasks to explain intent, changes, rationale, and verification steps.
 license: MIT
 compatibility: Designed for Claude Code, Cursor, and similar AI coding assistants
 metadata:
-  author: vibe-review
+  author: agent-blame
   version: "0.3.0"
   category: code-review
 allowed-tools: Read Write Bash(git:*)
 ---
 
-# Vibe Review Core - Protocol Core Content Generation
+# Agent Blame Core - Protocol Core Content Generation
 
 ## 📋 Function Positioning
 
-Generate **core content** of Vibe Review protocol after Agent completes code change tasks.
+Generate **core content** of Agent Blame protocol after Agent completes code change tasks.
 
 **Core Value**:
 - 📝 **Intent Explanation**: Explain user requirements as understood by Agent
@@ -264,7 +264,7 @@ When calling this Skill, need to provide following context:
 Generate following Markdown format protocol content:
 
 ```markdown
-## Vibe Review Protocol v0.3
+## Agent Blame Protocol v0.3
 
 ### WHAT
 **Intent**: [What I understand you want to do]
@@ -323,9 +323,9 @@ Generate following Markdown format protocol content:
 
 | Collaboration Target | Collaboration Method |
 |-------------------|---------------------|
-| **vibe-review-impact** | Optional, generate impact scope analysis |
-| **vibe-review-alternatives** | Optional, generate rejected solutions |
-| **vibe-review-confidence** | Optional, generate confidence level |
+| **agent-blame-impact** | Optional, generate impact scope analysis |
+| **agent-blame-alternatives** | Optional, generate rejected solutions |
+| **agent-blame-confidence** | Optional, generate confidence level |
 
 ---
 
@@ -333,22 +333,22 @@ Generate following Markdown format protocol content:
 **Version**: v0.3.0
 ```
 
-#### vibe-review-impact Skill Definition (Follows Agent Skills Protocol)
+#### agent-blame-impact Skill Definition (Follows Agent Skills Protocol)
 
 ```markdown
 ---
-name: vibe-review-impact
+name: agent-blame-impact
 description: Analyzes impact scope of code changes including side effects and affected modules. Use when changes affect multiple files or modules, or when API changes are involved.
 license: MIT
 compatibility: Designed for Claude Code, Cursor, and similar AI coding assistants
 metadata:
-  author: vibe-review
+  author: agent-blame
   version: "0.3.0"
   category: code-review
 allowed-tools: Read Bash(git:*) Bash(grep:*)
 ---
 
-# Vibe Review Impact - Impact Scope Analysis
+# Agent Blame Impact - Impact Scope Analysis
 
 ## 📋 Function Positioning
 
@@ -391,7 +391,7 @@ Analyze **impact scope** of code changes, including side effects and affected mo
 
 ## 🔗 Dependencies
 
-- Must first execute `vibe-review-core`
+- Must first execute `agent-blame-core`
 
 ---
 
@@ -431,18 +431,18 @@ Analyze **impact scope** of code changes, including side effects and affected mo
 
 ```yaml
 # .agent-blame/rule.yaml
-name: vibe-review-protocol
+name: agent-blame-protocol
 version: 0.3.0
 
 skills:
-  core: vibe-review-core@0.3.0  # Must match
+  core: agent-blame-core@0.3.0  # Must match
   optional:
-    - vibe-review-impact@0.3.0  # Must match
+    - agent-blame-impact@0.3.0  # Must match
 ```
 
 ```yaml
-# .agent-blame/skills/vibe-review-core/skill.yaml
-name: vibe-review-core
+# .agent-blame/skills/agent-blame-core/skill.yaml
+name: agent-blame-core
 version: 0.3.0  # Must match version declared in Rule
 
 # Compatibility declaration
@@ -458,7 +458,7 @@ Rule version: 0.3.0
 Skill version: 0.2.0
 
 Please upgrade your skills:
-  vibe-review upgrade --skill vibe-review-core
+  agent-blame upgrade --skill agent-blame-core
 ```
 
 ---
@@ -469,13 +469,13 @@ Please upgrade your skills:
 
 ```
 my-project/
-├─ AGENTS.md                    # Declare use of Vibe Review
+├─ AGENTS.md                    # Declare use of Agent Blame
 ├─ .agent-blame/
 │   ├─ rule.yaml                # Rule definition
 │   └─ skills/                  # Project-level Skills (optional)
-│       ├─ vibe-review-core/
+│       ├─ agent-blame-core/
 │       │   └─ SKILL.md         # Follows Claude Code Agent Skill protocol
-│       ├─ vibe-review-impact/
+│       ├─ agent-blame-impact/
 │       │   └─ SKILL.md
 │       └─ ...
 └─ src/
@@ -483,9 +483,9 @@ my-project/
 
 # Or use global Skills
 ~/.claude/skills/
-├─ vibe-review-core/
+├─ agent-blame-core/
 │   └─ SKILL.md
-├─ vibe-review-impact/
+├─ agent-blame-impact/
 │   └─ SKILL.md
 └─ ...
 ```
@@ -496,21 +496,21 @@ my-project/
 User: "Add remember me function to login page"
 
 Agent executes:
-1. Read AGENTS.md → Discover Vibe Review protocol
+1. Read AGENTS.md → Discover Agent Blame protocol
 2. Read .agent-blame/rule.yaml → Understand protocol requirements
 3. Execute task → Modify 3 files
 4. Task completes → Autonomously call Skill
-   ├─ Call vibe-review-core → Generate required fields
-   └─ Check trigger conditions → files_changed=3, call vibe-review-impact
+   ├─ Call agent-blame-core → Generate required fields
+   └─ Check trigger conditions → files_changed=3, call agent-blame-impact
 5. Output:
    ├─ Code changes (3 files)
-   └─ Vibe Review protocol (Markdown)
+   └─ Agent Blame protocol (Markdown)
 ```
 
 ### Generated Protocol Content
 
 ```markdown
-## Vibe Review Protocol v0.3
+## Agent Blame Protocol v0.3
 
 ### WHAT
 **Intent**: Add "remember me" feature to login page to auto-fill username when user visits next time.
@@ -596,15 +596,15 @@ Agent executes:
 |-----------------|----------------------|
 | [Agent Review Protocol](./D01-agent-review-protocol.md) | Skill generates protocol content |
 | [Data Acquisition Strategy](./D02-data-acquisition-strategy.md) | Skill is one track of dual-track system |
-| [MVP Strategy](./D04-mvp-strategy.md) | Phase 0 implement vibe-review-core Skill |
+| [MVP Strategy](./D04-mvp-strategy.md) | Phase 0 implement agent-blame-core Skill |
 
 ---
 
 ## Next Steps
 
 1. Define Rule's YAML Schema
-2. Create vibe-review-core Skill (follows Agent Skills protocol)
-3. Create vibe-review-impact Skill (follows Agent Skills protocol)
+2. Create agent-blame-core Skill (follows Agent Skills protocol)
+3. Create agent-blame-impact Skill (follows Agent Skills protocol)
 4. Implement version check mechanism
 
 ---

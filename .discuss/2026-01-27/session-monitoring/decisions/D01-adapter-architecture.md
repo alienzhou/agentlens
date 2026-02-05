@@ -9,7 +9,7 @@
 ## 📋 Background
 
 ### Problem/Requirement
-vibe-review needs to support Session monitoring for multiple AI Agents (Claude Code, Cursor, and future Codex, Copilot, OpenCode, etc.). Different Agents have vastly different Session storage formats:
+agent-blame needs to support Session monitoring for multiple AI Agents (Claude Code, Cursor, and future Codex, Copilot, OpenCode, etc.). Different Agents have vastly different Session storage formats:
 
 | Agent | Storage Format | Location |
 |-------|----------|------|

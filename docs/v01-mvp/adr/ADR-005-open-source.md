@@ -7,7 +7,7 @@
 
 ## Context
 
-Vibe Review is positioned as an open standard and tool, needing to determine open source scope and license selection to promote community adoption.
+Agent Blame is positioned as an open standard and tool, needing to determine open source scope and license selection to promote community adoption.
 
 ---
 

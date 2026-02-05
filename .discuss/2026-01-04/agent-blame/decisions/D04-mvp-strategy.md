@@ -13,7 +13,7 @@
 
 ## Background
 
-Vibe Review adopts 4-layer architecture (Tool Layer / Data Layer / Product Core Layer / Product Delivery Layer). MVP strategy is:
+Agent Blame adopts 4-layer architecture (Tool Layer / Data Layer / Product Core Layer / Product Delivery Layer). MVP strategy is:
 1. First do Tool Layer (data acquisition)
 2. Develop small tools to validate data layer (generate reports, pages, documentation)
 3. After validation passes, develop Product Core Layer
@@ -30,7 +30,7 @@ Vibe Review adopts 4-layer architecture (Tool Layer / Data Layer / Product Core 
 ├─────────────────────────────────────────────┤
 │                                             │
 │  Phase 0: Tool Layer (2-3 weeks)                       │
-│  ├─ vibe-review-core Skill                            │
+│  ├─ agent-blame-core Skill                            │
 │  ├─ Hook Core + first Adapter                        │
 │  └─ Data fusion logic                                   │
 │                                             │
@@ -156,7 +156,7 @@ interface Todo {
 }
 
 // Complete Review data
-interface VibeReviewData {
+interface AgentBlameData {
   // Meta information
   meta: {
     projectId: string;
@@ -234,7 +234,7 @@ interface VibeReviewData {
 $ agent-blame diff --annotated
 
 ╭──────────────────────────────────────────────────────╮
-│  Vibe Review Report                                 │
+│  Agent Blame Report                                 │
 │  📅 2026-01-04 14:30                                     │
 │  🤖 Agent: cursor | Session: abc123 | QA: #3                   │
 ╰──────────────────────────────────────────────────────╯
@@ -433,7 +433,7 @@ reviewUnit.todoIds = ['T1'];
 |-----------------|----------------------|
 | [Agent Review Protocol](./D01-agent-review-protocol.md) | Protocol content as annotation of ReviewUnit |
 | [Data Acquisition Strategy](./D02-data-acquisition-strategy.md) | Phase 0 implement Hook + Skill |
-| [Skill and Rule Collaboration](./D03-skill-rule-collaboration.md) | Phase 0 implement vibe-review-core Skill |
+| [Skill and Rule Collaboration](./D03-skill-rule-collaboration.md) | Phase 0 implement agent-blame-core Skill |
 
 ---
 
@@ -442,7 +442,7 @@ reviewUnit.todoIds = ['T1'];
 ### Phase 0: Tool Layer (2-3 weeks)
 
 1. **Week 1**:
-   - [ ] Implement vibe-review-core Skill
+   - [ ] Implement agent-blame-core Skill
    - [ ] Define data model TypeScript types
 
 2. **Week 2**:

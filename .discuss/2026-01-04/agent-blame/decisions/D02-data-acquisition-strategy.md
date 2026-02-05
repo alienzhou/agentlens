@@ -13,7 +13,7 @@
 
 ## Background
 
-Vibe Review needs to acquire two types of data:
+Agent Blame needs to acquire two types of data:
 1. **Execution Trace Data**: What Agent did (tool calls, file changes, decision points)
 2. **Protocol Content Data**: Why Agent did this (Intent, Rationale, Tests, etc.)
 
@@ -58,8 +58,8 @@ Traditional solutions can only choose one, we adopt **Dual-Track System** to acq
 #### 1.1 Core Design
 
 ```typescript
-// Vibe Review Hook Core
-interface VibeReviewHook {
+// Agent Blame Hook Core
+interface AgentBlameHook {
   // Lifecycle hooks
   onTaskStart(context: TaskContext): void;
   onToolCall(tool: string, args: any, result: any): void;
@@ -76,7 +76,7 @@ interface VibeReviewHook {
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│  Vibe Review Hook Core (Core)                      │
+│  Agent Blame Hook Core (Core)                      │
 │  ├─ Define unified Hook interface                        │
 │  └─ Provide data collection and export capability         │
 └─────────────────────────────────────────────────────┘
@@ -150,10 +150,10 @@ interface ExecutionTrace {
 Skill as **Open Protocol Standard**, allowing Agent to generate protocol content on-demand during execution.
 
 ```yaml
-# vibe-review-skill.yaml
-name: vibe-review-protocol-generator
+# agent-blame-skill.yaml
+name: agent-blame-protocol-generator
 version: 1.0.0
-description: Generate Vibe Review protocol content
+description: Generate Agent Blame protocol content
 
 # Trigger timing
 triggers:
@@ -165,7 +165,7 @@ triggers:
 outputs:
   - type: protocol
     format: markdown
-    schema: vibe-review-protocol-v0.3
+    schema: agent-blame-protocol-v0.3
 ```
 
 #### 2.2 Skill Mounting Method
@@ -176,11 +176,11 @@ outputs:
 ├─────────────────────────────────────────────────────┤
 │                                                     │
 │  1. Read task                                        │
-│  2. Read Rule (know to follow Vibe Review protocol)               │
+│  2. Read Rule (know to follow Agent Blame protocol)               │
 │  3. Execute task                                        │
 │     ├─ Call various tools                                 │
 │     └─ Generate code                                      │
-│  4. Call Skill: vibe-review-protocol-generator               │
+│  4. Call Skill: agent-blame-protocol-generator               │
 │     ├─ Generate WHAT (Intent, Changes)                         │
 │     ├─ Generate WHY (Rationale)                                │
 │     ├─ Generate HOW TO VERIFY (Tests, Edge Cases)              │
@@ -195,7 +195,7 @@ outputs:
 #### 2.3 Skill Generated Data
 
 ```markdown
-## Vibe Review Protocol
+## Agent Blame Protocol
 
 ### WHAT
 **Intent**: I understand you want to do X
@@ -219,8 +219,8 @@ This may affect D, E
 ```
 ┌─────────────────────────────────────────────────────┐
 │  Rule (Specification Layer)                            │
-│  ├─ Definition: Agent must follow Vibe Review protocol                   │
-│  ├─ Location: AGENTS.md or independent vibe-review.rule.yaml          │
+│  ├─ Definition: Agent must follow Agent Blame protocol                   │
+│  ├─ Location: AGENTS.md or independent agent-blame.rule.yaml          │
 │  └─ Content:                                                  │
 │     - Which fields must be generated                                      │
 │     - Format requirements                                              │
@@ -231,7 +231,7 @@ This may affect D, E
 ┌─────────────────────────────────────────────────────┐
 │  Skill (Implementation Layer)                                  │
 │  ├─ Definition: How to generate protocol content                            │
-│  ├─ Location: skills/vibe-review-protocol-generator/            │
+│  ├─ Location: skills/agent-blame-protocol-generator/            │
 │  └─ Content:                                                  │
 │     - Specific generation logic                                        │
 │     - Prompt templates                                           │
@@ -240,7 +240,7 @@ This may affect D, E
 ```
 
 **Collaboration Method**:
-1. **Rule Definition Requirements**: Agent must generate Vibe Review protocol when task completes
+1. **Rule Definition Requirements**: Agent must generate Agent Blame protocol when task completes
 2. **Skill Implementation Logic**: Provide specific methods for generating protocol
 3. **Agent Execution**: Read Rule → Call Skill → Generate protocol
 
@@ -348,7 +348,7 @@ User initiates task
     ▼
 ┌─────────────────────────────────────────────────────┐
 │  Agent Execution                                         │
-│  ├─ Read Rule: Must generate Vibe Review protocol                   │
+│  ├─ Read Rule: Must generate Agent Blame protocol                   │
 │  ├─ Execute task                                        │
 │  └─ Call Skill: Generate protocol content                       │
 └─────────────────────────────────────────────────────┘

@@ -46,7 +46,7 @@
 
 ## 🔬 Analysis
 
-### Value of Session Data for vibe-review
+### Value of Session Data for agent-blame
 
 | Existing Data (Hook) | Session Can Supplement |
 |----------------|----------------|

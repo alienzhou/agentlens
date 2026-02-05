@@ -1,6 +1,6 @@
-# Vibe Review Technical Solution Overview
+# Agent Blame Technical Solution Overview
 
-**Project Name**: **Vibe Review**  
+**Project Name**: **Agent Blame**  
 **Date**: 2026-01-04  
 **Status**: Design completed, ready for implementation
 
@@ -8,7 +8,7 @@
 
 ## Project Positioning
 
-**Vibe Review** is a Code Review tool designed for Vibe Coding era, solving the problem that traditional review methods cannot effectively review AI-generated code.
+**Agent Blame** is a Code Review tool designed for Vibe Coding era, solving the problem that traditional review methods cannot effectively review AI-generated code.
 
 **Core Philosophy**: The essence of Review is not "checking code," but "establishing understanding and trust in code."
 
@@ -71,7 +71,7 @@ Using "industrial-era human review rituals" to review "post-industrial era machi
 
 ### Phase 0: Tool Layer (2-3 weeks)
 
-- [ ] Implement vibe-review-core Skill
+- [ ] Implement agent-blame-core Skill
 - [ ] Define data model TypeScript types
 - [ ] Implement Hook Core + first Adapter
 - [ ] Implement data fusion logic

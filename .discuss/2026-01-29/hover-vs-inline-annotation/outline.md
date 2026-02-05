@@ -83,7 +83,7 @@
    - `hovers.currentLine.changes`: Code changes
    - Users can independently control each feature
 
-### Vibe Review Data Model Analysis
+### Agent Blame Data Model Analysis
 
 1. **SessionSource** existing fields:
    - `agent`: cursor / claude-code etc.

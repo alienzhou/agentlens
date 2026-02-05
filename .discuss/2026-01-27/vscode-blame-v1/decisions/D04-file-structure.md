@@ -54,7 +54,7 @@ packages/vscode/src/
 
 ### Comparison with GitLens
 
-| GitLens | vibe-review V1 |
+| GitLens | agent-blame V1 |
 |---------|----------------|
 | `git.ts` + `blameParser.ts` | `blame-service.ts` |
 | `lineTracker.ts` + `lineAnnotationController.ts` | `line-blame.ts` |

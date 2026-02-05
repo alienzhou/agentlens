@@ -7,7 +7,7 @@
 
 ## Context
 
-Vibe Review adopts 4-layer architecture (Tool Layer/Data Layer/Product Core Layer/Product Delivery Layer), need to determine MVP implementation strategy and priorities.
+Agent Blame adopts 4-layer architecture (Tool Layer/Data Layer/Product Core Layer/Product Delivery Layer), need to determine MVP implementation strategy and priorities.
 
 ---
 

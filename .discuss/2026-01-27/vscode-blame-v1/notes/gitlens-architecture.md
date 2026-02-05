@@ -128,4 +128,4 @@ Cursor Enterprise edition has similar functionality:
 | Model Tracking | Mark which model generated the code |
 | Conversation Link | Link to conversation summary that generated the code |
 
-This is exactly the target direction for vibe-review.
+This is exactly the target direction for agent-blame.

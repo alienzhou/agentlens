@@ -7,7 +7,7 @@
 
 ## Context
 
-Need to clarify what "Todo items" mean in the context of Vibe Review system.
+Need to clarify what "Todo items" mean in the context of Agent Blame system.
 
 ---
 
