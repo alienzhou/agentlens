@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import * as readline from 'node:readline';
 import * as path from 'node:path';
 import { diffLines } from 'diff';
-import { SUPPORTED_AGENTS, AGENT_CONFIGS, FileStorage } from '@agentlens/core';
+import { SUPPORTED_AGENTS, AGENT_CONFIGS, FileStorage, normalizeFilePath } from '@agentlens/core';
 import { CursorAdapter, ClaudeAdapter } from '@agentlens/hook';
 import type { AgentAdapter } from '@agentlens/hook';
 import { getHookCore } from '@agentlens/hook';
@@ -467,10 +467,15 @@ async function handlePostToolUse(input: ClaudePostToolUseInput, agent: string): 
   
   const { addedLines, removedLines } = calculateLineChanges(oldContent, newContent);
 
+  // Normalize file path for storage:
+  // - Use relative path if file is inside project directory
+  // - Use absolute path if file is outside project directory
+  const normalizedFilePath = normalizeFilePath(absolutePath, input.cwd);
+
   // Record code change event
   hookCore.onCodeChange(
     input.session_id,
-    filePath,
+    normalizedFilePath,
     absolutePath,
     newContent,
     addedLines,
@@ -484,7 +489,7 @@ async function handlePostToolUse(input: ClaudePostToolUseInput, agent: string): 
     agent,
     timestamp: Date.now(),
     toolName: input.tool_name,
-    filePath,
+    filePath: normalizedFilePath,
     oldContent: input.tool_input.old_string,
     newContent: input.tool_input.new_string ?? input.tool_input.content,
     success: input.tool_response.success ?? true,
@@ -564,6 +569,11 @@ async function handleCursorAfterFileEdit(input: CursorAfterFileEditInput, agent:
   const sessionId = conversationId ?? `cursor_${String(Date.now())}`;
   const absolutePath = getAbsolutePath(input.file_path, cwd);
 
+  // Normalize file path for storage:
+  // - Use relative path if file is inside project directory
+  // - Use absolute path if file is outside project directory
+  const normalizedFilePath = normalizeFilePath(absolutePath, cwd);
+
   for (const edit of input.edits ?? []) {
     const oldContent = edit.old_string ?? '';
     const newContent = edit.new_string ?? '';
@@ -571,7 +581,7 @@ async function handleCursorAfterFileEdit(input: CursorAfterFileEditInput, agent:
 
     hookCore.onCodeChange(
       sessionId,
-      input.file_path,
+      normalizedFilePath,
       absolutePath,
       newContent,
       addedLines,
@@ -585,7 +595,7 @@ async function handleCursorAfterFileEdit(input: CursorAfterFileEditInput, agent:
       agent,
       timestamp: Date.now(),
       toolName: 'afterFileEdit',
-      filePath: input.file_path,
+      filePath: normalizedFilePath,
       oldContent: edit.old_string,
       newContent: edit.new_string,
       success: true,

@@ -24,3 +24,6 @@ export * from './report/index.js';
 
 // Constants
 export * from './constants.js';
+
+// Utils
+export * from './utils/path-utils.js';

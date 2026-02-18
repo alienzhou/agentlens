@@ -12,6 +12,7 @@ import {
   LevenshteinMatcher,
   SIMILARITY_CONFIG,
   DATA_DIR_NAME,
+  normalizeFilePath,
 } from '@agentlens/core';
 import { createModuleLogger } from '../utils/logger.js';
 
@@ -204,7 +205,16 @@ export class ContributorService {
    */
   private async getAgentRecordsForFile(filePath: string): Promise<ExtendedAgentRecord[]> {
     const allRecords = await this.getAllAgentRecords();
-    return allRecords.filter((record) => record.filePath === filePath);
+    
+    // Normalize file path for comparison
+    // Both stored paths and input paths should be normalized relative to workspace root
+    const normalizedInputPath = normalizeFilePath(filePath, this.workspaceRoot);
+    
+    return allRecords.filter((record) => {
+      // Normalize stored path for comparison
+      const normalizedRecordPath = normalizeFilePath(record.filePath, this.workspaceRoot);
+      return normalizedRecordPath === normalizedInputPath;
+    });
   }
 
   /**

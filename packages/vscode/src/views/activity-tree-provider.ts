@@ -5,7 +5,7 @@
  */
 import * as vscode from 'vscode';
 import * as path from 'node:path';
-import { FileStorage, type CodeChangeRecord, type PromptRecord } from '@agentlens/core';
+import { FileStorage, type CodeChangeRecord, type PromptRecord, resolveFilePath, isAbsolutePath } from '@agentlens/core';
 import { createModuleLogger } from '../utils/logger.js';
 
 const log = createModuleLogger('activity-tree');
@@ -35,10 +35,18 @@ export class ActivityTreeItem extends vscode.TreeItem {
     this.contextValue = 'activity';
 
     // Set command to open the file
+    // Handle both relative and absolute paths:
+    // - Relative paths are resolved against workspace root
+    // - Absolute paths (for files outside project) are used directly
+    const filePath = activity.change.filePath;
+    const absoluteFilePath = isAbsolutePath(filePath) 
+      ? filePath 
+      : resolveFilePath(filePath, workspaceRoot);
+    
     this.command = {
       command: 'vscode.open',
       title: 'Open File',
-      arguments: [vscode.Uri.file(path.join(workspaceRoot, activity.change.filePath))],
+      arguments: [vscode.Uri.file(absoluteFilePath)],
     };
   }
 
