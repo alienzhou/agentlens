@@ -95,7 +95,7 @@ export function activate(context: vscode.ExtensionContext): void {
   );
 
   context.subscriptions.push({
-    dispose: () => clearInterval(cleanupTimer),
+    dispose: () => { clearInterval(cleanupTimer); },
   });
 
   // Initialize line blame controller
@@ -241,15 +241,15 @@ ${SUPPORTED_AGENTS.map((agent: string) => `- ${getAgentDisplayName(agent)}`).joi
     'agentlens.cleanup',
     async () => {
       log.info('Manual cleanup requested');
-      
+
       try {
         const result = await cleanupManager.tryCleanup(true);
-        
+
         if (result) {
           if (result.filesRemoved > 0) {
             const freedKB = Math.round(result.bytesFreed / 1024 * 100) / 100;
             vscode.window.showInformationMessage(
-              `Cleanup completed: ${result.filesRemoved} files removed, ${freedKB}KB freed`
+              `Cleanup completed: ${String(result.filesRemoved)} files removed, ${String(freedKB)}KB freed`
             );
             log.info('Manual cleanup completed', {
               filesRemoved: result.filesRemoved,
@@ -259,7 +259,7 @@ ${SUPPORTED_AGENTS.map((agent: string) => `- ${getAgentDisplayName(agent)}`).joi
           } else {
             vscode.window.showInformationMessage('No old files to clean up');
           }
-          
+
           if (result.errors.length > 0) {
             log.warn('Cleanup encountered errors', { errors: result.errors });
           }
@@ -280,23 +280,23 @@ ${SUPPORTED_AGENTS.map((agent: string) => `- ${getAgentDisplayName(agent)}`).joi
       try {
         const stats = await cleanupManager.getStats();
         const config = cleanupManager.getConfig();
-        
+
         const message = `
 Data Statistics:
-- Total files: ${stats.totalFiles}
+- Total files: ${String(stats.totalFiles)}
 - Total size: ${stats.totalSizeKB.toFixed(2)} KB
-- Changes files: ${stats.filesByDir['changes'] || 0}
-- Prompts files: ${stats.filesByDir['prompts'] || 0}
-- Log files: ${stats.filesByDir['logs'] || 0}
+- Changes files: ${String(stats.filesByDir['changes'] ?? 0)}
+- Prompts files: ${String(stats.filesByDir['prompts'] ?? 0)}
+- Log files: ${String(stats.filesByDir['logs'] ?? 0)}
 ${stats.oldestFile ? `- Oldest: ${stats.oldestFile}` : ''}
 ${stats.newestFile ? `- Newest: ${stats.newestFile}` : ''}
 
 Cleanup Config:
 - Auto cleanup: ${config.enabled ? 'Enabled' : 'Disabled'}
-- Retention: ${config.retentionDays} days
-- Check interval: ${config.checkIntervalHours} hours
+- Retention: ${String(config.retentionDays)} days
+- Check interval: ${String(config.checkIntervalHours)} hours
         `.trim();
-        
+
         vscode.window.showInformationMessage(message, { modal: true });
       } catch (err) {
         vscode.window.showErrorMessage(
@@ -318,11 +318,11 @@ Cleanup Config:
       try {
         // Build ExtendedContributorResult from params
         const result: ExtendedContributorResult = {
-          hunkId: String(params.hunkId ?? ''),
-          filePath: String(params.filePath ?? ''),
-          lineRange: (params.lineRange as [number, number]) ?? [0, 0],
-          addedLines: (params.addedLines as string[]) ?? [],
-          contributor: (params.contributor as ContributorType) ?? 'human',
+          hunkId: typeof params.hunkId === 'string' ? params.hunkId : '',
+          filePath: typeof params.filePath === 'string' ? params.filePath : '',
+          lineRange: params.lineRange as [number, number],
+          addedLines: params.addedLines as string[],
+          contributor: params.contributor as ContributorType,
           similarity: Number(params.similarity ?? 0),
           confidence: Number(params.confidence ?? 1),
           matchedRecord: params.matchedRecord as ExtendedContributorResult['matchedRecord'],
@@ -372,7 +372,7 @@ function registerTreeViews(context: vscode.ExtensionContext, workspaceRoot: stri
     activityDiffProvider.cleanup();
   }, 30 * 60 * 1000);
   context.subscriptions.push({
-    dispose: () => clearInterval(diffCleanupTimer),
+    dispose: () => { clearInterval(diffCleanupTimer); },
   });
 
   // Register Agents tree view
@@ -617,7 +617,7 @@ async function showAgentStatus(): Promise<void> {
  */
 function getCleanupConfig(): CleanupConfig {
   const config = vscode.workspace.getConfiguration('agentLens');
-  
+
   return {
     enabled: config.get<boolean>('autoCleanup.enabled', true),
     retentionDays: config.get<number>('autoCleanup.retentionDays', 7),
