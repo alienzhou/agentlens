@@ -246,25 +246,25 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "pnpm run build",
+    "vscode:prepublish": "pnpm run bundle",
     "build": "tsc",
-    "dev": "tsc --watch",
+    "bundle": "node esbuild.config.mjs --production",
+    "dev": "node esbuild.config.mjs --watch",
     "test": "vitest",
     "test:run": "vitest run",
     "clean": "rimraf dist"
   },
-  "dependencies": {
+  "devDependencies": {
     "@vibe-x/agentlens-core": "workspace:*",
     "@vibe-x/agentlens-hook": "workspace:*",
-    "winston": "^3.19.0",
-    "winston-daily-rotate-file": "^5.0.0",
-    "winston-transport-vscode": "^0.1.0"
-  },
-  "devDependencies": {
+    "esbuild": "^0.24.2",
     "@types/vscode": "^1.85.0",
     "rimraf": "^6.0.1",
     "typescript": "^5.7.2",
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.8",
+    "winston": "^3.19.0",
+    "winston-daily-rotate-file": "^5.0.0",
+    "winston-transport-vscode": "^0.1.0"
   },
   "license": "MIT"
 }

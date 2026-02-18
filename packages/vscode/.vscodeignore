@@ -1,0 +1,30 @@
+# Development files
+.vscode
+src
+tests
+*.ts
+!*.d.ts
+tsconfig.json
+tsconfig.tsbuildinfo
+esbuild.config.mjs
+
+# Build artifacts we don't need
+dist/**/*.map
+dist/**/*.d.ts
+dist/**/*.d.ts.map
+dist/blame
+dist/report
+dist/utils
+dist/views
+
+# Development dependencies
+node_modules
+
+# Git files
+.git
+.gitignore
+
+# Other
+*.vsix
+.npmrc
+pnpm-lock.yaml
