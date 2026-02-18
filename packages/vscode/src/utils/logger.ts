@@ -54,7 +54,7 @@ export function createLogger(
   config: Partial<LoggerConfig> = {}
 ): winston.Logger {
   const mergedConfig = { ...DEFAULT_CONFIG, ...config };
-  const logDir = path.join(workspaceRoot, '.agent-blame', 'logs');
+  const logDir = path.join(workspaceRoot, '.agentlens', 'logs');
 
   // Ensure log directory exists
   if (mergedConfig.logToFile && !fs.existsSync(logDir)) {
@@ -156,7 +156,7 @@ export class ModuleLogger {
  * Read logger configuration from VSCode settings
  */
 export function getLoggerConfig(): LoggerConfig {
-  const config = vscode.workspace.getConfiguration('agentBlame');
+  const config = vscode.workspace.getConfiguration('agentLens');
   return {
     level: config.get<string>('logLevel', DEFAULT_CONFIG.level),
     logToFile: config.get<boolean>('logToFile', DEFAULT_CONFIG.logToFile),

@@ -1,9 +1,13 @@
 {
-  "name": "@vibe-x/agent-blame-vscode",
+  "name": "agentlens",
   "version": "0.1.0",
-  "displayName": "Agent Blame",
-  "description": "VS Code extension for Agent Blame - Track AI agent contributions",
-  "publisher": "alienzhou",
+  "displayName": "Agent Lens",
+  "description": "VS Code extension for Agent Lens - Track AI agent contributions",
+  "publisher": "vibe-x",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alienzhou/agentlens"
+  },
   "main": "./dist/extension.js",
   "engines": {
     "vscode": "^1.85.0"
@@ -16,9 +20,9 @@
   ],
   "contributes": {
     "configuration": {
-      "title": "Agent Blame",
+      "title": "Agent Lens",
       "properties": {
-        "agentBlame.logLevel": {
+        "agentLens.logLevel": {
           "type": "string",
           "default": "info",
           "enum": ["debug", "info", "warn", "error"],
@@ -28,52 +32,52 @@
             "Show warn and error logs only",
             "Show error logs only"
           ],
-          "description": "Log level for Agent Blame extension"
+          "description": "Log level for Agent Lens extension"
         },
-        "agentBlame.logToFile": {
+        "agentLens.logToFile": {
           "type": "boolean",
           "default": true,
-          "description": "Write logs to file (.agent-blame/logs/)"
+          "description": "Write logs to file (.agentlens/logs/)"
         },
-        "agentBlame.logRetentionDays": {
+        "agentLens.logRetentionDays": {
           "type": "number",
           "default": 7,
           "minimum": 1,
           "maximum": 30,
           "description": "Number of days to keep log files"
         },
-        "agentBlame.matching.timeWindowDays": {
+        "agentLens.matching.timeWindowDays": {
           "type": "number",
           "default": 3,
           "minimum": 1,
           "maximum": 30,
           "description": "Time window for matching agent records (in days)"
         },
-        "agentBlame.matching.lengthTolerance": {
+        "agentLens.matching.lengthTolerance": {
           "type": "number",
           "default": 0.5,
           "minimum": 0.1,
           "maximum": 2.0,
           "description": "Content length tolerance for filtering (0.5 = 50%)"
         },
-        "agentBlame.developerMode": {
+        "agentLens.developerMode": {
           "type": "boolean",
           "default": false,
           "description": "Enable developer mode to show extra debug information"
         },
-        "agentBlame.autoCleanup.enabled": {
+        "agentLens.autoCleanup.enabled": {
           "type": "boolean",
           "default": true,
           "description": "Enable automatic cleanup of old data files"
         },
-        "agentBlame.autoCleanup.retentionDays": {
+        "agentLens.autoCleanup.retentionDays": {
           "type": "number",
           "default": 7,
           "minimum": 1,
           "maximum": 90,
           "description": "Number of days to retain data files (changes, prompts)"
         },
-        "agentBlame.autoCleanup.checkIntervalHours": {
+        "agentLens.autoCleanup.checkIntervalHours": {
           "type": "number",
           "default": 24,
           "minimum": 1,
@@ -84,47 +88,47 @@
     },
     "commands": [
       {
-        "command": "agent-blame.showBlame",
-        "title": "Agent Blame: Show Blame"
+        "command": "agentlens.showBlame",
+        "title": "Agent Lens: Show Blame"
       },
       {
-        "command": "agent-blame.connectAgent",
-        "title": "Agent Blame: Connect Agent"
+        "command": "agentlens.connectAgent",
+        "title": "Agent Lens: Connect Agent"
       },
       {
-        "command": "agent-blame.disconnectAgent",
-        "title": "Agent Blame: Disconnect Agent"
+        "command": "agentlens.disconnectAgent",
+        "title": "Agent Lens: Disconnect Agent"
       },
       {
-        "command": "agent-blame.showStatus",
-        "title": "Agent Blame: Show Agent Status"
+        "command": "agentlens.showStatus",
+        "title": "Agent Lens: Show Agent Status"
       },
       {
-        "command": "agentBlame.reportIssue",
-        "title": "Agent Blame: Report Matching Issue"
+        "command": "agentlens.reportIssue",
+        "title": "Agent Lens: Report Matching Issue"
       },
       {
-        "command": "agent-blame.cleanup",
-        "title": "Agent Blame: Cleanup Old Data"
+        "command": "agentlens.cleanup",
+        "title": "Agent Lens: Cleanup Old Data"
       },
       {
-        "command": "agent-blame.cleanupStats",
-        "title": "Agent Blame: Show Data Statistics"
+        "command": "agentlens.cleanupStats",
+        "title": "Agent Lens: Show Data Statistics"
       }
     ],
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "agent-blame",
-          "title": "Agent Blame",
+          "id": "agentlens",
+          "title": "Agent Lens",
           "icon": "resources/icon.svg"
         }
       ]
     },
     "views": {
-      "agent-blame": [
+      "agentlens": [
         {
-          "id": "agent-blame.agents",
+          "id": "agentlens.agents",
           "name": "Connected Agents"
         }
       ]
@@ -139,8 +143,8 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@agent-blame/core": "workspace:*",
-    "@vibe-x/agent-blame": "workspace:*",
+    "@agentlens/core": "workspace:*",
+    "@agentlens/hook": "workspace:*",
     "winston": "^3.19.0",
     "winston-daily-rotate-file": "^5.0.0",
     "winston-transport-vscode": "^0.1.0"

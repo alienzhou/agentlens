@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import type { GitDiff, GitFileDiff, GitHunk, ContributorType } from '@agent-blame/core';
+import type { GitDiff, GitFileDiff, GitHunk, ContributorType } from '@agentlens/core';
 
 /**
  * Terminal diff renderer options

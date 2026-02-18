@@ -28,7 +28,7 @@ export class LineHoverProvider implements vscode.HoverProvider {
    * Check if developer mode is enabled
    */
   private isDeveloperMode(): boolean {
-    const config = vscode.workspace.getConfiguration('agentBlame');
+    const config = vscode.workspace.getConfiguration('agentLens');
     return config.get<boolean>('developerMode', false);
   }
 
@@ -172,7 +172,7 @@ export class LineHoverProvider implements vscode.HoverProvider {
     // Add Report Issue button
     const reportParams = this.buildReportParams(filePath, lineText, line, result);
     markdown.appendMarkdown(`---\n\n`);
-    markdown.appendMarkdown(`[🐛 Report Issue](command:agentBlame.reportIssue?${encodeURIComponent(JSON.stringify(reportParams))})`);
+    markdown.appendMarkdown(`[🐛 Report Issue](command:agentlens.reportIssue?${encodeURIComponent(JSON.stringify(reportParams))})`);
 
     markdown.isTrusted = true;
     return new vscode.Hover(markdown);
@@ -222,7 +222,7 @@ export class LineHoverProvider implements vscode.HoverProvider {
       confidence: 1,
     });
     markdown.appendMarkdown(`---\n\n`);
-    markdown.appendMarkdown(`[🐛 Report Issue](command:agentBlame.reportIssue?${encodeURIComponent(JSON.stringify(reportParams))})`);
+    markdown.appendMarkdown(`[🐛 Report Issue](command:agentlens.reportIssue?${encodeURIComponent(JSON.stringify(reportParams))})`);
 
     markdown.isTrusted = true;
     return new vscode.Hover(markdown);

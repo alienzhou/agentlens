@@ -1,11 +1,11 @@
 /**
- * Agent Blame core constants
+ * Agent Lens core constants
  */
 
 /**
  * Default data directory name
  */
-export const DATA_DIR_NAME = '.agent-blame';
+export const DATA_DIR_NAME = '.agentlens';
 
 /**
  * Subdirectory names within the data directory

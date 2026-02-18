@@ -18,10 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Report Issue**: One-click issue reporting with rich context and user feedback
 
 #### Packages
-- **@agent-blame/core**: Core library with detection, storage, performance tracking, and report generation
-- **@agent-blame/hook**: Agent adapters for Cursor and Claude Code
-- **@agent-blame/cli**: Command-line interface for project initialization and management
-- **@agent-blame/vscode**: VS Code extension with line blame, hover info, and developer mode
+- **@agentlens/core**: Core library with detection, storage, performance tracking, and report generation
+- **@agentlens/hook**: Agent adapters for Cursor and Claude Code
+- **@agentlens/cli**: Command-line interface for project initialization and management
+- **agentlens** (VSCode): VS Code extension with line blame, hover info, and developer mode
 
 #### VS Code Extension
 - Line-level contributor blame annotations
@@ -31,12 +31,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configurable matching parameters
 
 #### CLI Commands
-- `agent-blame config --init`: Initialize project
-- `agent-blame hook connect <agent>`: Connect to AI agent
-- `agent-blame hook status`: Check connection status
-- `agent-blame diff --annotated`: View annotated diff
-- `agent-blame review`: Start review session
-- `agent-blame todos`: Manage TODOs
+- `agentlens config --init`: Initialize project
+- `agentlens hook connect <agent>`: Connect to AI agent
+- `agentlens hook status`: Check connection status
+- `agentlens diff --annotated`: View annotated diff
+- `agentlens review`: Start review session
+- `agentlens todos`: Manage TODOs
 
 #### Testing
 - 167+ test cases across 9 test files
@@ -48,11 +48,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ```json
 {
-  "agentBlame.matching.timeWindowDays": 3,
-  "agentBlame.matching.lengthTolerance": 0.5,
-  "agentBlame.autoCleanup.enabled": true,
-  "agentBlame.autoCleanup.retentionDays": 7,
-  "agentBlame.developerMode": false
+  "agentLens.matching.timeWindowDays": 3,
+  "agentLens.matching.lengthTolerance": 0.5,
+  "agentLens.autoCleanup.enabled": true,
+  "agentLens.autoCleanup.retentionDays": 7,
+  "agentLens.developerMode": false
 }
 ```
 
@@ -67,7 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Technical Details
 
 - **RecordId Format**: `{timestamp}-{8-char-nanoid}`
-- **Storage Structure**: Date-sharded JSONL files under `.agent-blame/data/hooks/`
+- **Storage Structure**: Date-sharded JSONL files under `.agentlens/data/hooks/`
 - **Similarity Thresholds**:
   - ≥ 90%: AI Generated
   - 70-90%: AI Generated (Human Modified)

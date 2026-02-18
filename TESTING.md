@@ -1,6 +1,6 @@
-# Agent Blame Testing Guide
+# Agent Lens Testing Guide
 
-This document describes the testing strategy, test structure, and verification procedures for the Agent Blame project.
+This document describes the testing strategy, test structure, and verification procedures for the Agent Lens project.
 
 ## Prerequisites
 
@@ -13,7 +13,7 @@ Ensure the following are installed:
 
 ## Test Overview
 
-Agent Blame uses [Vitest](https://vitest.dev/) as the testing framework with comprehensive coverage across all packages.
+Agent Lens uses [Vitest](https://vitest.dev/) as the testing framework with comprehensive coverage across all packages.
 
 ### Test Statistics
 
@@ -48,10 +48,10 @@ pnpm test:coverage
 
 ```bash
 # Run core package tests only
-pnpm --filter @agent-blame/core test
+pnpm --filter @agentlens/core test
 
 # Run VSCode extension tests
-pnpm --filter @agent-blame/vscode test
+pnpm --filter agentlens test
 ```
 
 ---
@@ -176,7 +176,7 @@ Tests complete workflow from storage to detection to reporting.
 ### Step 1: Build Project
 
 ```bash
-cd /path/to/agent-blame
+cd /path/to/agentlens
 pnpm build
 ```
 
@@ -189,7 +189,7 @@ cd packages/cli
 pnpm link --global
 
 # Verify installation
-agent-blame --version
+agentlens --version
 ```
 
 **Expected Output:** `0.1.0`
@@ -198,13 +198,13 @@ agent-blame --version
 
 ```bash
 cd $YOUR_PROJECT_DIR
-agent-blame config --init
-ls -la .agent-blame/
+agentlens config --init
+ls -la .agentlens/
 ```
 
 **Expected Directory Structure:**
 ```
-.agent-blame/
+.agentlens/
 ├── config/
 ├── data/
 │   ├── hooks/
@@ -221,10 +221,10 @@ ls -la .agent-blame/
 
 ```bash
 # Connect to Claude Code
-agent-blame hook connect claude-code
+agentlens hook connect claude-code
 
 # Check connection status
-agent-blame hook status
+agentlens hook status
 
 # View injected configuration
 cat ~/.claude/settings.json
@@ -238,7 +238,7 @@ cat ~/.claude/settings.json
       "matcher": "Edit|Write|MultiEdit",
       "hooks": [{
         "type": "command",
-        "command": "agent-blame hook posttooluse --agent claude-code"
+        "command": "agentlens hook posttooluse --agent claude-code"
       }]
     }]
   }
@@ -252,20 +252,20 @@ cat ~/.claude/settings.json
 
 ```bash
 # View code change shards
-ls -la .agent-blame/data/hooks/changes/
+ls -la .agentlens/data/hooks/changes/
 
 # View session data
-ls -la .agent-blame/data/sessions/
+ls -la .agentlens/data/sessions/
 
 # Use CLI to view diff
-agent-blame diff --annotated
+agentlens diff --annotated
 ```
 
 ### Step 6: Test VS Code Extension
 
-1. Open VS Code in a project with Agent Blame data
+1. Open VS Code in a project with Agent Lens data
 2. Hover over a line to see contributor info
-3. Enable Developer Mode: Settings → `agentBlame.developerMode`
+3. Enable Developer Mode: Settings → `agentLens.developerMode`
 4. Test Report Issue by clicking "🐛 Report Issue" in hover
 
 ### Step 7: Cleanup (After Testing)
@@ -275,7 +275,7 @@ cd packages/cli
 pnpm unlink --global
 
 # Verify uninstallation
-agent-blame --version  # Should report command not found
+agentlens --version  # Should report command not found
 ```
 
 ---
@@ -286,8 +286,8 @@ agent-blame --version  # Should report command not found
 |----------|-------------------|--------|
 | **Build** | No compilation errors | ⬜ |
 | **Tests** | All 167 tests pass | ⬜ |
-| **CLI** | `agent-blame --version` returns `0.1.0` | ⬜ |
-| **Init** | `.agent-blame/` directory created | ⬜ |
+| **CLI** | `agentlens --version` returns `0.1.0` | ⬜ |
+| **Init** | `.agentlens/` directory created | ⬜ |
 | **Hook** | Claude Code hook configured | ⬜ |
 | **Collection** | Data shards created by date | ⬜ |
 | **Detection** | Contributor detection works | ⬜ |
@@ -317,7 +317,7 @@ pnpm test:run -- --grep "Performance"
 
 ## Troubleshooting
 
-### Issue 1: `agent-blame: command not found`
+### Issue 1: `agentlens: command not found`
 
 **Solution:** Ensure `pnpm link --global` has been executed, and the pnpm global bin is in PATH.
 

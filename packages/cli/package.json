@@ -1,12 +1,12 @@
 {
-  "name": "@vibe-x/agent-blame-cli",
+  "name": "@agentlens/cli",
   "version": "0.1.0",
-  "description": "Agent Blame CLI - Command line tool for agent blame system",
+  "description": "AgentLens CLI - Command line tool for agentlens system",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "agent-blame": "./dist/index.js"
+    "agentlens": "./dist/index.js"
   },
   "files": [
     "dist"
@@ -19,8 +19,8 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@agent-blame/core": "workspace:*",
-    "@vibe-x/agent-blame": "workspace:*",
+    "@agentlens/core": "workspace:*",
+    "@agentlens/hook": "workspace:*",
     "chalk": "^5.3.0",
     "commander": "^12.1.0",
     "diff": "^7.0.0"

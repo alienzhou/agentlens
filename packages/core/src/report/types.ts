@@ -92,8 +92,8 @@ export interface ReportCandidate {
  * Environment information in the report
  */
 export interface ReportEnvironment {
-  /** Agent Blame extension version */
-  agentBlameVersion: string;
+  /** Agent Lens extension version */
+  agentLensVersion: string;
   /** VS Code version */
   vscodeVersion: string;
   /** Operating system platform */

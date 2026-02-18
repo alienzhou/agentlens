@@ -3,16 +3,16 @@ import chalk from 'chalk';
 import * as readline from 'node:readline';
 import * as path from 'node:path';
 import { diffLines } from 'diff';
-import { SUPPORTED_AGENTS, AGENT_CONFIGS, FileStorage } from '@agent-blame/core';
-import { CursorAdapter, ClaudeAdapter } from '@vibe-x/agent-blame';
-import type { AgentAdapter } from '@vibe-x/agent-blame';
-import { getHookCore } from '@vibe-x/agent-blame';
+import { SUPPORTED_AGENTS, AGENT_CONFIGS, FileStorage } from '@agentlens/core';
+import { CursorAdapter, ClaudeAdapter } from '@agentlens/hook';
+import type { AgentAdapter } from '@agentlens/hook';
+import { getHookCore } from '@agentlens/hook';
 import type {
   ClaudePostToolUseInput,
   ClaudeUserPromptSubmitInput,
   ClaudeSessionStartInput,
   ClaudeSessionEndInput,
-} from '@vibe-x/agent-blame';
+} from '@agentlens/hook';
 
 // ==================== Cursor Hook Type Definitions ====================
 
@@ -83,7 +83,7 @@ export const hookCommand = new Command('hook').description('Manage AI Agent hook
  */
 hookCommand
   .command('connect <agent>')
-  .description('Connect Agent Blame to an AI Agent')
+  .description('Connect Agent Lens to an AI Agent')
   .action(async (agent: string) => {
     try {
       await connectAgent(agent);

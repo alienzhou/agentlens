@@ -10,10 +10,10 @@ describe('ContributorService', () => {
 
   beforeEach(async () => {
     // Create temp directory
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'agent-blame-test-'));
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'agentlens-test-'));
     
-    // Create .agent-blame/data/hooks directory structure
-    const hooksDir = path.join(tempDir, '.agent-blame', 'data', 'hooks');
+    // Create .agentlens/data/hooks directory structure
+    const hooksDir = path.join(tempDir, '.agentlens', 'data', 'hooks');
     await fs.mkdir(hooksDir, { recursive: true });
     
     // Initialize service
@@ -32,7 +32,7 @@ describe('ContributorService', () => {
     });
 
     it('should return null when changes.jsonl is empty', async () => {
-      const changesFile = path.join(tempDir, '.agent-blame', 'data', 'hooks', 'changes.jsonl');
+      const changesFile = path.join(tempDir, '.agentlens', 'data', 'hooks', 'changes.jsonl');
       await fs.writeFile(changesFile, '');
 
       const result = await service.detectLineContributor('/test/file.ts', 'const a = 1;', 0);
@@ -40,7 +40,7 @@ describe('ContributorService', () => {
     });
 
     it('should detect AI contribution for exact match', async () => {
-      const changesFile = path.join(tempDir, '.agent-blame', 'data', 'hooks', 'changes.jsonl');
+      const changesFile = path.join(tempDir, '.agentlens', 'data', 'hooks', 'changes.jsonl');
       const testFilePath = path.join(tempDir, 'test.ts');
 
       const change = {
@@ -67,7 +67,7 @@ describe('ContributorService', () => {
     });
 
     it('should return human for non-matching file path', async () => {
-      const changesFile = path.join(tempDir, '.agent-blame', 'data', 'hooks', 'changes.jsonl');
+      const changesFile = path.join(tempDir, '.agentlens', 'data', 'hooks', 'changes.jsonl');
 
       const change = {
         sessionId: 'session-123',
@@ -89,7 +89,7 @@ describe('ContributorService', () => {
     });
 
     it('should skip failed changes', async () => {
-      const changesFile = path.join(tempDir, '.agent-blame', 'data', 'hooks', 'changes.jsonl');
+      const changesFile = path.join(tempDir, '.agentlens', 'data', 'hooks', 'changes.jsonl');
       const testFilePath = path.join(tempDir, 'test.ts');
 
       const change = {
@@ -110,7 +110,7 @@ describe('ContributorService', () => {
     });
 
     it('should handle multiple changes and find best match', async () => {
-      const changesFile = path.join(tempDir, '.agent-blame', 'data', 'hooks', 'changes.jsonl');
+      const changesFile = path.join(tempDir, '.agentlens', 'data', 'hooks', 'changes.jsonl');
       const testFilePath = path.join(tempDir, 'test.ts');
 
       const change1 = {
@@ -145,7 +145,7 @@ describe('ContributorService', () => {
     });
 
     it('should detect human contribution for very different code', async () => {
-      const changesFile = path.join(tempDir, '.agent-blame', 'data', 'hooks', 'changes.jsonl');
+      const changesFile = path.join(tempDir, '.agentlens', 'data', 'hooks', 'changes.jsonl');
       const testFilePath = path.join(tempDir, 'test.ts');
 
       const change = {

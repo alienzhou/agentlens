@@ -1,5 +1,5 @@
 /**
- * Agent Blame VS Code Extension
+ * Agent Lens VS Code Extension
  *
  * Features:
  * 1. Provide Blame view to display code contributor information (AI vs Human)
@@ -11,10 +11,10 @@
  * - Cursor Third Party Hooks: https://cursor.com/cn/docs/agent/third-party-hooks
  */
 import * as vscode from 'vscode';
-import { CursorAdapter, ClaudeAdapter, getHookCore } from '@vibe-x/agent-blame';
-import type { AgentAdapter } from '@vibe-x/agent-blame';
-import { SUPPORTED_AGENTS, CleanupManager, FileStorage, type ContributorType } from '@agent-blame/core';
-import type { CleanupConfig, CleanupResult } from '@agent-blame/core';
+import { CursorAdapter, ClaudeAdapter, getHookCore } from '@agentlens/hook';
+import type { AgentAdapter } from '@agentlens/hook';
+import { SUPPORTED_AGENTS, CleanupManager, FileStorage, type ContributorType } from '@agentlens/core';
+import type { CleanupConfig, CleanupResult } from '@agentlens/core';
 import { LineBlameController } from './blame/line-blame.js';
 import { ContributorService } from './blame/contributor-service.js';
 import { LineHoverProvider } from './blame/line-hover.js';
@@ -39,7 +39,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const workspaceRoot = workspaceFolder.uri.fsPath;
 
   // Initialize logger
-  const outputChannel = vscode.window.createOutputChannel('Agent Blame');
+  const outputChannel = vscode.window.createOutputChannel('Agent Lens');
   context.subscriptions.push(outputChannel);
 
   const loggerConfig = getLoggerConfig();
@@ -134,7 +134,7 @@ function registerCommands(
   // Initialize ReportIssueService
   const reportIssueService = new ReportIssueService(workspaceRoot, '0.1.0');
   // Show Blame view
-  const showBlameCmd = vscode.commands.registerCommand('agent-blame.showBlame', () => {
+  const showBlameCmd = vscode.commands.registerCommand('agentlens.showBlame', () => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       vscode.window.showWarningMessage('No active editor');
@@ -142,11 +142,11 @@ function registerCommands(
     }
 
     // TODO: Implement Blame view display
-    vscode.window.showInformationMessage('Agent Blame view - Coming soon!');
+    vscode.window.showInformationMessage('Agent Lens view - Coming soon!');
   });
 
   // Connect Agent - directly call hook adapter
-  const connectAgentCmd = vscode.commands.registerCommand('agent-blame.connectAgent', async () => {
+  const connectAgentCmd = vscode.commands.registerCommand('agentlens.connectAgent', async () => {
     // Let user select agent
     const agentOptions = SUPPORTED_AGENTS.map((agent: string) => ({
       label: agent,
@@ -167,7 +167,7 @@ function registerCommands(
 
   // Disconnect Agent - directly call hook adapter
   const disconnectAgentCmd = vscode.commands.registerCommand(
-    'agent-blame.disconnectAgent',
+    'agentlens.disconnectAgent',
     async () => {
       // Let user select agent
       const agentOptions = SUPPORTED_AGENTS.map((agent: string) => ({
@@ -189,14 +189,14 @@ function registerCommands(
   );
 
   // Show Agent connection status
-  const showStatusCmd = vscode.commands.registerCommand('agent-blame.showStatus', async () => {
+  const showStatusCmd = vscode.commands.registerCommand('agentlens.showStatus', async () => {
     await showAgentStatus();
   });
 
   // Show help information
-  const showHelpCmd = vscode.commands.registerCommand('agent-blame.showHelp', () => {
+  const showHelpCmd = vscode.commands.registerCommand('agentlens.showHelp', () => {
     const helpText = `
-Agent Blame - AI Code Tracking Tool
+Agent Lens - AI Code Tracking Tool
 
 Features:
 - Connect/Disconnect AI Agents directly from VS Code
@@ -204,7 +204,7 @@ Features:
 - Hover to see detailed blame information
 
 Setup:
-1. Use "Agent Blame: Connect Agent" command to connect
+1. Use "Agent Lens: Connect Agent" command to connect
 2. For Cursor: Enable "Third-party skills" in Settings
 
 Supported Agents:
@@ -216,7 +216,7 @@ ${SUPPORTED_AGENTS.map((agent: string) => `- ${getAgentDisplayName(agent)}`).joi
 
   // Copy commit hash to clipboard
   const copyCommitHashCmd = vscode.commands.registerCommand(
-    'agent-blame.copyCommitHash',
+    'agentlens.copyCommitHash',
     async (hash: string) => {
       await vscode.env.clipboard.writeText(hash);
       vscode.window.showInformationMessage(`Copied: ${hash}`);
@@ -225,7 +225,7 @@ ${SUPPORTED_AGENTS.map((agent: string) => `- ${getAgentDisplayName(agent)}`).joi
 
   // Copy session ID to clipboard
   const copySessionIdCmd = vscode.commands.registerCommand(
-    'agent-blame.copySessionId',
+    'agentlens.copySessionId',
     async (sessionId: string) => {
       await vscode.env.clipboard.writeText(sessionId);
       vscode.window.showInformationMessage(`Copied: ${sessionId}`);
@@ -234,7 +234,7 @@ ${SUPPORTED_AGENTS.map((agent: string) => `- ${getAgentDisplayName(agent)}`).joi
 
   // Manual cleanup command
   const cleanupCmd = vscode.commands.registerCommand(
-    'agent-blame.cleanup',
+    'agentlens.cleanup',
     async () => {
       log.info('Manual cleanup requested');
       
@@ -271,7 +271,7 @@ ${SUPPORTED_AGENTS.map((agent: string) => `- ${getAgentDisplayName(agent)}`).joi
 
   // Show cleanup stats command
   const cleanupStatsCmd = vscode.commands.registerCommand(
-    'agent-blame.cleanupStats',
+    'agentlens.cleanupStats',
     async () => {
       try {
         const stats = await cleanupManager.getStats();
@@ -304,7 +304,7 @@ Cleanup Config:
 
   // Report Issue command
   const reportIssueCmd = vscode.commands.registerCommand(
-    'agentBlame.reportIssue',
+    'agentlens.reportIssue',
     async (params: Record<string, unknown>) => {
       log.info('Report issue requested', {
         filePath: params.filePath,
@@ -355,9 +355,9 @@ Cleanup Config:
  */
 function updateStatusBar(context: vscode.ExtensionContext): void {
   const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-  statusBarItem.text = '$(eye) Agent Blame';
-  statusBarItem.tooltip = 'Agent Blame - AI Code Tracking\nClick for help';
-  statusBarItem.command = 'agent-blame.showHelp';
+  statusBarItem.text = '$(eye) Agent Lens';
+  statusBarItem.tooltip = 'Agent Lens - AI Code Tracking\nClick for help';
+  statusBarItem.command = 'agentlens.showHelp';
   statusBarItem.show();
 
   context.subscriptions.push(statusBarItem);
@@ -516,7 +516,7 @@ async function showAgentStatus(): Promise<void> {
  * Get cleanup configuration from VSCode settings
  */
 function getCleanupConfig(): CleanupConfig {
-  const config = vscode.workspace.getConfiguration('agentBlame');
+  const config = vscode.workspace.getConfiguration('agentLens');
   
   return {
     enabled: config.get<boolean>('autoCleanup.enabled', true),

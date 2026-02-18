@@ -1,5 +1,5 @@
 {
-  "name": "agent-blame",
+  "name": "agentlens",
   "version": "0.1.0",
   "description": "Code Review tool redesigned for the Vibe Coding era",
   "private": true,
@@ -36,15 +36,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vibe-x-ai/agent-blame.git"
+    "url": "git+https://github.com/alienzhou/agentlens.git"
   },
-  "author": "vibe-x-ai",
+  "author": "alienzhou",
   "contributors": [
     "zhouhongxuan"
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/vibe-x-ai/agent-blame/issues"
+    "url": "https://github.com/alienzhou/agentlens/issues"
   },
-  "homepage": "https://github.com/vibe-x-ai/agent-blame#readme"
+  "homepage": "https://github.com/alienzhou/agentlens#readme"
 }

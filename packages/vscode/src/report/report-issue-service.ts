@@ -18,7 +18,7 @@ import {
   getReportFileName,
   getReportDirectoryName,
   DATA_DIR_NAME,
-} from '@agent-blame/core';
+} from '@agentlens/core';
 import type { LineContributorResult } from '../blame/contributor-service.js';
 import { createModuleLogger } from '../utils/logger.js';
 
@@ -64,12 +64,12 @@ export class ReportIssueService {
     result: ExtendedContributorResult,
     userFeedback?: UserFeedback
   ): Promise<ReportIssue> {
-    const config = vscode.workspace.getConfiguration('agentBlame');
+    const config = vscode.workspace.getConfiguration('agentLens');
     const developerMode = config.get<boolean>('developerMode', false);
 
     // Build environment info
     const environment = {
-      agentBlameVersion: this.extensionVersion,
+      agentLensVersion: this.extensionVersion,
       vscodeVersion: vscode.version,
       platform: process.platform,
     };

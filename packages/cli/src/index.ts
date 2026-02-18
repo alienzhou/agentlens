@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Agent Blame CLI - Entry point
+ * Agent Lens CLI - Entry point
  */
 import { program } from 'commander';
 import { diffCommand } from './commands/diff.js';
@@ -13,8 +13,8 @@ import { hookCommand } from './commands/hook.js';
 const VERSION = '0.1.0';
 
 program
-  .name('agent-blame')
-  .description('Agent Blame - Track and identify AI agent contributions in code')
+  .name('agent-lens')
+  .description('Agent Lens - Track and identify AI agent contributions in code')
   .version(VERSION);
 
 // Register commands

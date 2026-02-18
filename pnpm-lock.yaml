@@ -41,10 +41,10 @@ importers:
 
   packages/cli:
     dependencies:
-      '@agent-blame/core':
+      '@agentlens/core':
         specifier: workspace:*
         version: link:../core
-      '@vibe-x/agent-blame':
+      '@agentlens/hook':
         specifier: workspace:*
         version: link:../hook
       chalk:
@@ -100,7 +100,7 @@ importers:
 
   packages/hook:
     dependencies:
-      '@agent-blame/core':
+      '@agentlens/core':
         specifier: workspace:*
         version: link:../core
       chokidar:
@@ -119,10 +119,10 @@ importers:
 
   packages/vscode:
     dependencies:
-      '@agent-blame/core':
+      '@agentlens/core':
         specifier: workspace:*
         version: link:../core
-      '@vibe-x/agent-blame':
+      '@agentlens/hook':
         specifier: workspace:*
         version: link:../hook
       winston:

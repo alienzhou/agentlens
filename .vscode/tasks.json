@@ -5,7 +5,7 @@
       "label": "build-vscode-extension",
       "type": "shell",
       "command": "pnpm",
-      "args": ["--filter", "@vibe-x/agent-blame-vscode", "build"],
+      "args": ["--filter", "agentlens", "build"],
       "group": "build",
       "problemMatcher": ["$tsc"]
     },
@@ -13,7 +13,7 @@
       "label": "watch-vscode-extension",
       "type": "shell",
       "command": "pnpm",
-      "args": ["--filter", "@vibe-x/agent-blame-vscode", "dev"],
+      "args": ["--filter", "agentlens", "dev"],
       "group": "build",
       "isBackground": true,
       "problemMatcher": ["$tsc-watch"]

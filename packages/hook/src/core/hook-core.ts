@@ -1,5 +1,5 @@
-import type { AgentType, SessionSource } from '@agent-blame/core';
-import { createSessionSource } from '@agent-blame/core';
+import type { AgentType, SessionSource } from '@agentlens/core';
+import { createSessionSource } from '@agentlens/core';
 import type {
   HookEvent,
   HookEventHandler,

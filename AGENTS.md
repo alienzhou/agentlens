@@ -7,7 +7,7 @@ You are an expert TypeScript developer for a VSCode extension that tracks AI cod
 ```bash
 # Build
 pnpm build                    # Build all packages
-pnpm --filter @vibe-x/agent-blame-vscode build  # Build VSCode extension only
+pnpm --filter agentlens build  # Build VSCode extension only
 
 # Test
 pnpm test:run                 # Run all tests

@@ -2,8 +2,8 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
-import type { AgentType } from '@agent-blame/core';
-import { AGENT_CONFIGS } from '@agent-blame/core';
+import type { AgentType } from '@agentlens/core';
+import { AGENT_CONFIGS } from '@agentlens/core';
 import type { HookCore } from '../core/hook-core.js';
 import type {
   AgentAdapterConfig,
@@ -15,9 +15,9 @@ import { BaseAgentAdapter } from './adapter-interface.js';
 const execAsync = promisify(exec);
 
 /**
- * Agent Blame identifier in configuration
+ * Agent Lens identifier in configuration
  */
-const AGENT_BLAME_HOOK_MARKER = 'agent-blame hook';
+const AGENT_LENS_HOOK_MARKER = 'agent-lens hook';
 
 /**
  * Cursor adapter for integrating with Cursor AI IDE
@@ -106,18 +106,18 @@ export class CursorAdapter extends BaseAgentAdapter {
       const content = await fs.readFile(configPath, 'utf-8');
       const config = JSON.parse(content) as CursorHooksConfig;
 
-      // Check if agent-blame hook config exists
+      // Check if agent-lens hook config exists
       if (Object.keys(config.hooks).length === 0) {
         return false;
       }
 
-      // Check if any hook event contains agent-blame command
+      // Check if any hook event contains agent-lens command
       const hookEvents = ['afterFileEdit', 'sessionStart', 'sessionEnd', 'postToolUse'] as const;
       for (const eventName of hookEvents) {
         const eventHooks = config.hooks[eventName];
         if (Array.isArray(eventHooks)) {
           for (const hook of eventHooks) {
-            if (hook.command && hook.command.includes(AGENT_BLAME_HOOK_MARKER)) {
+            if (hook.command && hook.command.includes(AGENT_LENS_HOOK_MARKER)) {
               return true;
             }
           }
@@ -154,7 +154,7 @@ export class CursorAdapter extends BaseAgentAdapter {
     config.hooks.postToolUse = this.mergeHooks(
       config.hooks.postToolUse,
       {
-        command: 'agent-blame hook posttooluse --agent cursor',
+        command: 'agent-lens hook posttooluse --agent cursor',
         matcher: 'Write', // In Cursor, Edit maps to Write
       }
     );
@@ -163,7 +163,7 @@ export class CursorAdapter extends BaseAgentAdapter {
     config.hooks.afterFileEdit = this.mergeHooks(
       config.hooks.afterFileEdit,
       {
-        command: 'agent-blame hook afterfileedit --agent cursor',
+        command: 'agent-lens hook afterfileedit --agent cursor',
       }
     );
 
@@ -171,7 +171,7 @@ export class CursorAdapter extends BaseAgentAdapter {
     config.hooks.sessionStart = this.mergeHooks(
       config.hooks.sessionStart,
       {
-        command: 'agent-blame hook sessionstart --agent cursor',
+        command: 'agent-lens hook sessionstart --agent cursor',
       }
     );
 
@@ -179,7 +179,7 @@ export class CursorAdapter extends BaseAgentAdapter {
     config.hooks.sessionEnd = this.mergeHooks(
       config.hooks.sessionEnd,
       {
-        command: 'agent-blame hook sessionend --agent cursor',
+        command: 'agent-lens hook sessionend --agent cursor',
       }
     );
 
@@ -196,14 +196,14 @@ export class CursorAdapter extends BaseAgentAdapter {
       const content = await fs.readFile(configPath, 'utf-8');
       const config = JSON.parse(content) as CursorHooksConfig;
 
-      // Remove hooks containing agent-blame command
+      // Remove hooks containing agent-lens command
       const hookEvents = ['afterFileEdit', 'sessionStart', 'sessionEnd', 'postToolUse'] as const;
       if (Object.keys(config.hooks).length > 0) {
         for (const eventName of hookEvents) {
           const eventHooks = config.hooks[eventName];
           if (Array.isArray(eventHooks)) {
             const filteredHooks = eventHooks.filter(
-              (hook) => !(hook.command && hook.command.includes(AGENT_BLAME_HOOK_MARKER))
+              (hook) => !(hook.command && hook.command.includes(AGENT_LENS_HOOK_MARKER))
             );
             if (filteredHooks.length === 0) {
               // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
@@ -275,9 +275,9 @@ export class CursorAdapter extends BaseAgentAdapter {
   ): CursorHookEntry[] {
     const hooks = existing ?? [];
 
-    // Check if agent-blame hook already exists
+    // Check if agent-lens hook already exists
     const existingIndex = hooks.findIndex(
-      (h) => h.command && h.command.includes(AGENT_BLAME_HOOK_MARKER)
+      (h) => h.command && h.command.includes(AGENT_LENS_HOOK_MARKER)
     );
 
     if (existingIndex >= 0) {

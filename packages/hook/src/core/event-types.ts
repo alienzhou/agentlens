@@ -1,4 +1,4 @@
-import type { AgentType, SessionSource } from '@agent-blame/core';
+import type { AgentType, SessionSource } from '@agentlens/core';
 
 /**
  * Code change event - emitted when Agent modifies a file

@@ -53,7 +53,7 @@ describe('Report Service', () => {
   });
 
   const createTestEnvironment = () => ({
-    agentBlameVersion: '0.1.0',
+    agentLensVersion: '0.1.0',
     vscodeVersion: '1.85.0',
     platform: 'darwin',
   });

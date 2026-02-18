@@ -1,7 +1,7 @@
 {
-  "name": "@vibe-x/agent-blame",
+  "name": "@agentlens/hook",
   "version": "0.1.0",
-  "description": "Agent blame system - Agent adapters, event capture, and session monitoring",
+  "description": "AgentLens hook system - Agent adapters, event capture, and session monitoring",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -24,7 +24,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@agent-blame/core": "workspace:*",
+    "@agentlens/core": "workspace:*",
     "chokidar": "^4.0.1"
   },
   "devDependencies": {

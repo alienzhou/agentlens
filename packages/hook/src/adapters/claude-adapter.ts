@@ -2,8 +2,8 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
-import type { AgentType } from '@agent-blame/core';
-import { AGENT_CONFIGS } from '@agent-blame/core';
+import type { AgentType } from '@agentlens/core';
+import { AGENT_CONFIGS } from '@agentlens/core';
 import type { HookCore } from '../core/hook-core.js';
 import type {
   AgentAdapterConfig,
@@ -15,9 +15,9 @@ import { BaseAgentAdapter } from './adapter-interface.js';
 const execAsync = promisify(exec);
 
 /**
- * Agent Blame hook identifier registered in Claude Code
+ * Agent Lens hook identifier registered in Claude Code
  */
-const AGENT_BLAME_HOOK_MARKER = 'agent-blame hook';
+const AGENT_LENS_HOOK_MARKER = 'agent-lens hook';
 
 /**
  * Claude Code adapter for integrating with Claude Code (Anthropic's CLI)
@@ -94,10 +94,10 @@ export class ClaudeAdapter extends BaseAgentAdapter {
       const content = await fs.readFile(configPath, 'utf-8');
       const config = JSON.parse(content) as ClaudeSettingsConfig;
 
-      // Check if agent-blame hook config exists
+      // Check if agent-lens hook config exists
       if (!config.hooks) return false;
 
-      // Check if any hook event contains agent-blame command
+      // Check if any hook event contains agent-lens command
       const hookEvents = ['PostToolUse', 'UserPromptSubmit', 'SessionStart', 'SessionEnd'] as const;
       for (const eventName of hookEvents) {
         const eventHooks = config.hooks[eventName];
@@ -105,7 +105,7 @@ export class ClaudeAdapter extends BaseAgentAdapter {
           for (const matcher of eventHooks) {
             if (Array.isArray(matcher.hooks)) {
               for (const hook of matcher.hooks) {
-                if (hook.command && hook.command.includes(AGENT_BLAME_HOOK_MARKER)) {
+                if (hook.command && hook.command.includes(AGENT_LENS_HOOK_MARKER)) {
                   return true;
                 }
               }
@@ -177,7 +177,7 @@ export class ClaudeAdapter extends BaseAgentAdapter {
       const config = JSON.parse(content) as ClaudeSettingsConfig;
 
       if (config.hooks) {
-        // Remove hooks containing agent-blame command
+        // Remove hooks containing agent-lens command
         const hookEvents = ['PostToolUse', 'UserPromptSubmit', 'SessionStart', 'SessionEnd'] as const;
         for (const eventName of hookEvents) {
           const eventHooks = config.hooks[eventName];
@@ -185,7 +185,7 @@ export class ClaudeAdapter extends BaseAgentAdapter {
             config.hooks[eventName] = eventHooks.filter((matcher) => {
               if (Array.isArray(matcher.hooks)) {
                 matcher.hooks = matcher.hooks.filter(
-                  (hook) => !(hook.command && hook.command.includes(AGENT_BLAME_HOOK_MARKER))
+                  (hook) => !(hook.command && hook.command.includes(AGENT_LENS_HOOK_MARKER))
                 );
                 return matcher.hooks.length > 0;
               }
@@ -217,12 +217,12 @@ export class ClaudeAdapter extends BaseAgentAdapter {
   ): ClaudeHookMatcher[] {
     const matchers = existing ?? [];
 
-    // Check if agent-blame hook with same matcher already exists
+    // Check if agent-lens hook with same matcher already exists
     const existingIndex = matchers.findIndex((m) => {
       if (m.matcher !== newMatcher.matcher) return false;
       if (!Array.isArray(m.hooks)) return false;
       return m.hooks.some(
-        (h) => h.command && h.command.includes(AGENT_BLAME_HOOK_MARKER)
+        (h) => h.command && h.command.includes(AGENT_LENS_HOOK_MARKER)
       );
     });
 
@@ -247,7 +247,7 @@ export class ClaudeAdapter extends BaseAgentAdapter {
       hooks: [
         {
           type: 'command',
-          command: 'agent-blame hook posttooluse --agent claude-code',
+          command: 'agent-lens hook posttooluse --agent claude-code',
         },
       ],
     };
@@ -262,7 +262,7 @@ export class ClaudeAdapter extends BaseAgentAdapter {
       hooks: [
         {
           type: 'command',
-          command: 'agent-blame hook userpromptsubmit --agent claude-code',
+          command: 'agent-lens hook userpromptsubmit --agent claude-code',
         },
       ],
     };
@@ -276,7 +276,7 @@ export class ClaudeAdapter extends BaseAgentAdapter {
       hooks: [
         {
           type: 'command',
-          command: 'agent-blame hook sessionstart --agent claude-code',
+          command: 'agent-lens hook sessionstart --agent claude-code',
         },
       ],
     };
@@ -290,7 +290,7 @@ export class ClaudeAdapter extends BaseAgentAdapter {
       hooks: [
         {
           type: 'command',
-          command: 'agent-blame hook sessionend --agent claude-code',
+          command: 'agent-lens hook sessionend --agent claude-code',
         },
       ],
     };

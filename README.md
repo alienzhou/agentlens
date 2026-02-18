@@ -1,14 +1,14 @@
-# Agent Blame
+# Agent Lens
 
 > Code Review tool redesigned for the Vibe Coding era
 
-[![CI](https://github.com/vibe-x-ai/agent-blame/actions/workflows/ci.yml/badge.svg)](https://github.com/vibe-x-ai/agent-blame/actions)
+[![CI](https://github.com/alienzhou/agentlens/actions/workflows/ci.yml/badge.svg)](https://github.com/alienzhou/agentlens/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Status: Beta](https://img.shields.io/badge/Status-Beta-blue.svg)](https://github.com/vibe-x-ai/agent-blame)
+[![Status: Beta](https://img.shields.io/badge/Status-Beta-blue.svg)](https://github.com/alienzhou/agentlens)
 
 ## 📋 Overview
 
-Agent Blame is a Code Review tool designed specifically for the era of AI-assisted coding. It addresses the fundamental challenge of reviewing AI-generated code by providing:
+Agent Lens is a Code Review tool designed specifically for the era of AI-assisted coding. It addresses the fundamental challenge of reviewing AI-generated code by providing:
 
 - **Dual-Track Data Collection**: Captures both Hook events and session files from AI Agents
 - **Contributor Detection**: Identifies whether code was written by AI or humans using hunk-level similarity matching
@@ -50,7 +50,7 @@ In the Vibe Coding era:
 
 ### The Solution
 
-Agent Blame provides:
+Agent Lens provides:
 1. **Agent Traceability**: Track which AI Agent generated which code
 2. **Session Context**: Link code changes to the original conversation and task breakdown
 3. **Contributor Classification**: Automatically detect AI vs. human contributions
@@ -58,7 +58,7 @@ Agent Blame provides:
 
 ## 🏗️ Architecture
 
-Agent Blame uses a 4-layer architecture:
+Agent Lens uses a 4-layer architecture:
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -79,7 +79,7 @@ Agent Blame uses a 4-layer architecture:
 ### Data Storage Structure
 
 ```
-.agent-blame/data/hooks/
+.agentlens/data/hooks/
 ├── changes/                    # Code change records (sharded by date)
 │   ├── 2026-02-10.jsonl
 │   ├── 2026-02-11.jsonl
@@ -107,8 +107,8 @@ Agent Blame uses a 4-layer architecture:
 
 ```bash
 # Clone the repository
-git clone git@github.com:vibe-x-ai/agent-blame.git
-cd agent-blame
+git clone git@github.com:alienzhou/agentlens.git
+cd agentlens
 
 # Install dependencies
 pnpm install
@@ -119,14 +119,14 @@ pnpm build
 
 ### Basic Usage
 
-#### 1. Initialize Agent Blame in Your Project
+#### 1. Initialize Agent Lens in Your Project
 
 ```bash
 cd your-project
-agent-blame config --init
+agentlens config --init
 ```
 
-This creates a `.agent-blame/` directory with:
+This creates a `.agentlens/` directory with:
 - `data/sessions/` - Session data
 - `data/hooks/` - Hook captured data (sharded by date)
 - `data/todos.json` - TODO items
@@ -136,52 +136,52 @@ This creates a `.agent-blame/` directory with:
 
 ```bash
 # Connect to Cursor
-agent-blame hook connect cursor
+agentlens hook connect cursor
 
 # Connect to Claude Code
-agent-blame hook connect claude-code
+agentlens hook connect claude-code
 
 # Check connection status
-agent-blame hook status
+agentlens hook status
 ```
 
 #### 3. View Annotated Diff
 
 ```bash
 # Show working tree changes with contributor info
-agent-blame diff --annotated
+agentlens diff --annotated
 
 # Show staged changes
-agent-blame diff --staged
+agentlens diff --staged
 
 # Output to markdown
-agent-blame diff --format markdown -o report.md
+agentlens diff --format markdown -o report.md
 ```
 
 #### 4. Start a Review Session
 
 ```bash
 # Interactive review session
-agent-blame review
+agentlens review
 
 # Filter by session
-agent-blame review --session abc123
+agentlens review --session abc123
 
 # Export to file
-agent-blame review --format markdown -o review-report.md
+agentlens review --format markdown -o review-report.md
 ```
 
 #### 5. Manage TODOs
 
 ```bash
 # List all TODOs
-agent-blame todos
+agentlens todos
 
 # Filter by status
-agent-blame todos --status pending
+agentlens todos --status pending
 
 # Output as JSON
-agent-blame todos --format json
+agentlens todos --format json
 ```
 
 ## 📦 Packages
@@ -190,16 +190,16 @@ This monorepo contains:
 
 | Package | Description | Status |
 |---------|-------------|--------|
-| **@agent-blame/core** | Core data models, Git integration, contributor detection, performance tracking | ✅ Stable |
-| **@agent-blame/hook** | Agent hook adapters (Cursor, Claude Code) | ✅ Stable |
-| **@agent-blame/cli** | Command-line interface | ✅ Stable |
-| **@agent-blame/vscode** | VS Code extension with blame annotations | ✅ Beta |
+| **@agentlens/core** | Core data models, Git integration, contributor detection, performance tracking | ✅ Stable |
+| **@agentlens/hook** | Agent hook adapters (Cursor, Claude Code) | ✅ Stable |
+| **@agentlens/cli** | Command-line interface | ✅ Stable |
+| **agentlens** (VSCode) | VS Code extension with blame annotations | ✅ Beta |
 
 ## 🔍 How It Works
 
 ### Contributor Detection
 
-Agent Blame uses **4-level filtering with Levenshtein similarity matching** to determine code authorship:
+Agent Lens uses **4-level filtering with Levenshtein similarity matching** to determine code authorship:
 
 ```
 Level 1: File Path Filter     (100 records → 30 records)
@@ -219,7 +219,7 @@ Level 4: Levenshtein Matching  (5 candidates → best match)
 ### VS Code Extension Features
 
 - **Line Blame**: Hover over any line to see contributor info
-- **Developer Mode**: Enable `agentBlame.developerMode` for detailed debug info
+- **Developer Mode**: Enable `agentLens.developerMode` for detailed debug info
 - **Report Issue**: Click "🐛 Report Issue" to report matching problems
 - **Auto Cleanup**: Automatic cleanup of old data files
 
@@ -227,11 +227,11 @@ Level 4: Levenshtein Matching  (5 candidates → best match)
 
 ```json
 {
-  "agentBlame.matching.timeWindowDays": 3,
-  "agentBlame.matching.lengthTolerance": 0.5,
-  "agentBlame.autoCleanup.enabled": true,
-  "agentBlame.autoCleanup.retentionDays": 7,
-  "agentBlame.developerMode": false
+  "agentLens.matching.timeWindowDays": 3,
+  "agentLens.matching.lengthTolerance": 0.5,
+  "agentLens.autoCleanup.enabled": true,
+  "agentLens.autoCleanup.retentionDays": 7,
+  "agentLens.developerMode": false
 }
 ```
 
@@ -240,7 +240,7 @@ Level 4: Levenshtein Matching  (5 candidates → best match)
 ### Project Structure
 
 ```
-agent-blame/
+agentlens/
 ├── packages/
 │   ├── core/          # Core library (detection, storage, performance)
 │   ├── hook/          # Hook system (agent adapters)
@@ -280,7 +280,7 @@ pnpm clean            # Remove build artifacts and node_modules
 pnpm test:run
 
 # Run tests for specific package
-pnpm --filter @agent-blame/core test
+pnpm --filter @agentlens/core test
 
 # Generate coverage report
 pnpm test:coverage
@@ -347,9 +347,9 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 
 ## 📧 Contact
 
-- Organization: [vibe-x-ai](https://github.com/vibe-x-ai)
-- Repository: [agent-blame](https://github.com/vibe-x-ai/agent-blame)
-- Issues: [GitHub Issues](https://github.com/vibe-x-ai/agent-blame/issues)
+- Author: [alienzhou](https://github.com/alienzhou)
+- Repository: [agentlens](https://github.com/alienzhou/agentlens)
+- Issues: [GitHub Issues](https://github.com/alienzhou/agentlens/issues)
 - Documentation: [docs/](./docs/)
 
 ---

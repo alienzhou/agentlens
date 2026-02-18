@@ -1,7 +1,7 @@
 {
-  "name": "@agent-blame/core",
+  "name": "@agentlens/core",
   "version": "0.1.0",
-  "description": "Core library for Agent Blame - data models, protocols, and utilities",
+  "description": "Core library for AgentLens - data models, protocols, and utilities",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

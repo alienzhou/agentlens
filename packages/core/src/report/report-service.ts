@@ -90,7 +90,7 @@ export function generateReport(
   matchResult: ExtendedMatchResult,
   candidates: AgentRecord[],
   environment: {
-    agentBlameVersion: string;
+    agentLensVersion: string;
     vscodeVersion: string;
     platform: string;
   },
@@ -284,7 +284,7 @@ export function validateReport(report: unknown): report is ReportIssue {
   // Environment
   if (typeof r.environment !== 'object' || r.environment === null) return false;
   const env = r.environment as Record<string, unknown>;
-  if (typeof env.agentBlameVersion !== 'string') return false;
+  if (typeof env.agentLensVersion !== 'string') return false;
   if (typeof env.vscodeVersion !== 'string') return false;
   if (typeof env.platform !== 'string') return false;
 

@@ -12,7 +12,7 @@ import {
   LevenshteinMatcher,
   SIMILARITY_CONFIG,
   DATA_DIR_NAME,
-} from '@agent-blame/core';
+} from '@agentlens/core';
 import { createModuleLogger } from '../utils/logger.js';
 
 const execAsync = promisify(exec);
@@ -46,7 +46,7 @@ interface ExtendedAgentRecord extends AgentRecord {
 /**
  * Contributor Service - Detects AI vs Human contributors for uncommitted code
  *
- * Reads from .agent-blame/data/hooks/changes.jsonl and uses ContributorDetector
+ * Reads from .agentlens/data/hooks/changes.jsonl and uses ContributorDetector
  * to match code lines with AI-generated records.
  */
 export class ContributorService {

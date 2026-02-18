@@ -1,6 +1,6 @@
-# Contributing to Agent Blame
+# Contributing to Agent Lens
 
-Thank you for your interest in contributing to Agent Blame! This document provides guidelines for contributing to the project.
+Thank you for your interest in contributing to Agent Lens! This document provides guidelines for contributing to the project.
 
 ## 🚀 Getting Started
 
@@ -15,8 +15,8 @@ Thank you for your interest in contributing to Agent Blame! This document provid
 1. Fork the repository
 2. Clone your fork:
    ```bash
-   git clone git@github.com:YOUR_USERNAME/agent-blame.git
-   cd agent-blame
+   git clone git@github.com:YOUR_USERNAME/agentlens.git
+   cd agentlens
    ```
 
 3. Install dependencies:
@@ -63,13 +63,13 @@ git checkout -b fix/your-bug-fix
 
 ```bash
 # Run tests for a specific package
-pnpm --filter @agent-blame/core test
+pnpm --filter @agentlens/core test
 
 # Build a specific package
-pnpm --filter @vibe-x/agent-blame-cli build
+pnpm --filter @agentlens/cli build
 
 # Run CLI in dev mode
-pnpm --filter @vibe-x/agent-blame-cli dev
+pnpm --filter @agentlens/cli dev
 ```
 
 ## 🧪 Testing
@@ -182,7 +182,7 @@ When reporting bugs, please include:
    - OS and version
    - Node.js version
    - pnpm version
-   - Agent Blame version
+   - Agent Lens version
 6. **Logs/Screenshots**: Any relevant logs or screenshots
 
 ## 💡 Suggesting Features
@@ -219,8 +219,8 @@ Contributors will be:
 
 ## 📜 License
 
-By contributing to Agent Blame, you agree that your contributions will be licensed under the MIT License.
+By contributing to Agent Lens, you agree that your contributions will be licensed under the MIT License.
 
 ## 🙏 Thank You!
 
-Thank you for contributing to Agent Blame! Your efforts help make code review better for everyone in the Vibe Coding era.
+Thank you for contributing to Agent Lens! Your efforts help make code review better for everyone in the Vibe Coding era.

@@ -1,14 +1,14 @@
 import * as path from 'node:path';
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { FileStorage, DATA_DIR_NAME, DATA_SUBDIRS, DATA_FILES } from '@agent-blame/core';
+import { FileStorage, DATA_DIR_NAME, DATA_SUBDIRS, DATA_FILES } from '@agentlens/core';
 
 /**
- * config command - Configure Agent Blame settings
+ * config command - Configure Agent Lens settings
  */
 export const configCommand = new Command('config')
-  .description('Configure Agent Blame settings')
-  .option('--init', 'Initialize Agent Blame in the current project')
+  .description('Configure Agent Lens settings')
+  .option('--init', 'Initialize Agent Lens in the current project')
   .option('--show', 'Show current configuration')
   .option('--set <key=value>', 'Set a configuration value')
   .option('--reset', 'Reset configuration to defaults')
@@ -55,7 +55,7 @@ async function initializeProject(storage: FileStorage): Promise<void> {
   const isInitialized = await storage.isInitialized();
 
   if (isInitialized) {
-    console.log(chalk.yellow('Agent Blame is already initialized in this project.'));
+    console.log(chalk.yellow('Agent Lens is already initialized in this project.'));
     const stats = await storage.getStats();
     console.log(chalk.dim(`  Sessions: ${String(stats.sessionsCount)}`));
     console.log(chalk.dim(`  Review Units: ${String(stats.reviewUnitsCount)}`));
@@ -63,11 +63,11 @@ async function initializeProject(storage: FileStorage): Promise<void> {
     return;
   }
 
-  console.log(chalk.blue('Initializing Agent Blame...'));
+  console.log(chalk.blue('Initializing Agent Lens...'));
 
   await storage.initialize();
 
-  console.log(chalk.green('✓ Agent Blame initialized successfully!'));
+  console.log(chalk.green('✓ Agent Lens initialized successfully!'));
   console.log();
   console.log(chalk.dim(`Created ${DATA_DIR_NAME}${path.posix.sep} directory with:`));
   console.log(chalk.dim(`  - ${path.posix.join(DATA_SUBDIRS.DATA, DATA_SUBDIRS.SESSIONS)}${path.posix.sep}    (session data)`));
@@ -76,20 +76,20 @@ async function initializeProject(storage: FileStorage): Promise<void> {
   console.log(chalk.dim(`  - ${DATA_SUBDIRS.CONFIG}${path.posix.sep}           (configuration)`));
   console.log();
   console.log(chalk.cyan('Next steps:'));
-  console.log(chalk.dim('  1. Connect an AI Agent: agent-blame hook connect cursor'));
+  console.log(chalk.dim('  1. Connect an AI Agent: agent-lens hook connect cursor'));
   console.log(chalk.dim('  2. Use your Agent normally'));
-  console.log(chalk.dim('  3. View changes: agent-blame diff --annotated'));
+  console.log(chalk.dim('  3. View changes: agent-lens diff --annotated'));
 }
 
 async function resetProject(storage: FileStorage): Promise<void> {
   const isInitialized = await storage.isInitialized();
 
   if (!isInitialized) {
-    console.log(chalk.yellow('Agent Blame is not initialized in this project.'));
+    console.log(chalk.yellow('Agent Lens is not initialized in this project.'));
     return;
   }
 
-  console.log(chalk.yellow('⚠️  Warning: This will delete all Agent Blame data!'));
+  console.log(chalk.yellow('⚠️  Warning: This will delete all Agent Lens data!'));
   console.log(chalk.dim('  - All session data'));
   console.log(chalk.dim('  - All review units'));
   console.log(chalk.dim('  - All TODOs'));
@@ -118,7 +118,7 @@ function setConfig(keyValue: string): void {
 }
 
 async function showConfig(storage: FileStorage): Promise<void> {
-  console.log(chalk.blue.bold('📋 Agent Blame Configuration'));
+  console.log(chalk.blue.bold('📋 Agent Lens Configuration'));
   console.log(chalk.dim('─'.repeat(50)));
   console.log();
 
@@ -143,6 +143,6 @@ async function showConfig(storage: FileStorage): Promise<void> {
 
   if (!isInitialized) {
     console.log();
-    console.log(chalk.yellow('Run "agent-blame config --init" to initialize.'));
+    console.log(chalk.yellow('Run "agent-lens config --init" to initialize.'));
   }
 }

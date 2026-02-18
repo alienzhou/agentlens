@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { FileStorage, type Todo } from '@agent-blame/core';
+import { FileStorage, type Todo } from '@agentlens/core';
 
 /**
  * todos command - Manage TODO items
@@ -34,8 +34,8 @@ async function executeTodos(options: TodosOptions): Promise<void> {
   // Check if initialized
   const isInitialized = await storage.isInitialized();
   if (!isInitialized) {
-    console.log(chalk.yellow('Agent Blame not initialized in this project.'));
-    console.log(chalk.dim('Run "agent-blame config --init" to initialize.'));
+    console.log(chalk.yellow('Agent Lens not initialized in this project.'));
+    console.log(chalk.dim('Run "agent-lens config --init" to initialize.'));
     return;
   }
 
@@ -64,7 +64,7 @@ async function executeTodos(options: TodosOptions): Promise<void> {
   }
 
   // Terminal format
-  console.log(chalk.blue.bold('📋 Agent Blame - TODOs'));
+  console.log(chalk.blue.bold('📋 Agent Lens - TODOs'));
   console.log(chalk.dim('─'.repeat(50)));
   console.log();
 
