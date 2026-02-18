@@ -1,5 +1,5 @@
 /**
- * Agent Lens core constants
+ * AgentLens core constants
  */
 
 /**

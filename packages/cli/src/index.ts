@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Agent Lens CLI - Entry point
+ * AgentLens CLI - Entry point
  */
 import { program } from 'commander';
 import { diffCommand } from './commands/diff.js';
@@ -14,7 +14,7 @@ const VERSION = '0.1.0';
 
 program
   .name('agent-lens')
-  .description('Agent Lens - Track and identify AI agent contributions in code')
+  .description('AgentLens - Track and identify AI agent contributions in code')
   .version(VERSION);
 
 // Register commands

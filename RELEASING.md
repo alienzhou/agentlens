@@ -1,6 +1,6 @@
 # Releasing Guide
 
-Quick reference for publishing Agent Lens packages.
+Quick reference for publishing AgentLens packages.
 
 ## Packages to Publish
 

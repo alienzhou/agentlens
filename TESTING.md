@@ -1,6 +1,6 @@
-# Agent Lens Testing Guide
+# AgentLens Testing Guide
 
-This document describes the testing strategy, test structure, and verification procedures for the Agent Lens project.
+This document describes the testing strategy, test structure, and verification procedures for the AgentLens project.
 
 ## Prerequisites
 
@@ -13,7 +13,7 @@ Ensure the following are installed:
 
 ## Test Overview
 
-Agent Lens uses [Vitest](https://vitest.dev/) as the testing framework with comprehensive coverage across all packages.
+AgentLens uses [Vitest](https://vitest.dev/) as the testing framework with comprehensive coverage across all packages.
 
 ### Test Statistics
 
@@ -263,7 +263,7 @@ agentlens diff --annotated
 
 ### Step 6: Test VS Code Extension
 
-1. Open VS Code in a project with Agent Lens data
+1. Open VS Code in a project with AgentLens data
 2. Hover over a line to see contributor info
 3. Enable Developer Mode: Settings → `agentLens.developerMode`
 4. Test Report Issue by clicking "🐛 Report Issue" in hover

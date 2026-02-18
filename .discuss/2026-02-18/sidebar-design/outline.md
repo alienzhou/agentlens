@@ -1,4 +1,4 @@
-# Agent Lens Sidebar Design Discussion
+# AgentLens Sidebar Design Discussion
 
 ## 🔵 Current Focus
 - Discussion complete, ready for implementation

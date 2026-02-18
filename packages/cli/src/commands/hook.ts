@@ -83,7 +83,7 @@ export const hookCommand = new Command('hook').description('Manage AI Agent hook
  */
 hookCommand
   .command('connect <agent>')
-  .description('Connect Agent Lens to an AI Agent')
+  .description('Connect AgentLens to an AI Agent')
   .action(async (agent: string) => {
     try {
       await connectAgent(agent);

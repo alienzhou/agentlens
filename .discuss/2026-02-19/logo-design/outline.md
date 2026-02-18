@@ -1,4 +1,4 @@
-# Agent Lens Logo Design Discussion
+# AgentLens Logo Design Discussion
 
 ## 🔵 Current Focus
 - (none - discussion complete)

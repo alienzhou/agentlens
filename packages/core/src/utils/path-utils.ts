@@ -1,7 +1,7 @@
 import * as path from 'node:path';
 
 /**
- * Path utilities for normalizing file paths in Agent Lens
+ * Path utilities for normalizing file paths in AgentLens
  *
  * Rules:
  * - Files inside project directory: use relative paths

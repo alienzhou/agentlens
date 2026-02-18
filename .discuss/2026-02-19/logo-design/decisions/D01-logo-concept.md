@@ -5,7 +5,7 @@
 
 ## Decision
 
-Adopt **GitLens-inspired commit graph with hexagon nodes** as the Agent Lens logo.
+Adopt **GitLens-inspired commit graph with hexagon nodes** as the AgentLens logo.
 
 ## Visual Description
 
@@ -23,7 +23,7 @@ Adopt **GitLens-inspired commit graph with hexagon nodes** as the Agent Lens log
 
 ## Rationale
 
-1. **GitLens kinship**: Agent Lens does "Agent blame" like GitLens does "Git blame" — visual relationship is appropriate
+1. **GitLens kinship**: AgentLens does "Agent blame" like GitLens does "Git blame" — visual relationship is appropriate
 2. **Clear differentiation**: Hexagons instead of circles immediately signals "AI/tech" aesthetic
 3. **Simplicity**: Clean silhouette works at 24px Activity Bar size
 4. **Recognition**: Users familiar with GitLens will understand the concept immediately

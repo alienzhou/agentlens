@@ -1,5 +1,5 @@
 /**
- * Agent Lens VS Code Extension
+ * AgentLens VS Code Extension
  *
  * Features:
  * 1. Provide Blame view to display code contributor information (AI vs Human)
@@ -40,7 +40,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const workspaceRoot = workspaceFolder.uri.fsPath;
 
   // Initialize logger
-  const outputChannel = vscode.window.createOutputChannel('Agent Lens');
+  const outputChannel = vscode.window.createOutputChannel('AgentLens');
   context.subscriptions.push(outputChannel);
 
   const loggerConfig = getLoggerConfig();
@@ -146,7 +146,7 @@ function registerCommands(
     }
 
     // TODO: Implement Blame view display
-    vscode.window.showInformationMessage('Agent Lens view - Coming soon!');
+    vscode.window.showInformationMessage('AgentLens view - Coming soon!');
   });
 
   // Connect Agent - directly call hook adapter
@@ -200,7 +200,7 @@ function registerCommands(
   // Show help information
   const showHelpCmd = vscode.commands.registerCommand('agentlens.showHelp', () => {
     const helpText = `
-Agent Lens - AI Code Tracking Tool
+AgentLens - AI Code Tracking Tool
 
 Features:
 - Connect/Disconnect AI Agents directly from VS Code
@@ -208,7 +208,7 @@ Features:
 - Hover to see detailed blame information
 
 Setup:
-1. Use "Agent Lens: Connect Agent" command to connect
+1. Use "AgentLens: Connect Agent" command to connect
 2. For Cursor: Enable "Third-party skills" in Settings
 
 Supported Agents:
@@ -459,8 +459,8 @@ function registerTreeViews(context: vscode.ExtensionContext, workspaceRoot: stri
  */
 function updateStatusBar(context: vscode.ExtensionContext): void {
   const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-  statusBarItem.text = '$(eye) Agent Lens';
-  statusBarItem.tooltip = 'Agent Lens - AI Code Tracking\nClick for help';
+  statusBarItem.text = '$(eye) AgentLens';
+  statusBarItem.tooltip = 'AgentLens - AI Code Tracking\nClick for help';
   statusBarItem.command = 'agentlens.showHelp';
   statusBarItem.show();
 

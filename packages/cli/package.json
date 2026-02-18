@@ -1,6 +1,6 @@
 {
   "name": "@vibe-x/agentlens-cli",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "AgentLens CLI - Command line tool for agentlens system",
   "type": "module",
   "main": "./dist/index.js",

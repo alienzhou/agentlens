@@ -1,6 +1,6 @@
-# Contributing to Agent Lens
+# Contributing to AgentLens
 
-Thank you for your interest in contributing to Agent Lens! This document provides guidelines for contributing to the project.
+Thank you for your interest in contributing to AgentLens! This document provides guidelines for contributing to the project.
 
 ## 🚀 Getting Started
 
@@ -14,22 +14,23 @@ Thank you for your interest in contributing to Agent Lens! This document provide
 
 1. Fork the repository
 2. Clone your fork:
+
    ```bash
    git clone git@github.com:YOUR_USERNAME/agentlens.git
    cd agentlens
    ```
-
 3. Install dependencies:
+
    ```bash
    pnpm install
    ```
-
 4. Build all packages:
+
    ```bash
    pnpm build
    ```
-
 5. Run tests to verify setup:
+
    ```bash
    pnpm test:run
    ```
@@ -155,19 +156,15 @@ test(hook): add tests for session watcher
 ## 🔍 Pull Request Process
 
 1. **Update Documentation**: If your changes affect user-facing functionality, update the relevant documentation
-
 2. **Add Tests**: Ensure your changes are covered by tests
-
 3. **Update CHANGELOG**: Add an entry to the unreleased section
-
 4. **Create Pull Request**:
+
    - Use a descriptive title following commit message conventions
    - Provide a clear description of the changes
    - Link related issues
    - Ensure CI passes
-
 5. **Code Review**: Address reviewer feedback promptly
-
 6. **Merge**: Once approved, a maintainer will merge your PR
 
 ## 🐛 Reporting Bugs
@@ -182,7 +179,7 @@ When reporting bugs, please include:
    - OS and version
    - Node.js version
    - pnpm version
-   - Agent Lens version
+   - AgentLens version
 6. **Logs/Screenshots**: Any relevant logs or screenshots
 
 ## 💡 Suggesting Features
@@ -207,6 +204,7 @@ Documentation improvements are always welcome:
 ## 🏆 Recognition
 
 Contributors will be:
+
 - Listed in the project's contributors
 - Mentioned in release notes for significant contributions
 - Credited in the documentation
@@ -219,8 +217,8 @@ Contributors will be:
 
 ## 📜 License
 
-By contributing to Agent Lens, you agree that your contributions will be licensed under the MIT License.
+By contributing to AgentLens, you agree that your contributions will be licensed under the MIT License.
 
 ## 🙏 Thank You!
 
-Thank you for contributing to Agent Lens! Your efforts help make code review better for everyone in the Vibe Coding era.
+Thank you for contributing to AgentLens! Your efforts help make code review better for everyone in the Vibe Coding era.

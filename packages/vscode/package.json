@@ -1,7 +1,7 @@
 {
   "name": "agentlens",
   "version": "0.1.0",
-  "displayName": "Agent Lens",
+  "displayName": "AgentLens",
   "description": "Track AI agent contributions in your codebase. Know which code was written by AI vs humans with GitLens-style inline blame.",
   "publisher": "vibe-x-ai",
   "icon": "resources/icon.png",
@@ -57,7 +57,7 @@
   ],
   "contributes": {
     "configuration": {
-      "title": "Agent Lens",
+      "title": "AgentLens",
       "properties": {
         "agentLens.logLevel": {
           "type": "string",
@@ -69,7 +69,7 @@
             "Show warn and error logs only",
             "Show error logs only"
           ],
-          "description": "Log level for Agent Lens extension"
+          "description": "Log level for AgentLens extension"
         },
         "agentLens.logToFile": {
           "type": "boolean",
@@ -126,33 +126,33 @@
     "commands": [
       {
         "command": "agentlens.showBlame",
-        "title": "Agent Lens: Show Blame"
+        "title": "AgentLens: Show Blame"
       },
       {
         "command": "agentlens.connectAgent",
-        "title": "Agent Lens: Connect Agent",
+        "title": "AgentLens: Connect Agent",
         "icon": "$(plug)"
       },
       {
         "command": "agentlens.disconnectAgent",
-        "title": "Agent Lens: Disconnect Agent",
+        "title": "AgentLens: Disconnect Agent",
         "icon": "$(debug-disconnect)"
       },
       {
         "command": "agentlens.showStatus",
-        "title": "Agent Lens: Show Agent Status"
+        "title": "AgentLens: Show Agent Status"
       },
       {
         "command": "agentlens.reportIssue",
-        "title": "Agent Lens: Report Matching Issue"
+        "title": "AgentLens: Report Matching Issue"
       },
       {
         "command": "agentlens.cleanup",
-        "title": "Agent Lens: Cleanup Old Data"
+        "title": "AgentLens: Cleanup Old Data"
       },
       {
         "command": "agentlens.cleanupStats",
-        "title": "Agent Lens: Show Data Statistics"
+        "title": "AgentLens: Show Data Statistics"
       },
       {
         "command": "agentlens.refreshAgents",
@@ -179,7 +179,7 @@
       "activitybar": [
         {
           "id": "agentlens",
-          "title": "Agent Lens",
+          "title": "AgentLens",
           "icon": "resources/icon.svg"
         }
       ]
@@ -201,7 +201,7 @@
     "viewsWelcome": [
       {
         "view": "agentlens.agents",
-        "contents": "Connect an AI coding assistant to start tracking code contributions.\n[Connect Cursor](command:agentlens.connectAgent)\n[Connect Claude Code](command:agentlens.connectAgent)\n\nAfter connecting, Agent Lens will automatically track which code was written by AI.",
+        "contents": "Connect an AI coding assistant to start tracking code contributions.\n[Connect Cursor](command:agentlens.connectAgent)\n[Connect Claude Code](command:agentlens.connectAgent)\n\nAfter connecting, AgentLens will automatically track which code was written by AI.",
         "when": "agentlens.noAgentsConnected"
       },
       {

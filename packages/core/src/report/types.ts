@@ -92,7 +92,7 @@ export interface ReportCandidate {
  * Environment information in the report
  */
 export interface ReportEnvironment {
-  /** Agent Lens extension version */
+  /** AgentLens extension version */
   agentLensVersion: string;
   /** VS Code version */
   vscodeVersion: string;

@@ -15,7 +15,7 @@ import { BaseAgentAdapter } from './adapter-interface.js';
 const execAsync = promisify(exec);
 
 /**
- * Agent Lens identifier in configuration
+ * AgentLens identifier in configuration
  */
 const AGENT_LENS_HOOK_MARKER = 'agentlens hook';
 

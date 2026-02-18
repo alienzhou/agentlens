@@ -4,11 +4,11 @@ import chalk from 'chalk';
 import { FileStorage, DATA_DIR_NAME, DATA_SUBDIRS, DATA_FILES } from '@vibe-x/agentlens-core';
 
 /**
- * config command - Configure Agent Lens settings
+ * config command - Configure AgentLens settings
  */
 export const configCommand = new Command('config')
-  .description('Configure Agent Lens settings')
-  .option('--init', 'Initialize Agent Lens in the current project')
+  .description('Configure AgentLens settings')
+  .option('--init', 'Initialize AgentLens in the current project')
   .option('--show', 'Show current configuration')
   .option('--set <key=value>', 'Set a configuration value')
   .option('--reset', 'Reset configuration to defaults')
@@ -55,7 +55,7 @@ async function initializeProject(storage: FileStorage): Promise<void> {
   const isInitialized = await storage.isInitialized();
 
   if (isInitialized) {
-    console.log(chalk.yellow('Agent Lens is already initialized in this project.'));
+    console.log(chalk.yellow('AgentLens is already initialized in this project.'));
     const stats = await storage.getStats();
     console.log(chalk.dim(`  Sessions: ${String(stats.sessionsCount)}`));
     console.log(chalk.dim(`  Review Units: ${String(stats.reviewUnitsCount)}`));
@@ -63,11 +63,11 @@ async function initializeProject(storage: FileStorage): Promise<void> {
     return;
   }
 
-  console.log(chalk.blue('Initializing Agent Lens...'));
+  console.log(chalk.blue('Initializing AgentLens...'));
 
   await storage.initialize();
 
-  console.log(chalk.green('✓ Agent Lens initialized successfully!'));
+  console.log(chalk.green('✓ AgentLens initialized successfully!'));
   console.log();
   console.log(chalk.dim(`Created ${DATA_DIR_NAME}${path.posix.sep} directory with:`));
   console.log(chalk.dim(`  - ${path.posix.join(DATA_SUBDIRS.DATA, DATA_SUBDIRS.SESSIONS)}${path.posix.sep}    (session data)`));
@@ -85,11 +85,11 @@ async function resetProject(storage: FileStorage): Promise<void> {
   const isInitialized = await storage.isInitialized();
 
   if (!isInitialized) {
-    console.log(chalk.yellow('Agent Lens is not initialized in this project.'));
+    console.log(chalk.yellow('AgentLens is not initialized in this project.'));
     return;
   }
 
-  console.log(chalk.yellow('⚠️  Warning: This will delete all Agent Lens data!'));
+  console.log(chalk.yellow('⚠️  Warning: This will delete all AgentLens data!'));
   console.log(chalk.dim('  - All session data'));
   console.log(chalk.dim('  - All review units'));
   console.log(chalk.dim('  - All TODOs'));
@@ -118,7 +118,7 @@ function setConfig(keyValue: string): void {
 }
 
 async function showConfig(storage: FileStorage): Promise<void> {
-  console.log(chalk.blue.bold('📋 Agent Lens Configuration'));
+  console.log(chalk.blue.bold('📋 AgentLens Configuration'));
   console.log(chalk.dim('─'.repeat(50)));
   console.log();
 

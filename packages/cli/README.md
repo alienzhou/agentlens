@@ -1,14 +1,14 @@
 # @vibe-x/agentlens-cli
 
-> Command-line interface for Agent Lens - Track and identify AI agent contributions in code
+> Command-line interface for AgentLens - Track and identify AI agent contributions in code
 
-![Agent Lens](https://s17-def.ap4r.com/kos/s101/nlav112218/mengshou/agentlens.96a74eebe90f8cc4.png)
+![AgentLens](https://s17-def.ap4r.com/kos/s101/nlav112218/mengshou/agentlens.96a74eebe90f8cc4.png)
 
 ## Overview
 
-Agent Lens CLI is a command-line tool that helps you track which code in your repository was written by AI agents (like Cursor, Claude Code) versus humans. It integrates with AI coding assistants via hooks to capture code changes in real-time.
+AgentLens CLI is a command-line tool that helps you track which code in your repository was written by AI agents (like Cursor, Claude Code) versus humans. It integrates with AI coding assistants via hooks to capture code changes in real-time.
 
-**For a visual experience**, we recommend using the CLI together with the [Agent Lens VS Code Extension](https://marketplace.visualstudio.com/items?itemName=vibe-x-ai.agentlens), which provides GitLens-style inline blame annotations and a sidebar for browsing AI activity.
+**For a visual experience**, we recommend using the CLI together with the [AgentLens VS Code Extension](https://marketplace.visualstudio.com/items?itemName=vibe-x-ai.agentlens), which provides GitLens-style inline blame annotations and a sidebar for browsing AI activity.
 
 ## Installation
 
@@ -23,7 +23,7 @@ npx @vibe-x/agentlens-cli --help
 ## Quick Start
 
 ```bash
-# 1. Initialize Agent Lens in your project
+# 1. Initialize AgentLens in your project
 cd your-project
 agentlens config --init
 
@@ -41,10 +41,10 @@ agentlens diff --annotated
 
 ### `agentlens config`
 
-Configure Agent Lens settings in your project.
+Configure AgentLens settings in your project.
 
 ```bash
-# Initialize Agent Lens in the current project
+# Initialize AgentLens in the current project
 agentlens config --init
 
 # Show current configuration
@@ -183,7 +183,7 @@ agentlens todos --format json
 
 ### Hook System
 
-Agent Lens uses a hook system to capture code changes from AI agents:
+AgentLens uses a hook system to capture code changes from AI agents:
 
 1. **For Cursor**: Uses the [Third-party Hooks](https://cursor.com/cn/docs/agent/hooks) feature
 2. **For Claude Code**: Uses the [Hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) feature
@@ -210,7 +210,7 @@ All captured data is stored in `.agentlens/data/hooks/`:
 
 ### Contributor Detection
 
-Agent Lens uses **4-level filtering with Levenshtein similarity matching** to determine code authorship:
+AgentLens uses **4-level filtering with Levenshtein similarity matching** to determine code authorship:
 
 ```
 Level 1: File Path Filter     (100 records → 30 records)
@@ -229,9 +229,9 @@ Level 4: Levenshtein Matching  (5 candidates → best match)
 
 ## VS Code Extension
 
-For the best experience, use the CLI together with the [Agent Lens VS Code Extension](https://marketplace.visualstudio.com/items?itemName=vibe-x-ai.agentlens).
+For the best experience, use the CLI together with the [AgentLens VS Code Extension](https://marketplace.visualstudio.com/items?itemName=vibe-x-ai.agentlens).
 
-![Agent Lens Inline Blame](https://v17-def.ap4r.com/kos/s101/nlav112218/mengshou/inline-blame.3916d683ae836108.png)
+![AgentLens Inline Blame](https://v17-def.ap4r.com/kos/s101/nlav112218/mengshou/inline-blame.3916d683ae836108.png)
 
 The extension provides:
 
@@ -247,7 +247,7 @@ The extension provides:
 code --install-extension vibe-x-ai.agentlens
 ```
 
-Or search for "Agent Lens" in VS Code Extensions (`Cmd+Shift+X` / `Ctrl+Shift+X`).
+Or search for "AgentLens" in VS Code Extensions (`Cmd+Shift+X` / `Ctrl+Shift+X`).
 
 **Note:** The VS Code extension works independently and does not require the CLI to be installed. Both tools can connect to AI agents directly.
 
@@ -259,7 +259,7 @@ Or search for "Agent Lens" in VS Code Extensions (`Cmd+Shift+X` / `Ctrl+Shift+X`
 
 ## Related
 
-- [Agent Lens](https://github.com/vibe-x-ai/agent-blame) - Main repository
+- [AgentLens](https://github.com/vibe-x-ai/agent-blame) - Main repository
 - [VS Code Extension](https://marketplace.visualstudio.com/items?itemName=vibe-x-ai.agentlens)
 
 ## License

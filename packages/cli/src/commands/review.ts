@@ -43,7 +43,7 @@ async function executeReview(options: ReviewOptions): Promise<void> {
   // Initialize storage if needed
   const isInitialized = await storage.isInitialized();
   if (!isInitialized) {
-    console.log(chalk.yellow('Agent Lens not initialized in this project.'));
+    console.log(chalk.yellow('AgentLens not initialized in this project.'));
     console.log(chalk.dim('Run "agent-lens config --init" to initialize.'));
     console.log();
   }
@@ -65,7 +65,7 @@ async function executeReview(options: ReviewOptions): Promise<void> {
     reviewUnits = reviewUnits.filter((unit) => unit.createdAt >= sinceDate);
   }
 
-  console.log(chalk.blue.bold('📋 Agent Lens - Code Review Session'));
+  console.log(chalk.blue.bold('📋 AgentLens - Code Review Session'));
   console.log(chalk.dim('─'.repeat(50)));
   console.log();
 

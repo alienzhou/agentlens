@@ -34,7 +34,7 @@ async function executeTodos(options: TodosOptions): Promise<void> {
   // Check if initialized
   const isInitialized = await storage.isInitialized();
   if (!isInitialized) {
-    console.log(chalk.yellow('Agent Lens not initialized in this project.'));
+    console.log(chalk.yellow('AgentLens not initialized in this project.'));
     console.log(chalk.dim('Run "agent-lens config --init" to initialize.'));
     return;
   }
@@ -64,7 +64,7 @@ async function executeTodos(options: TodosOptions): Promise<void> {
   }
 
   // Terminal format
-  console.log(chalk.blue.bold('📋 Agent Lens - TODOs'));
+  console.log(chalk.blue.bold('📋 AgentLens - TODOs'));
   console.log(chalk.dim('─'.repeat(50)));
   console.log();
 

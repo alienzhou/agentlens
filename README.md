@@ -1,4 +1,4 @@
-# Agent Lens
+# AgentLens
 
 > Code Review tool redesigned for the Vibe Coding era
 
@@ -9,7 +9,7 @@
 
 ## 📋 Overview
 
-Agent Lens is a Code Review tool designed specifically for the era of AI-assisted coding.
+AgentLens is a Code Review tool designed specifically for the era of AI-assisted coding.
 
 ![](./assets/agentlens.png)
 
@@ -56,7 +56,7 @@ In the Vibe Coding era:
 
 ### The Solution
 
-Agent Lens provides:
+AgentLens provides:
 1. **Agent Traceability**: Track which AI Agent generated which code
 2. **Session Context**: Link code changes to the original conversation and task breakdown
 3. **Contributor Classification**: Automatically detect AI vs. human contributions
@@ -64,7 +64,7 @@ Agent Lens provides:
 
 ## 🏗️ Architecture
 
-Agent Lens uses a 4-layer architecture:
+AgentLens uses a 4-layer architecture:
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -125,7 +125,7 @@ pnpm build
 
 ### Basic Usage
 
-#### 1. Initialize Agent Lens in Your Project
+#### 1. Initialize AgentLens in Your Project
 
 ```bash
 cd your-project
@@ -205,7 +205,7 @@ This monorepo contains:
 
 ### Contributor Detection
 
-Agent Lens uses **4-level filtering with Levenshtein similarity matching** to determine code authorship:
+AgentLens uses **4-level filtering with Levenshtein similarity matching** to determine code authorship:
 
 ```
 Level 1: File Path Filter     (100 records → 30 records)
@@ -335,7 +335,7 @@ See [docs/v01-mvp/04-task-list.md](./docs/v01-mvp/04-task-list.md) for detailed 
 Install from VS Code Marketplace:
 1. Open VS Code
 2. Go to Extensions (Ctrl+Shift+X / Cmd+Shift+X)
-3. Search for "Agent Lens"
+3. Search for "AgentLens"
 4. Click Install
 
 Or install via command line:
@@ -373,7 +373,7 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 - Author: [alienzhou](https://github.com/alienzhou)
 - Repository: [agentlens](https://github.com/alienzhou/agentlens)
 - Issues: [GitHub Issues](https://github.com/alienzhou/agentlens/issues)
-- VS Code Marketplace: [Agent Lens](https://marketplace.visualstudio.com/items?itemName=vibe-x-ai.agentlens)
+- VS Code Marketplace: [AgentLens](https://marketplace.visualstudio.com/items?itemName=vibe-x-ai.agentlens)
 - Documentation: [docs/](./docs/)
 
 ---
