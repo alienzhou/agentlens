@@ -17,7 +17,7 @@ const execAsync = promisify(exec);
 /**
  * Agent Lens identifier in configuration
  */
-const AGENT_LENS_HOOK_MARKER = 'agent-lens hook';
+const AGENT_LENS_HOOK_MARKER = 'agentlens hook';
 
 /**
  * Cursor adapter for integrating with Cursor AI IDE
@@ -154,7 +154,7 @@ export class CursorAdapter extends BaseAgentAdapter {
     config.hooks.postToolUse = this.mergeHooks(
       config.hooks.postToolUse,
       {
-        command: 'agent-lens hook posttooluse --agent cursor',
+        command: 'agentlens hook posttooluse --agent cursor',
         matcher: 'Write', // In Cursor, Edit maps to Write
       }
     );
@@ -163,7 +163,7 @@ export class CursorAdapter extends BaseAgentAdapter {
     config.hooks.afterFileEdit = this.mergeHooks(
       config.hooks.afterFileEdit,
       {
-        command: 'agent-lens hook afterfileedit --agent cursor',
+        command: 'agentlens hook afterfileedit --agent cursor',
       }
     );
 
@@ -171,7 +171,7 @@ export class CursorAdapter extends BaseAgentAdapter {
     config.hooks.sessionStart = this.mergeHooks(
       config.hooks.sessionStart,
       {
-        command: 'agent-lens hook sessionstart --agent cursor',
+        command: 'agentlens hook sessionstart --agent cursor',
       }
     );
 
@@ -179,7 +179,7 @@ export class CursorAdapter extends BaseAgentAdapter {
     config.hooks.sessionEnd = this.mergeHooks(
       config.hooks.sessionEnd,
       {
-        command: 'agent-lens hook sessionend --agent cursor',
+        command: 'agentlens hook sessionend --agent cursor',
       }
     );
 

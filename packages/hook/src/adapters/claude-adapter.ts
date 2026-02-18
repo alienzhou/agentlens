@@ -17,7 +17,7 @@ const execAsync = promisify(exec);
 /**
  * Agent Lens hook identifier registered in Claude Code
  */
-const AGENT_LENS_HOOK_MARKER = 'agent-lens hook';
+const AGENT_LENS_HOOK_MARKER = 'agentlens hook';
 
 /**
  * Claude Code adapter for integrating with Claude Code (Anthropic's CLI)
@@ -247,7 +247,7 @@ export class ClaudeAdapter extends BaseAgentAdapter {
       hooks: [
         {
           type: 'command',
-          command: 'agent-lens hook posttooluse --agent claude-code',
+          command: 'agentlens hook posttooluse --agent claude-code',
         },
       ],
     };
@@ -262,7 +262,7 @@ export class ClaudeAdapter extends BaseAgentAdapter {
       hooks: [
         {
           type: 'command',
-          command: 'agent-lens hook userpromptsubmit --agent claude-code',
+          command: 'agentlens hook userpromptsubmit --agent claude-code',
         },
       ],
     };
@@ -276,7 +276,7 @@ export class ClaudeAdapter extends BaseAgentAdapter {
       hooks: [
         {
           type: 'command',
-          command: 'agent-lens hook sessionstart --agent claude-code',
+          command: 'agentlens hook sessionstart --agent claude-code',
         },
       ],
     };
@@ -290,7 +290,7 @@ export class ClaudeAdapter extends BaseAgentAdapter {
       hooks: [
         {
           type: 'command',
-          command: 'agent-lens hook sessionend --agent claude-code',
+          command: 'agentlens hook sessionend --agent claude-code',
         },
       ],
     };
