@@ -4,7 +4,6 @@
   "description": "AgentLens CLI - Command line tool for agentlens system",
   "type": "module",
   "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "bin": {
     "agentlens": "./dist/index.js"
   },
@@ -15,22 +14,29 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
+    "build": "tsup",
+    "build:tsc": "tsc",
+    "dev": "tsup --watch",
     "test": "vitest",
     "test:run": "vitest run",
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@vibe-x/agentlens-core": "workspace:*",
-    "@vibe-x/agentlens-hook": "workspace:*",
     "chalk": "^5.3.0",
+    "chokidar": "^4.0.1",
     "commander": "^12.1.0",
-    "diff": "^7.0.0"
+    "diff": "^7.0.0",
+    "fast-levenshtein": "^3.0.0",
+    "nanoid": "^5.1.6",
+    "simple-git": "^3.27.0"
   },
   "devDependencies": {
     "@types/diff": "^5.2.3",
+    "@types/fast-levenshtein": "^0.0.4",
+    "@vibe-x/agentlens-core": "workspace:*",
+    "@vibe-x/agentlens-hook": "workspace:*",
     "rimraf": "^6.0.1",
+    "tsup": "^8.5.1",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
   },
