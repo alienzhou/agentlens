@@ -1,5 +1,5 @@
 import * as path from 'node:path';
-import type { AgentType } from '@agentlens/core';
+import type { AgentType } from '@vibe-x/agentlens-core';
 import type { HookCore } from '../core/hook-core.js';
 
 /**

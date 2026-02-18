@@ -13,7 +13,7 @@ import {
   SIMILARITY_CONFIG,
   DATA_DIR_NAME,
   normalizeFilePath,
-} from '@agentlens/core';
+} from '@vibe-x/agentlens-core';
 import { createModuleLogger } from '../utils/logger.js';
 
 const execAsync = promisify(exec);

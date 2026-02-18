@@ -1,4 +1,4 @@
-import type { AgentType, SessionSource } from '@agentlens/core';
+import type { AgentType, SessionSource } from '@vibe-x/agentlens-core';
 
 /**
  * Code change event - emitted when Agent modifies a file

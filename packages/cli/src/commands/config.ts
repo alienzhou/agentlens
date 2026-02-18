@@ -1,7 +1,7 @@
 import * as path from 'node:path';
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { FileStorage, DATA_DIR_NAME, DATA_SUBDIRS, DATA_FILES } from '@agentlens/core';
+import { FileStorage, DATA_DIR_NAME, DATA_SUBDIRS, DATA_FILES } from '@vibe-x/agentlens-core';
 
 /**
  * config command - Configure Agent Lens settings

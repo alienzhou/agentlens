@@ -254,8 +254,8 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@agentlens/core": "workspace:*",
-    "@agentlens/hook": "workspace:*",
+    "@vibe-x/agentlens-core": "workspace:*",
+    "@vibe-x/agentlens-hook": "workspace:*",
     "winston": "^3.19.0",
     "winston-daily-rotate-file": "^5.0.0",
     "winston-transport-vscode": "^0.1.0"

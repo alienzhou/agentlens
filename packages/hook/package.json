@@ -1,5 +1,5 @@
 {
-  "name": "@agentlens/hook",
+  "name": "@vibe-x/agentlens-hook",
   "version": "0.1.0",
   "description": "AgentLens hook system - Agent adapters, event capture, and session monitoring",
   "type": "module",
@@ -16,6 +16,9 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
@@ -24,7 +27,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@agentlens/core": "workspace:*",
+    "@vibe-x/agentlens-core": "workspace:*",
     "chokidar": "^4.0.1"
   },
   "devDependencies": {

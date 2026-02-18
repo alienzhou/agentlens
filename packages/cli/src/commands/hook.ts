@@ -3,16 +3,16 @@ import chalk from 'chalk';
 import * as readline from 'node:readline';
 import * as path from 'node:path';
 import { diffLines } from 'diff';
-import { SUPPORTED_AGENTS, AGENT_CONFIGS, FileStorage, normalizeFilePath } from '@agentlens/core';
-import { CursorAdapter, ClaudeAdapter } from '@agentlens/hook';
-import type { AgentAdapter } from '@agentlens/hook';
-import { getHookCore } from '@agentlens/hook';
+import { SUPPORTED_AGENTS, AGENT_CONFIGS, FileStorage, normalizeFilePath } from '@vibe-x/agentlens-core';
+import { CursorAdapter, ClaudeAdapter } from '@vibe-x/agentlens-hook';
+import type { AgentAdapter } from '@vibe-x/agentlens-hook';
+import { getHookCore } from '@vibe-x/agentlens-hook';
 import type {
   ClaudePostToolUseInput,
   ClaudeUserPromptSubmitInput,
   ClaudeSessionStartInput,
   ClaudeSessionEndInput,
-} from '@agentlens/hook';
+} from '@vibe-x/agentlens-hook';
 
 // ==================== Cursor Hook Type Definitions ====================
 

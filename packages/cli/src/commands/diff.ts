@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { GitIntegration, FileStorage } from '@agentlens/core';
+import { GitIntegration, FileStorage } from '@vibe-x/agentlens-core';
 import { TerminalDiffRenderer } from '../renderer/terminal-diff-renderer.js';
 
 /**

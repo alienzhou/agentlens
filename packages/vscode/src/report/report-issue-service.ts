@@ -18,7 +18,7 @@ import {
   getReportFileName,
   getReportDirectoryName,
   DATA_DIR_NAME,
-} from '@agentlens/core';
+} from '@vibe-x/agentlens-core';
 import type { LineContributorResult } from '../blame/contributor-service.js';
 import { createModuleLogger } from '../utils/logger.js';
 

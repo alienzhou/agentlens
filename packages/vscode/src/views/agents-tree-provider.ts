@@ -4,8 +4,8 @@
  * Displays connected AI agents in the sidebar with their status.
  */
 import * as vscode from 'vscode';
-import { CursorAdapter, ClaudeAdapter } from '@agentlens/hook';
-import type { AgentAdapter } from '@agentlens/hook';
+import { CursorAdapter, ClaudeAdapter } from '@vibe-x/agentlens-hook';
+import type { AgentAdapter } from '@vibe-x/agentlens-hook';
 import { createModuleLogger } from '../utils/logger.js';
 
 const log = createModuleLogger('agents-tree');

@@ -1,5 +1,5 @@
-import type { AgentType, SessionSource } from '@agentlens/core';
-import { createSessionSource } from '@agentlens/core';
+import type { AgentType, SessionSource } from '@vibe-x/agentlens-core';
+import { createSessionSource } from '@vibe-x/agentlens-core';
 import type {
   HookEvent,
   HookEventHandler,

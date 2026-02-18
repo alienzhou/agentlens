@@ -5,7 +5,7 @@
  */
 import * as vscode from 'vscode';
 import * as path from 'node:path';
-import { FileStorage, type CodeChangeRecord, type PromptRecord, resolveFilePath, isAbsolutePath } from '@agentlens/core';
+import { FileStorage, type CodeChangeRecord, type PromptRecord, resolveFilePath, isAbsolutePath } from '@vibe-x/agentlens-core';
 import { createModuleLogger } from '../utils/logger.js';
 import type { ActivityDiffProvider } from './activity-diff-provider.js';
 

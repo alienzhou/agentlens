@@ -2,8 +2,8 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
-import type { AgentType } from '@agentlens/core';
-import { AGENT_CONFIGS } from '@agentlens/core';
+import type { AgentType } from '@vibe-x/agentlens-core';
+import { AGENT_CONFIGS } from '@vibe-x/agentlens-core';
 import type { HookCore } from '../core/hook-core.js';
 import type {
   AgentAdapterConfig,

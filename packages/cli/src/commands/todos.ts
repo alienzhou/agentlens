@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { FileStorage, type Todo } from '@agentlens/core';
+import { FileStorage, type Todo } from '@vibe-x/agentlens-core';
 
 /**
  * todos command - Manage TODO items

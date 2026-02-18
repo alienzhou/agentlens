@@ -11,10 +11,10 @@
  * - Cursor Third Party Hooks: https://cursor.com/cn/docs/agent/third-party-hooks
  */
 import * as vscode from 'vscode';
-import { CursorAdapter, ClaudeAdapter, getHookCore } from '@agentlens/hook';
-import type { AgentAdapter } from '@agentlens/hook';
-import { SUPPORTED_AGENTS, CleanupManager, FileStorage, type ContributorType } from '@agentlens/core';
-import type { CleanupConfig, CleanupResult } from '@agentlens/core';
+import { CursorAdapter, ClaudeAdapter, getHookCore } from '@vibe-x/agentlens-hook';
+import type { AgentAdapter } from '@vibe-x/agentlens-hook';
+import { SUPPORTED_AGENTS, CleanupManager, FileStorage, type ContributorType } from '@vibe-x/agentlens-core';
+import type { CleanupConfig, CleanupResult } from '@vibe-x/agentlens-core';
 import { LineBlameController } from './blame/line-blame.js';
 import { ContributorService } from './blame/contributor-service.js';
 import { LineHoverProvider } from './blame/line-hover.js';

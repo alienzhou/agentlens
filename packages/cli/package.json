@@ -1,5 +1,5 @@
 {
-  "name": "@agentlens/cli",
+  "name": "@vibe-x/agentlens-cli",
   "version": "0.1.0",
   "description": "AgentLens CLI - Command line tool for agentlens system",
   "type": "module",
@@ -11,6 +11,9 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
@@ -19,8 +22,8 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@agentlens/core": "workspace:*",
-    "@agentlens/hook": "workspace:*",
+    "@vibe-x/agentlens-core": "workspace:*",
+    "@vibe-x/agentlens-hook": "workspace:*",
     "chalk": "^5.3.0",
     "commander": "^12.1.0",
     "diff": "^7.0.0"
