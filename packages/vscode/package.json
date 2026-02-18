@@ -2,18 +2,55 @@
   "name": "agentlens",
   "version": "0.1.0",
   "displayName": "Agent Lens",
-  "description": "VS Code extension for Agent Lens - Track AI agent contributions",
-  "publisher": "vibe-x",
+  "description": "Track AI agent contributions in your codebase. Know which code was written by AI vs humans with GitLens-style inline blame.",
+  "publisher": "vibe-x-ai",
+  "icon": "resources/icon.png",
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "copilot",
+    "cursor",
+    "claude",
+    "code review",
+    "git blame",
+    "vibe coding"
+  ],
+  "badges": [
+    {
+      "url": "https://img.shields.io/github/license/alienzhou/agentlens",
+      "href": "https://github.com/alienzhou/agentlens/blob/main/LICENSE",
+      "description": "License"
+    },
+    {
+      "url": "https://img.shields.io/github/stars/alienzhou/agentlens",
+      "href": "https://github.com/alienzhou/agentlens",
+      "description": "GitHub Stars"
+    }
+  ],
+  "homepage": "https://github.com/alienzhou/agentlens#readme",
+  "bugs": {
+    "url": "https://github.com/alienzhou/agentlens/issues"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/alienzhou/agentlens"
+  },
+  "author": {
+    "name": "alienzhou",
+    "url": "https://github.com/alienzhou"
   },
   "main": "./dist/extension.js",
   "engines": {
     "vscode": "^1.85.0"
   },
   "categories": [
-    "Other"
+    "Other",
+    "Visualization",
+    "SCM Providers"
   ],
   "activationEvents": [
     "workspaceContains:.git"

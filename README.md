@@ -3,6 +3,7 @@
 > Code Review tool redesigned for the Vibe Coding era
 
 [![CI](https://github.com/alienzhou/agentlens/actions/workflows/ci.yml/badge.svg)](https://github.com/alienzhou/agentlens/actions)
+[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/vibe-x-ai.agentlens?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=vibe-x-ai.agentlens)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Status: Beta](https://img.shields.io/badge/Status-Beta-blue.svg)](https://github.com/alienzhou/agentlens)
 
@@ -108,7 +109,7 @@ Agent Lens uses a 4-layer architecture:
 
 ```bash
 # Clone the repository
-git clone git@github.com:alienzhou/agentlens.git
+git clone https://github.com/alienzhou/agentlens.git
 cd agentlens
 
 # Install dependencies
@@ -323,6 +324,21 @@ pnpm test:coverage
 
 See [docs/v01-mvp/04-task-list.md](./docs/v01-mvp/04-task-list.md) for detailed task breakdown.
 
+## 📦 Installation
+
+### VS Code Extension
+
+Install from VS Code Marketplace:
+1. Open VS Code
+2. Go to Extensions (Ctrl+Shift+X / Cmd+Shift+X)
+3. Search for "Agent Lens"
+4. Click Install
+
+Or install via command line:
+```bash
+code --install-extension vibe-x-ai.agentlens
+```
+
 ## 🤝 Contributing
 
 We welcome contributions! Please:
@@ -353,6 +369,7 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 - Author: [alienzhou](https://github.com/alienzhou)
 - Repository: [agentlens](https://github.com/alienzhou/agentlens)
 - Issues: [GitHub Issues](https://github.com/alienzhou/agentlens/issues)
+- VS Code Marketplace: [Agent Lens](https://marketplace.visualstudio.com/items?itemName=vibe-x-ai.agentlens)
 - Documentation: [docs/](./docs/)
 
 ---

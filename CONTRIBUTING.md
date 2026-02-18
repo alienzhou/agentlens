@@ -57,7 +57,7 @@ git checkout -b fix/your-bug-fix
 - `packages/core/` - Core library (data models, Git, detection)
 - `packages/hook/` - Hook system (adapters, session monitoring)
 - `packages/cli/` - CLI tool (commands, renderer)
-- `packages/vscode/` - VS Code extension (future)
+- `packages/vscode/` - VS Code extension (blame annotations, sidebar views)
 
 ### Running Package-Specific Commands
 
