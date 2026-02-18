@@ -21,6 +21,7 @@ import { LineHoverProvider } from './blame/line-hover.js';
 import { ReportIssueService, type ExtendedContributorResult } from './report/report-issue-service.js';
 import { BlameService } from './blame/blame-service.js';
 import { createLogger, getLoggerConfig, disposeLogger, createModuleLogger } from './utils/logger.js';
+import { AgentsTreeProvider, ActivityTreeProvider } from './views/index.js';
 
 // Module logger for extension entry
 const log = createModuleLogger('extension');
@@ -108,6 +109,9 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // Register commands
   registerCommands(context, cleanupManager, workspaceRoot);
+
+  // Register tree view providers
+  registerTreeViews(context, workspaceRoot);
 
   // Update status bar
   updateStatusBar(context);
@@ -348,6 +352,40 @@ Cleanup Config:
     cleanupStatsCmd,
     reportIssueCmd
   );
+}
+
+/**
+ * Register tree view providers for the sidebar
+ */
+function registerTreeViews(context: vscode.ExtensionContext, workspaceRoot: string): void {
+  // Register Agents tree view
+  const agentsTreeProvider = new AgentsTreeProvider();
+  const agentsTreeView = vscode.window.createTreeView('agentlens.agents', {
+    treeDataProvider: agentsTreeProvider,
+    showCollapseAll: false,
+  });
+  context.subscriptions.push(agentsTreeView);
+
+  // Register Activity tree view
+  const activityTreeProvider = new ActivityTreeProvider(workspaceRoot);
+  const activityTreeView = vscode.window.createTreeView('agentlens.activity', {
+    treeDataProvider: activityTreeProvider,
+    showCollapseAll: false,
+  });
+  context.subscriptions.push(activityTreeView);
+
+  // Register refresh commands
+  const refreshAgentsCmd = vscode.commands.registerCommand('agentlens.refreshAgents', () => {
+    agentsTreeProvider.refresh();
+  });
+  context.subscriptions.push(refreshAgentsCmd);
+
+  const refreshActivityCmd = vscode.commands.registerCommand('agentlens.refreshActivity', () => {
+    activityTreeProvider.refresh();
+  });
+  context.subscriptions.push(refreshActivityCmd);
+
+  log.info('Tree views registered');
 }
 
 /**

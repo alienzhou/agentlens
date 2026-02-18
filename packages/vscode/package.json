@@ -93,11 +93,13 @@
       },
       {
         "command": "agentlens.connectAgent",
-        "title": "Agent Lens: Connect Agent"
+        "title": "Agent Lens: Connect Agent",
+        "icon": "$(plug)"
       },
       {
         "command": "agentlens.disconnectAgent",
-        "title": "Agent Lens: Disconnect Agent"
+        "title": "Agent Lens: Disconnect Agent",
+        "icon": "$(debug-disconnect)"
       },
       {
         "command": "agentlens.showStatus",
@@ -114,6 +116,16 @@
       {
         "command": "agentlens.cleanupStats",
         "title": "Agent Lens: Show Data Statistics"
+      },
+      {
+        "command": "agentlens.refreshAgents",
+        "title": "Refresh Agents",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "agentlens.refreshActivity",
+        "title": "Refresh Activity",
+        "icon": "$(refresh)"
       }
     ],
     "viewsContainers": {
@@ -130,6 +142,36 @@
         {
           "id": "agentlens.agents",
           "name": "Connected Agents"
+        },
+        {
+          "id": "agentlens.activity",
+          "name": "Recent Activity"
+        }
+      ]
+    },
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "agentlens.connectAgent",
+          "when": "view == agentlens.agents && viewItem == agent-detected",
+          "group": "inline"
+        },
+        {
+          "command": "agentlens.disconnectAgent",
+          "when": "view == agentlens.agents && viewItem == agent-connected",
+          "group": "inline"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "agentlens.refreshAgents",
+          "when": "view == agentlens.agents",
+          "group": "navigation"
+        },
+        {
+          "command": "agentlens.refreshActivity",
+          "when": "view == agentlens.activity",
+          "group": "navigation"
         }
       ]
     }

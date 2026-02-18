@@ -752,6 +752,44 @@ export class FileStorage implements StorageInterface {
     return prompts.sort((a, b) => a.timestamp - b.timestamp);
   }
 
+  /**
+   * Get recent prompts within a time window
+   * Reads from sharded files for better performance
+   */
+  async getRecentPrompts(timeWindowDays: number): Promise<PromptRecord[]> {
+    await this.ensureInitialized();
+    
+    const records: PromptRecord[] = [];
+    const today = new Date();
+    
+    for (let i = 0; i < timeWindowDays; i++) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = this.getDateString(date.getTime());
+      
+      const filePath = path.join(this.hookDataPath, 'prompts', `${dateStr}.jsonl`);
+      
+      try {
+        const content = await fs.readFile(filePath, 'utf-8');
+        const lines = content.trim().split('\n');
+        
+        for (const line of lines) {
+          if (line.trim()) {
+            try {
+              records.push(JSON.parse(line) as PromptRecord);
+            } catch {
+              // Skip invalid lines
+            }
+          }
+        }
+      } catch {
+        // File doesn't exist, skip
+      }
+    }
+    
+    return records;
+  }
+
   // ==================== Performance Log Operations ====================
 
   /**
