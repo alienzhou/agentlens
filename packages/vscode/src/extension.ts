@@ -391,9 +391,13 @@ function registerTreeViews(context: vscode.ExtensionContext, workspaceRoot: stri
   });
   context.subscriptions.push(activityTreeView);
 
+  // Update context for welcome views
+  void updateWelcomeViewContext(agentsTreeProvider);
+
   // Register refresh commands
   const refreshAgentsCmd = vscode.commands.registerCommand('agentlens.refreshAgents', () => {
     agentsTreeProvider.refresh();
+    void updateWelcomeViewContext(agentsTreeProvider);
   });
   context.subscriptions.push(refreshAgentsCmd);
 
@@ -623,4 +627,16 @@ function getCleanupConfig(): CleanupConfig {
     retentionDays: config.get<number>('autoCleanup.retentionDays', 7),
     checkIntervalHours: config.get<number>('autoCleanup.checkIntervalHours', 24),
   };
+}
+
+/**
+ * Update context for welcome views based on agent connection status
+ */
+async function updateWelcomeViewContext(agentsTreeProvider: AgentsTreeProvider): Promise<void> {
+  const items = await agentsTreeProvider.getChildren();
+  const hasConnectedAgent = items.some(item => item.isConnected);
+
+  await vscode.commands.executeCommand('setContext', 'agentlens.noAgentsConnected', !hasConnectedAgent);
+
+  log.debug('Updated welcome view context', { hasConnectedAgent });
 }

@@ -11,6 +11,32 @@ Agent Lens helps you understand **who wrote what** in your codebase — AI or hu
 
 ![Agent Lens](https://s17-def.ap4r.com/kos/s101/nlav112218/mengshou/agentlens.96a74eebe90f8cc4.png)
 
+## Getting Started
+
+### Step 1: Install the Extension
+
+Install Agent Lens from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=vibe-x-ai.agentlens), or search for "Agent Lens" in VS Code Extensions.
+
+### Step 2: Connect to an AI Agent
+
+**This step is required** to enable code tracking. Agent Lens needs to connect to your AI coding assistant to capture code changes.
+
+1. Open Command Palette (`Cmd+Shift+P` / `Ctrl+Shift+P`)
+2. Run `Agent Lens: Connect Agent`
+3. Select your AI Agent (Cursor or Claude Code)
+
+![Connect Agent](https://v17-def.ap4r.com/kos/s101/nlav112218/mengshou/connect-agent.png)
+
+**For Cursor users:** Make sure to enable **"Third-party skills"** in Cursor Settings > Features for hooks to work.
+
+### Step 3: Start Coding with Your AI Agent
+
+Once connected, Agent Lens automatically tracks all code changes made by your AI agent. You can:
+
+- **Hover over any line** to see if it was written by AI or human
+- **Check the sidebar** to see connected agents and recent AI activity
+- **Use the diff view** to review AI-generated changes
+
 ## Features
 
 ### 🎯 GitLens-Style Blame
@@ -24,14 +50,31 @@ Hover over any line to see contributor information:
 
 ### 📊 Sidebar Views
 
-- **Connected Agents**: View all detected AI agents and their connection status
-- **Recent Activity**: Browse recent AI-generated code changes with quick file navigation
+The sidebar provides two views to help you understand AI contributions:
+
+#### Connected Agents
+
+Shows all supported AI agents and their connection status:
+- ✅ **Connected**: Agent is connected and tracking code changes
+- ⚠️ **Detected**: Agent is installed but not connected
+- ❌ **Not Detected**: Agent is not installed on your system
+
+> **Tip:** Click on an agent to connect or disconnect.
+
+#### Recent Activity
+
+Displays recent code changes made by AI agents:
+- Browse changes grouped by time
+- Click to open the changed file
+- Use the diff icon to view before/after changes
+
+> **Note:** This view requires at least one agent to be connected. If empty, use `Agent Lens: Connect Agent` command first.
 
 ### 🔌 Multi-Agent Support
 
 Works with popular AI coding assistants:
-- Cursor
-- Claude Code
+- **Cursor** - via Third-party Hooks
+- **Claude Code** - via Hooks system
 - More coming soon...
 
 ### ⚙️ Configuration
@@ -77,10 +120,10 @@ Level 4: Levenshtein Matching  (5 candidates → best match)
 
 | Command | Description |
 |---------|-------------|
-| `Agent Lens: Show Blame` | Show contributor info for current line |
-| `Agent Lens: Connect Agent` | Connect to an AI agent |
+| `Agent Lens: Connect Agent` | Connect to an AI agent (required for tracking) |
 | `Agent Lens: Disconnect Agent` | Disconnect from an AI agent |
 | `Agent Lens: Show Agent Status` | Display agent connection status |
+| `Agent Lens: Show Blame` | Show contributor info for current line |
 | `Agent Lens: Report Matching Issue` | Report a matching problem |
 | `Agent Lens: Cleanup Old Data` | Manually clean up old data files |
 
@@ -88,17 +131,34 @@ Level 4: Levenshtein Matching  (5 candidates → best match)
 
 - VS Code 1.85.0 or higher
 - Git repository
+- AI coding assistant (Cursor or Claude Code)
 
-## Getting Started
+## Troubleshooting
 
-1. Install the extension from VS Code Marketplace
-2. Open a project with a `.git` folder
-3. Agent Lens will automatically detect AI agents and start tracking
+### Sidebar shows no activity
+
+Make sure you have connected to an AI agent:
+1. Run `Agent Lens: Connect Agent` from Command Palette
+2. Select your AI agent
+3. Start using your AI agent to generate code
+
+### Cursor hooks not working
+
+Ensure "Third-party skills" is enabled in Cursor:
+1. Open Cursor Settings
+2. Go to Features
+3. Enable "Third-party skills"
+
+### Blame shows "Human Contribution" for AI code
+
+This can happen when:
+- The agent was not connected when the code was written
+- The code was heavily modified after AI generation
+- The time window has expired (default: 3 days)
 
 ## Links
 
 - [GitHub Repository](https://github.com/alienzhou/agentlens)
-- [Documentation](https://github.com/alienzhou/agentlens/tree/main/docs)
 - [Issue Tracker](https://github.com/alienzhou/agentlens/issues)
 - [Changelog](https://github.com/alienzhou/agentlens/blob/main/CHANGELOG.md)
 

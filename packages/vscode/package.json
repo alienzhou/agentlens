@@ -198,6 +198,18 @@
         }
       ]
     },
+    "viewsWelcome": [
+      {
+        "view": "agentlens.agents",
+        "contents": "Connect an AI coding assistant to start tracking code contributions.\n[Connect Cursor](command:agentlens.connectAgent)\n[Connect Claude Code](command:agentlens.connectAgent)\n\nAfter connecting, Agent Lens will automatically track which code was written by AI.",
+        "when": "agentlens.noAgentsConnected"
+      },
+      {
+        "view": "agentlens.activity",
+        "contents": "No recent AI activity detected.\n\nTo start tracking:\n1. [Connect an Agent](command:agentlens.connectAgent)\n2. Use your AI assistant to write code\n3. Changes will appear here automatically\n\n[Learn More](https://github.com/vibe-x-ai/agent-blame#readme)",
+        "when": "agentlens.noActivity"
+      }
+    ],
     "menus": {
       "view/item/context": [
         {
