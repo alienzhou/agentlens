@@ -1,40 +1,43 @@
-<svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+<svg width="24" height="24"
+     viewBox="2 2 20 20"
+     fill="none"
      xmlns="http://www.w3.org/2000/svg">
 
   <!-- Connections -->
   <path d="M7 18V6"
         stroke="currentColor"
-        stroke-width="2"
+        stroke-width="2.2"
         stroke-linecap="round"/>
 
   <path d="M7 12C7 12 10 12 12 12C14 12 17 9 17 6"
         stroke="currentColor"
-        stroke-width="2"
+        stroke-width="2.2"
         stroke-linecap="round"/>
 
-  <!-- Node 1 (Bottom Left) -->
+  <!-- Node 1 -->
   <path d="M7 15.5L9.165 16.75V19.25L7 20.5L4.835 19.25V16.75L7 15.5Z"
         fill="currentColor"/>
 
-  <!-- Node 2 (Top Left) -->
+  <!-- Node 2 -->
   <path d="M7 3.5L9.165 4.75V7.25L7 8.5L4.835 7.25V4.75L7 3.5Z"
         fill="currentColor"/>
 
-  <!-- Node 3 (Top Right) -->
+  <!-- Node 3 -->
   <path d="M17 3.5L19.165 4.75V7.25L17 8.5L14.835 7.25V4.75L17 3.5Z"
         fill="currentColor"/>
 
-  <!-- AI Badge Background -->
-  <rect x="12.5" y="14.5" width="9" height="6"
+  <!-- AI Badge -->
+  <rect x="12" y="14"
+        width="9.5" height="6.5"
         rx="2"
         fill="currentColor"
-        opacity="0.12"/>
+        opacity="0.15"/>
 
   <!-- AI Text -->
-  <text x="17" y="19"
+  <text x="16.7" y="19.2"
         text-anchor="middle"
-        font-size="5"
-        font-weight="600"
+        font-size="6.8"
+        font-weight="700"
         fill="currentColor"
         font-family="system-ui, -apple-system, BlinkMacSystemFont, sans-serif">
     AI
