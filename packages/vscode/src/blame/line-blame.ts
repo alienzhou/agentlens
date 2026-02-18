@@ -172,10 +172,11 @@ export class LineBlameController {
       });
 
       // Create decoration
+      // Note: We don't include hoverMessage here because LineHoverProvider handles hover content
+      // Including it would cause duplicate hover content to appear
       const range = new vscode.Range(line, Number.MAX_SAFE_INTEGER, line, Number.MAX_SAFE_INTEGER);
       const decoration: vscode.DecorationOptions = {
         range,
-        hoverMessage: displayInfo.hoverMessage,
         renderOptions: {
           after: {
             contentText: displayInfo.text,

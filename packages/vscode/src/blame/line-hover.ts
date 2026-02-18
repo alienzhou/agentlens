@@ -131,21 +131,36 @@ export class LineHoverProvider implements vscode.HoverProvider {
     const developerMode = this.isDeveloperMode();
     const agentName = this.contributorService.getAgentDisplayName(result.matchedRecord.agent);
     const markdown = new vscode.MarkdownString();
+    markdown.supportThemeIcons = true;
     
-    // Basic information (for all users)
-    markdown.appendMarkdown(`🤖 **${agentName}**\n\n`);
+    // Basic information: Agent name + time (GitLens style)
+    const fullTime = this.formatFullTime(result.matchedRecord.timestamp);
+    markdown.appendMarkdown(`🤖 **${agentName}**, ${fullTime}\n\n`);
 
-    if (result.matchedRecord.sessionId) {
-      const shortSessionId = result.matchedRecord.sessionId.substring(0, 13);
-      markdown.appendMarkdown(`Session: \`${shortSessionId}\`\n\n`);
-    }
-
+    // User prompt (show as Task, most important context)
     if (result.matchedRecord.userPrompt) {
       // Truncate long prompts
-      const promptPreview = result.matchedRecord.userPrompt.length > 100
-        ? result.matchedRecord.userPrompt.substring(0, 100) + '...'
+      const promptPreview = result.matchedRecord.userPrompt.length > 200
+        ? result.matchedRecord.userPrompt.substring(0, 200) + '...'
         : result.matchedRecord.userPrompt;
-      markdown.appendMarkdown(`Prompt: "${promptPreview}"\n\n`);
+      markdown.appendMarkdown(`**Task**: "${promptPreview}"\n\n`);
+    }
+
+    // Uncommitted changes label
+    markdown.appendMarkdown(`Uncommitted changes\n\n`);
+
+    // Diff preview for the current line
+    if (lineText && lineText.trim()) {
+      markdown.appendCodeblock(`+ ${lineText}`, 'diff');
+      markdown.appendMarkdown('\n');
+    }
+
+    // Session ID with copy button
+    if (result.matchedRecord.sessionId) {
+      const shortSessionId = result.matchedRecord.sessionId.substring(0, 13);
+      const copySessionArgs = encodeURIComponent(JSON.stringify([result.matchedRecord.sessionId]));
+      markdown.appendMarkdown(`Session: \`${shortSessionId}\` `);
+      markdown.appendMarkdown(`[$(copy)](command:agentlens.copySessionId?${copySessionArgs} "Copy session ID")\n\n`);
     }
 
     // Developer mode extra information
@@ -168,10 +183,6 @@ export class LineHoverProvider implements vscode.HoverProvider {
       if (result.matchedRecord.toolName) {
         markdown.appendMarkdown(`• Tool: ${result.matchedRecord.toolName}\n\n`);
       }
-      
-      // Timestamp
-      const recordTime = new Date(result.matchedRecord.timestamp).toLocaleString();
-      markdown.appendMarkdown(`• Recorded: ${recordTime}\n\n`);
     }
 
     // Add Report Issue button
@@ -194,9 +205,19 @@ export class LineHoverProvider implements vscode.HoverProvider {
   ): vscode.Hover {
     const developerMode = this.isDeveloperMode();
     const markdown = new vscode.MarkdownString();
+    markdown.supportThemeIcons = true;
     
-    markdown.appendMarkdown(`👤 **Human Edit**\n\n`);
-    markdown.appendMarkdown(`Not committed yet\n\n`);
+    markdown.appendMarkdown(`👤 **Human Edit**, just now\n\n`);
+    markdown.appendMarkdown(`Uncommitted changes\n\n`);
+
+    // Diff preview for the current line
+    if (lineText && lineText.trim()) {
+      markdown.appendCodeblock(`+ ${lineText}`, 'diff');
+      markdown.appendMarkdown('\n');
+    }
+
+    // Working Tree label
+    markdown.appendMarkdown(`Working Tree\n\n`);
 
     // Developer mode extra information
     if (developerMode && result) {
@@ -260,11 +281,24 @@ export class LineHoverProvider implements vscode.HoverProvider {
   }
 
   /**
+   * Normalize timestamp to seconds
+   * Hook records use milliseconds (Date.now()), Git blame uses seconds (Unix timestamp)
+   */
+  private normalizeTimestamp(timestamp: number): number {
+    // If timestamp > 10^12 (around year 2001 in milliseconds), treat as milliseconds
+    if (timestamp > 1e12) {
+      return Math.floor(timestamp / 1000);
+    }
+    return timestamp;
+  }
+
+  /**
    * Format timestamp to relative time (e.g., "3 days ago")
    */
   private formatRelativeTime(timestamp: number): string {
+    const normalizedTs = this.normalizeTimestamp(timestamp);
     const now = Math.floor(Date.now() / 1000);
-    const diff = now - timestamp;
+    const diff = now - normalizedTs;
 
     const seconds = diff;
     const minutes = Math.floor(seconds / 60);
@@ -293,5 +327,23 @@ export class LineHoverProvider implements vscode.HoverProvider {
       return minutes === 1 ? '1 minute ago' : `${String(minutes)} minutes ago`;
     }
     return 'just now';
+  }
+
+  /**
+   * Format timestamp to full time display: relative time (exact time)
+   * e.g., "yesterday (Jan 27 23:23)"
+   */
+  private formatFullTime(timestamp: number): string {
+    const normalizedTs = this.normalizeTimestamp(timestamp);
+    const relativeTime = this.formatRelativeTime(timestamp);
+    const date = new Date(normalizedTs * 1000);
+    const formattedDate = date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+    return `${relativeTime} (${formattedDate})`;
   }
 }
