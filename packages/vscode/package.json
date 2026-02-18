@@ -126,6 +126,14 @@
         "command": "agentlens.refreshActivity",
         "title": "Refresh Activity",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "agentlens.openActivityDiff",
+        "title": "View Changes"
+      },
+      {
+        "command": "agentlens.openActivityFile",
+        "title": "Open File"
       }
     ],
     "viewsContainers": {
@@ -160,6 +168,16 @@
           "command": "agentlens.disconnectAgent",
           "when": "view == agentlens.agents && viewItem == agent-connected",
           "group": "inline"
+        },
+        {
+          "command": "agentlens.openActivityFile",
+          "when": "view == agentlens.activity && viewItem == activity",
+          "group": "navigation@1"
+        },
+        {
+          "command": "agentlens.openActivityDiff",
+          "when": "view == agentlens.activity && viewItem == activity",
+          "group": "navigation@2"
         }
       ],
       "view/title": [

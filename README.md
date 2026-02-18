@@ -12,7 +12,8 @@ Agent Lens is a Code Review tool designed specifically for the era of AI-assiste
 
 - **Dual-Track Data Collection**: Captures both Hook events and session files from AI Agents
 - **Contributor Detection**: Identifies whether code was written by AI or humans using hunk-level similarity matching
-- **GitLens-Style Integration**: Displays contributor information directly in your code review workflow
+- **VS Code Sidebar Integration**: View connected agents and recent AI activity directly in VS Code
+- **GitLens-Style Blame**: Displays contributor information inline when hovering over code
 - **Multi-Agent Support**: Works with Cursor, Claude Code, and other AI coding assistants
 - **Performance Optimized**: 4-level filtering for efficient matching on large datasets
 
@@ -218,7 +219,9 @@ Level 4: Levenshtein Matching  (5 candidates → best match)
 
 ### VS Code Extension Features
 
-- **Line Blame**: Hover over any line to see contributor info
+- **Sidebar - Connected Agents**: View all detected AI agents and their connection status
+- **Sidebar - Recent Activity**: Browse recent AI-generated code changes with quick file navigation
+- **Line Blame**: Hover over any line to see contributor info (AI or Human)
 - **Developer Mode**: Enable `agentLens.developerMode` for detailed debug info
 - **Report Issue**: Click "🐛 Report Issue" to report matching problems
 - **Auto Cleanup**: Automatic cleanup of old data files

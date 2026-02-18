@@ -21,7 +21,7 @@ import { LineHoverProvider } from './blame/line-hover.js';
 import { ReportIssueService, type ExtendedContributorResult } from './report/report-issue-service.js';
 import { BlameService } from './blame/blame-service.js';
 import { createLogger, getLoggerConfig, disposeLogger, createModuleLogger } from './utils/logger.js';
-import { AgentsTreeProvider, ActivityTreeProvider } from './views/index.js';
+import { AgentsTreeProvider, ActivityTreeProvider, ActivityTreeItem, ActivityDiffProvider, ACTIVITY_DIFF_SCHEME, openActivityDiff } from './views/index.js';
 
 // Module logger for extension entry
 const log = createModuleLogger('extension');
@@ -358,6 +358,23 @@ Cleanup Config:
  * Register tree view providers for the sidebar
  */
 function registerTreeViews(context: vscode.ExtensionContext, workspaceRoot: string): void {
+  // Register Activity diff provider
+  const activityDiffProvider = new ActivityDiffProvider();
+  const diffProviderDisposable = vscode.workspace.registerTextDocumentContentProvider(
+    ACTIVITY_DIFF_SCHEME,
+    activityDiffProvider
+  );
+  context.subscriptions.push(diffProviderDisposable);
+  context.subscriptions.push(activityDiffProvider);
+
+  // Set up periodic cleanup for diff content (every 30 minutes)
+  const diffCleanupTimer = setInterval(() => {
+    activityDiffProvider.cleanup();
+  }, 30 * 60 * 1000);
+  context.subscriptions.push({
+    dispose: () => clearInterval(diffCleanupTimer),
+  });
+
   // Register Agents tree view
   const agentsTreeProvider = new AgentsTreeProvider();
   const agentsTreeView = vscode.window.createTreeView('agentlens.agents', {
@@ -366,8 +383,8 @@ function registerTreeViews(context: vscode.ExtensionContext, workspaceRoot: stri
   });
   context.subscriptions.push(agentsTreeView);
 
-  // Register Activity tree view
-  const activityTreeProvider = new ActivityTreeProvider(workspaceRoot);
+  // Register Activity tree view with diff provider
+  const activityTreeProvider = new ActivityTreeProvider(workspaceRoot, activityDiffProvider);
   const activityTreeView = vscode.window.createTreeView('agentlens.activity', {
     treeDataProvider: activityTreeProvider,
     showCollapseAll: false,
@@ -384,6 +401,51 @@ function registerTreeViews(context: vscode.ExtensionContext, workspaceRoot: stri
     activityTreeProvider.refresh();
   });
   context.subscriptions.push(refreshActivityCmd);
+
+  // Register command to open activity diff
+  const openActivityDiffCmd = vscode.commands.registerCommand(
+    'agentlens.openActivityDiff',
+    async (args: { filePath: string; oldContent: string; newContent: string; title?: string } | ActivityTreeItem) => {
+      // Handle both direct args and TreeItem (from context menu)
+      if ('activity' in args) {
+        // It's a TreeItem from context menu
+        const change = args.activity.change;
+        const fileName = change.filePath.split('/').pop() || 'file';
+        const agentName = change.agent;
+        const title = `${fileName} (${agentName} Change)`;
+        await openActivityDiff(
+          activityDiffProvider,
+          change.filePath,
+          change.oldContent ?? '',
+          change.newContent ?? '',
+          title
+        );
+      } else {
+        // Direct call with args
+        await openActivityDiff(
+          activityDiffProvider,
+          args.filePath,
+          args.oldContent,
+          args.newContent,
+          args.title
+        );
+      }
+    }
+  );
+  context.subscriptions.push(openActivityDiffCmd);
+
+  // Register command to open activity file (for context menu)
+  const openActivityFileCmd = vscode.commands.registerCommand(
+    'agentlens.openActivityFile',
+    async (item: { fileUri?: vscode.Uri } | vscode.Uri) => {
+      // Handle both TreeItem (from context menu) and Uri (direct call)
+      const uri = 'fileUri' in item ? item.fileUri : item;
+      if (uri) {
+        await vscode.commands.executeCommand('vscode.open', uri);
+      }
+    }
+  );
+  context.subscriptions.push(openActivityFileCmd);
 
   log.info('Tree views registered');
 }

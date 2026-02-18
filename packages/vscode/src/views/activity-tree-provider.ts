@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 import * as path from 'node:path';
 import { FileStorage, type CodeChangeRecord, type PromptRecord, resolveFilePath, isAbsolutePath } from '@agentlens/core';
 import { createModuleLogger } from '../utils/logger.js';
+import type { ActivityDiffProvider } from './activity-diff-provider.js';
 
 const log = createModuleLogger('activity-tree');
 
@@ -22,9 +23,13 @@ interface ActivityRecord {
  * Tree item representing an activity entry
  */
 export class ActivityTreeItem extends vscode.TreeItem {
+  /** File URI for context menu commands */
+  public readonly fileUri: vscode.Uri;
+
   constructor(
     public readonly activity: ActivityRecord,
-    public readonly workspaceRoot: string
+    public readonly workspaceRoot: string,
+    private readonly diffProvider?: ActivityDiffProvider
   ) {
     const fileName = path.basename(activity.change.filePath);
     super(fileName, vscode.TreeItemCollapsibleState.None);
@@ -34,7 +39,6 @@ export class ActivityTreeItem extends vscode.TreeItem {
     this.iconPath = this.getAgentIcon();
     this.contextValue = 'activity';
 
-    // Set command to open the file
     // Handle both relative and absolute paths:
     // - Relative paths are resolved against workspace root
     // - Absolute paths (for files outside project) are used directly
@@ -43,7 +47,41 @@ export class ActivityTreeItem extends vscode.TreeItem {
       ? filePath 
       : resolveFilePath(filePath, workspaceRoot);
     
-    this.command = {
+    this.fileUri = vscode.Uri.file(absoluteFilePath);
+
+    // Set command based on whether we have diff content
+    this.command = this.buildCommand(fileName, absoluteFilePath);
+  }
+
+  /**
+   * Build the command for clicking on this item
+   */
+  private buildCommand(fileName: string, absoluteFilePath: string): vscode.Command {
+    const change = this.activity.change;
+    const hasDiffContent = change.oldContent !== undefined || change.newContent !== undefined;
+
+    // If we have diff content and a diff provider, show diff view
+    if (hasDiffContent && this.diffProvider) {
+      const oldContent = change.oldContent ?? '';
+      const newContent = change.newContent ?? '';
+      const agentName = this.formatAgentName(change.agent);
+      const time = this.formatTime(change.timestamp);
+      const title = `${fileName} (${agentName} · ${time})`;
+
+      return {
+        command: 'agentlens.openActivityDiff',
+        title: 'View Changes',
+        arguments: [{
+          filePath: change.filePath,
+          oldContent,
+          newContent,
+          title,
+        }],
+      };
+    }
+
+    // Fallback to opening the file directly
+    return {
       command: 'vscode.open',
       title: 'Open File',
       arguments: [vscode.Uri.file(absoluteFilePath)],
@@ -148,6 +186,7 @@ export class ActivityTreeProvider implements vscode.TreeDataProvider<vscode.Tree
 
   private storage: FileStorage;
   private workspaceRoot: string;
+  private diffProvider?: ActivityDiffProvider;
 
   /** Maximum number of activities to display */
   private readonly maxItems = 50;
@@ -155,9 +194,10 @@ export class ActivityTreeProvider implements vscode.TreeDataProvider<vscode.Tree
   /** Time window for fetching activities (days) */
   private readonly timeWindowDays = 7;
 
-  constructor(workspaceRoot: string) {
+  constructor(workspaceRoot: string, diffProvider?: ActivityDiffProvider) {
     this.workspaceRoot = workspaceRoot;
     this.storage = new FileStorage(workspaceRoot);
+    this.diffProvider = diffProvider;
   }
 
   /**
@@ -203,7 +243,7 @@ export class ActivityTreeProvider implements vscode.TreeDataProvider<vscode.Tree
       
       // Create tree items
       return limitedActivities.map(activity => 
-        new ActivityTreeItem(activity, this.workspaceRoot)
+        new ActivityTreeItem(activity, this.workspaceRoot, this.diffProvider)
       );
     } catch (error) {
       log.error('Failed to load activities', error);
