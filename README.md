@@ -9,7 +9,11 @@
 
 ## 📋 Overview
 
-Agent Lens is a Code Review tool designed specifically for the era of AI-assisted coding. It addresses the fundamental challenge of reviewing AI-generated code by providing:
+Agent Lens is a Code Review tool designed specifically for the era of AI-assisted coding.
+
+![](./assets/agentlens.png)
+
+It addresses the fundamental challenge of reviewing AI-generated code by providing:
 
 - **Dual-Track Data Collection**: Captures both Hook events and session files from AI Agents
 - **Contributor Detection**: Identifies whether code was written by AI or humans using hunk-level similarity matching
