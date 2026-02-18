@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'node:path';
 import { BlameService } from './blame-service.js';
-import { ContributorService } from './contributor-service.js';
+import { ContributorService, type LineContributorResult } from './contributor-service.js';
 import { createModuleLogger } from '../utils/logger.js';
 
 const log = createModuleLogger('line-hover');
@@ -11,14 +11,26 @@ const log = createModuleLogger('line-hover');
  *
  * Displays different information based on code state:
  * - Committed code: git blame info (author, time, commit message)
- * - Uncommitted AI code: Agent name, Session ID, User prompt
+ * - Uncommitted AI code: Agent name, Session ID, User prompt, Report Issue button
  * - Uncommitted Human code: "Human Edit, Not committed yet"
+ * 
+ * Developer Mode:
+ * When enabled, shows additional debug information including similarity scores,
+ * confidence levels, and candidate filtering statistics.
  */
 export class LineHoverProvider implements vscode.HoverProvider {
   constructor(
     private blameService: BlameService,
     private contributorService: ContributorService
   ) {}
+
+  /**
+   * Check if developer mode is enabled
+   */
+  private isDeveloperMode(): boolean {
+    const config = vscode.workspace.getConfiguration('agentBlame');
+    return config.get<boolean>('developerMode', false);
+  }
 
   async provideHover(
     document: vscode.TextDocument,
@@ -99,20 +111,23 @@ export class LineHoverProvider implements vscode.HoverProvider {
     const result = await this.contributorService.detectLineContributor(filePath, lineText, line);
     if (!result) {
       // No match found, assume human
-      return this.createHumanHover();
+      return this.createHumanHover(filePath, lineText, line);
     }
 
     if (result.contributor === 'human') {
-      return this.createHumanHover();
+      return this.createHumanHover(filePath, lineText, line, result);
     }
 
     // AI-generated code
     if (!result.matchedRecord) {
-      return this.createHumanHover();
+      return this.createHumanHover(filePath, lineText, line, result);
     }
 
+    const developerMode = this.isDeveloperMode();
     const agentName = this.contributorService.getAgentDisplayName(result.matchedRecord.agent);
     const markdown = new vscode.MarkdownString();
+    
+    // Basic information (for all users)
     markdown.appendMarkdown(`🤖 **${agentName}**\n\n`);
 
     if (result.matchedRecord.sessionId) {
@@ -121,8 +136,43 @@ export class LineHoverProvider implements vscode.HoverProvider {
     }
 
     if (result.matchedRecord.userPrompt) {
-      markdown.appendMarkdown(`Prompt: "${result.matchedRecord.userPrompt}"`);
+      // Truncate long prompts
+      const promptPreview = result.matchedRecord.userPrompt.length > 100
+        ? result.matchedRecord.userPrompt.substring(0, 100) + '...'
+        : result.matchedRecord.userPrompt;
+      markdown.appendMarkdown(`Prompt: "${promptPreview}"\n\n`);
     }
+
+    // Developer mode extra information
+    if (developerMode) {
+      markdown.appendMarkdown(`---\n\n`);
+      markdown.appendMarkdown(`🔍 **Debug Info**\n\n`);
+      
+      // Similarity and confidence
+      const similarityPercent = (result.similarity * 100).toFixed(1);
+      const confidencePercent = (result.confidence * 100).toFixed(1);
+      markdown.appendMarkdown(`• Similarity: **${similarityPercent}%**\n\n`);
+      markdown.appendMarkdown(`• Confidence: **${confidencePercent}%**\n\n`);
+      
+      // Contributor type
+      const contributorLabel = result.contributor === 'ai' ? 'Pure AI' : 
+                               result.contributor === 'ai_modified' ? 'AI Modified' : 'Human';
+      markdown.appendMarkdown(`• Type: ${contributorLabel}\n\n`);
+      
+      // Tool name if available
+      if (result.matchedRecord.toolName) {
+        markdown.appendMarkdown(`• Tool: ${result.matchedRecord.toolName}\n\n`);
+      }
+      
+      // Timestamp
+      const recordTime = new Date(result.matchedRecord.timestamp).toLocaleString();
+      markdown.appendMarkdown(`• Recorded: ${recordTime}\n\n`);
+    }
+
+    // Add Report Issue button
+    const reportParams = this.buildReportParams(filePath, lineText, line, result);
+    markdown.appendMarkdown(`---\n\n`);
+    markdown.appendMarkdown(`[🐛 Report Issue](command:agentBlame.reportIssue?${encodeURIComponent(JSON.stringify(reportParams))})`);
 
     markdown.isTrusted = true;
     return new vscode.Hover(markdown);
@@ -131,12 +181,77 @@ export class LineHoverProvider implements vscode.HoverProvider {
   /**
    * Create hover for human-edited code
    */
-  private createHumanHover(): vscode.Hover {
+  private createHumanHover(
+    filePath: string,
+    lineText: string,
+    line: number,
+    result?: LineContributorResult
+  ): vscode.Hover {
+    const developerMode = this.isDeveloperMode();
     const markdown = new vscode.MarkdownString();
+    
     markdown.appendMarkdown(`👤 **Human Edit**\n\n`);
-    markdown.appendMarkdown(`Not committed yet`);
+    markdown.appendMarkdown(`Not committed yet\n\n`);
+
+    // Developer mode extra information
+    if (developerMode && result) {
+      markdown.appendMarkdown(`---\n\n`);
+      markdown.appendMarkdown(`🔍 **Debug Info**\n\n`);
+      
+      // Show why it was classified as human
+      if (result.similarity === 0) {
+        markdown.appendMarkdown(`• No matching AI records found\n\n`);
+      } else {
+        const similarityPercent = (result.similarity * 100).toFixed(1);
+        markdown.appendMarkdown(`• Best similarity: ${similarityPercent}% (below threshold)\n\n`);
+      }
+      
+      const confidencePercent = (result.confidence * 100).toFixed(1);
+      markdown.appendMarkdown(`• Confidence: ${confidencePercent}%\n\n`);
+      
+      // Unchanged flag
+      if (result.unchanged) {
+        markdown.appendMarkdown(`• Status: Unchanged from HEAD\n\n`);
+      }
+    }
+
+    // Add Report Issue button for human edits too (in case of wrong detection)
+    const reportParams = this.buildReportParams(filePath, lineText, line, result ?? {
+      contributor: 'human',
+      similarity: 0,
+      confidence: 1,
+    });
+    markdown.appendMarkdown(`---\n\n`);
+    markdown.appendMarkdown(`[🐛 Report Issue](command:agentBlame.reportIssue?${encodeURIComponent(JSON.stringify(reportParams))})`);
+
     markdown.isTrusted = true;
     return new vscode.Hover(markdown);
+  }
+
+  /**
+   * Build parameters for Report Issue command
+   */
+  private buildReportParams(
+    filePath: string,
+    lineText: string,
+    line: number,
+    result: LineContributorResult
+  ): Record<string, unknown> {
+    // Generate a simple hunk ID based on file path and line
+    const hunkId = `${filePath}:${line}`;
+
+    return {
+      hunkId,
+      filePath,
+      lineRange: [line, line] as [number, number],
+      addedLines: [lineText],
+      contributor: result.contributor,
+      similarity: result.similarity,
+      confidence: result.confidence,
+      matchedRecord: result.matchedRecord,
+      // Candidates will be populated by the service if available
+      candidates: [],
+    };
   }
 
   /**

@@ -46,6 +46,28 @@ export const SIMILARITY_CONFIG = {
 } as const;
 
 /**
+ * Filtering optimization configuration
+ */
+export const FILTERING_CONFIG = {
+  /** Default time window for matching (in days) */
+  DEFAULT_TIME_WINDOW_DAYS: 3,
+
+  /** Default content length tolerance (0.5 = 50%) */
+  DEFAULT_LENGTH_TOLERANCE: 0.5,
+} as const;
+
+/**
+ * Performance monitoring configuration
+ */
+export const PERFORMANCE_CONFIG = {
+  /** Threshold for performance warning (in milliseconds) */
+  THRESHOLD_MS: 500,
+
+  /** Whether performance logging is enabled */
+  LOG_ENABLED: true,
+} as const;
+
+/**
  * Contributor types
  */
 export type ContributorType = 'ai' | 'ai_modified' | 'human';

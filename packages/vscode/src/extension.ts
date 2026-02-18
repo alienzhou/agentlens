@@ -13,10 +13,12 @@
 import * as vscode from 'vscode';
 import { CursorAdapter, ClaudeAdapter, getHookCore } from '@vibe-x/agent-blame';
 import type { AgentAdapter } from '@vibe-x/agent-blame';
-import { SUPPORTED_AGENTS } from '@agent-blame/core';
+import { SUPPORTED_AGENTS, CleanupManager, FileStorage, type ContributorType } from '@agent-blame/core';
+import type { CleanupConfig, CleanupResult } from '@agent-blame/core';
 import { LineBlameController } from './blame/line-blame.js';
 import { ContributorService } from './blame/contributor-service.js';
 import { LineHoverProvider } from './blame/line-hover.js';
+import { ReportIssueService, type ExtendedContributorResult } from './report/report-issue-service.js';
 import { BlameService } from './blame/blame-service.js';
 import { createLogger, getLoggerConfig, disposeLogger, createModuleLogger } from './utils/logger.js';
 
@@ -50,9 +52,50 @@ export function activate(context: vscode.ExtensionContext): void {
   });
 
   // Initialize services
+  const storage = new FileStorage(workspaceRoot);
   const blameService = new BlameService();
   const contributorService = new ContributorService(workspaceRoot);
   log.info('Services initialized');
+
+  // Initialize cleanup manager
+  const cleanupConfig = getCleanupConfig();
+  const cleanupManager = new CleanupManager(
+    storage.getHookDataPath(),
+    cleanupConfig
+  );
+
+  // Run cleanup on startup (async, don't block activation)
+  void cleanupManager.tryCleanup().then((result: CleanupResult | null) => {
+    if (result && result.filesRemoved > 0) {
+      log.info('Startup cleanup completed', {
+        filesRemoved: result.filesRemoved,
+        bytesFreed: result.bytesFreed,
+      });
+    }
+  }).catch((err: unknown) => {
+    log.warn('Startup cleanup failed', { error: String(err) });
+  });
+
+  // Set up periodic cleanup timer (check every hour, actual cleanup based on config)
+  const cleanupTimer = setInterval(
+    () => {
+      void cleanupManager.tryCleanup().then((result: CleanupResult | null) => {
+        if (result && result.filesRemoved > 0) {
+          log.info('Periodic cleanup completed', {
+            filesRemoved: result.filesRemoved,
+            bytesFreed: result.bytesFreed,
+          });
+        }
+      }).catch((err: unknown) => {
+        log.warn('Periodic cleanup failed', { error: String(err) });
+      });
+    },
+    60 * 60 * 1000 // Check every hour
+  );
+
+  context.subscriptions.push({
+    dispose: () => clearInterval(cleanupTimer),
+  });
 
   // Initialize line blame controller
   const lineBlameController = new LineBlameController(contributorService);
@@ -64,7 +107,7 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(hoverDisposable);
 
   // Register commands
-  registerCommands(context);
+  registerCommands(context, cleanupManager, workspaceRoot);
 
   // Update status bar
   updateStatusBar(context);
@@ -83,7 +126,13 @@ export function deactivate(): void {
 /**
  * Register commands
  */
-function registerCommands(context: vscode.ExtensionContext): void {
+function registerCommands(
+  context: vscode.ExtensionContext,
+  cleanupManager: CleanupManager,
+  workspaceRoot: string
+): void {
+  // Initialize ReportIssueService
+  const reportIssueService = new ReportIssueService(workspaceRoot, '0.1.0');
   // Show Blame view
   const showBlameCmd = vscode.commands.registerCommand('agent-blame.showBlame', () => {
     const editor = vscode.window.activeTextEditor;
@@ -99,7 +148,7 @@ function registerCommands(context: vscode.ExtensionContext): void {
   // Connect Agent - directly call hook adapter
   const connectAgentCmd = vscode.commands.registerCommand('agent-blame.connectAgent', async () => {
     // Let user select agent
-    const agentOptions = SUPPORTED_AGENTS.map((agent) => ({
+    const agentOptions = SUPPORTED_AGENTS.map((agent: string) => ({
       label: agent,
       description: getAgentDisplayName(agent),
     }));
@@ -121,7 +170,7 @@ function registerCommands(context: vscode.ExtensionContext): void {
     'agent-blame.disconnectAgent',
     async () => {
       // Let user select agent
-      const agentOptions = SUPPORTED_AGENTS.map((agent) => ({
+      const agentOptions = SUPPORTED_AGENTS.map((agent: string) => ({
         label: agent,
         description: getAgentDisplayName(agent),
       }));
@@ -159,7 +208,7 @@ Setup:
 2. For Cursor: Enable "Third-party skills" in Settings
 
 Supported Agents:
-${SUPPORTED_AGENTS.map((agent) => `- ${getAgentDisplayName(agent)}`).join('\n')}
+${SUPPORTED_AGENTS.map((agent: string) => `- ${getAgentDisplayName(agent)}`).join('\n')}
     `.trim();
 
     vscode.window.showInformationMessage(helpText, { modal: true });
@@ -183,6 +232,110 @@ ${SUPPORTED_AGENTS.map((agent) => `- ${getAgentDisplayName(agent)}`).join('\n')}
     }
   );
 
+  // Manual cleanup command
+  const cleanupCmd = vscode.commands.registerCommand(
+    'agent-blame.cleanup',
+    async () => {
+      log.info('Manual cleanup requested');
+      
+      try {
+        const result = await cleanupManager.tryCleanup(true);
+        
+        if (result) {
+          if (result.filesRemoved > 0) {
+            const freedKB = Math.round(result.bytesFreed / 1024 * 100) / 100;
+            vscode.window.showInformationMessage(
+              `Cleanup completed: ${result.filesRemoved} files removed, ${freedKB}KB freed`
+            );
+            log.info('Manual cleanup completed', {
+              filesRemoved: result.filesRemoved,
+              bytesFreed: result.bytesFreed,
+              removedFiles: result.removedFiles,
+            });
+          } else {
+            vscode.window.showInformationMessage('No old files to clean up');
+          }
+          
+          if (result.errors.length > 0) {
+            log.warn('Cleanup encountered errors', { errors: result.errors });
+          }
+        }
+      } catch (err) {
+        log.error('Manual cleanup failed', err);
+        vscode.window.showErrorMessage(
+          `Cleanup failed: ${err instanceof Error ? err.message : String(err)}`
+        );
+      }
+    }
+  );
+
+  // Show cleanup stats command
+  const cleanupStatsCmd = vscode.commands.registerCommand(
+    'agent-blame.cleanupStats',
+    async () => {
+      try {
+        const stats = await cleanupManager.getStats();
+        const config = cleanupManager.getConfig();
+        
+        const message = `
+Data Statistics:
+- Total files: ${stats.totalFiles}
+- Total size: ${stats.totalSizeKB.toFixed(2)} KB
+- Changes files: ${stats.filesByDir['changes'] || 0}
+- Prompts files: ${stats.filesByDir['prompts'] || 0}
+- Log files: ${stats.filesByDir['logs'] || 0}
+${stats.oldestFile ? `- Oldest: ${stats.oldestFile}` : ''}
+${stats.newestFile ? `- Newest: ${stats.newestFile}` : ''}
+
+Cleanup Config:
+- Auto cleanup: ${config.enabled ? 'Enabled' : 'Disabled'}
+- Retention: ${config.retentionDays} days
+- Check interval: ${config.checkIntervalHours} hours
+        `.trim();
+        
+        vscode.window.showInformationMessage(message, { modal: true });
+      } catch (err) {
+        vscode.window.showErrorMessage(
+          `Failed to get stats: ${err instanceof Error ? err.message : String(err)}`
+        );
+      }
+    }
+  );
+
+  // Report Issue command
+  const reportIssueCmd = vscode.commands.registerCommand(
+    'agentBlame.reportIssue',
+    async (params: Record<string, unknown>) => {
+      log.info('Report issue requested', {
+        filePath: params.filePath,
+        contributor: params.contributor,
+      });
+
+      try {
+        // Build ExtendedContributorResult from params
+        const result: ExtendedContributorResult = {
+          hunkId: String(params.hunkId ?? ''),
+          filePath: String(params.filePath ?? ''),
+          lineRange: (params.lineRange as [number, number]) ?? [0, 0],
+          addedLines: (params.addedLines as string[]) ?? [],
+          contributor: (params.contributor as ContributorType) ?? 'human',
+          similarity: Number(params.similarity ?? 0),
+          confidence: Number(params.confidence ?? 1),
+          matchedRecord: params.matchedRecord as ExtendedContributorResult['matchedRecord'],
+          candidates: (params.candidates as ExtendedContributorResult['candidates']) ?? [],
+          performance: params.performance as ExtendedContributorResult['performance'],
+        };
+
+        // Execute report flow
+        await reportIssueService.executeReportFlow(result);
+      } catch (error) {
+        log.error('Failed to report issue', error);
+        const message = error instanceof Error ? error.message : String(error);
+        vscode.window.showErrorMessage(`Failed to report issue: ${message}`);
+      }
+    }
+  );
+
   context.subscriptions.push(
     showBlameCmd,
     connectAgentCmd,
@@ -190,7 +343,10 @@ ${SUPPORTED_AGENTS.map((agent) => `- ${getAgentDisplayName(agent)}`).join('\n')}
     showStatusCmd,
     showHelpCmd,
     copyCommitHashCmd,
-    copySessionIdCmd
+    copySessionIdCmd,
+    cleanupCmd,
+    cleanupStatsCmd,
+    reportIssueCmd
   );
 }
 
@@ -354,4 +510,17 @@ async function showAgentStatus(): Promise<void> {
 
   const statusText = `Agent Connection Status\n\n${statusItems.join('\n')}`;
   vscode.window.showInformationMessage(statusText, { modal: true });
+}
+
+/**
+ * Get cleanup configuration from VSCode settings
+ */
+function getCleanupConfig(): CleanupConfig {
+  const config = vscode.workspace.getConfiguration('agentBlame');
+  
+  return {
+    enabled: config.get<boolean>('autoCleanup.enabled', true),
+    retentionDays: config.get<number>('autoCleanup.retentionDays', 7),
+    checkIntervalHours: config.get<number>('autoCleanup.checkIntervalHours', 24),
+  };
 }

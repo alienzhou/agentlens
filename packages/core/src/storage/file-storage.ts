@@ -1,9 +1,11 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
+import { nanoid } from 'nanoid';
 import type { StorageInterface, StorageStats } from './storage-interface.js';
 import type { ReviewUnit } from '../models/review-unit.js';
 import type { Todo } from '../models/todo.js';
 import type { SessionSource } from '../models/session-source.js';
+import type { PerformanceMetrics } from '../performance/performance-tracker.js';
 import { DATA_DIR_NAME, DATA_SUBDIRS, DATA_FILES } from '../constants.js';
 
 // ==================== Hook Data Types ====================
@@ -12,6 +14,8 @@ import { DATA_DIR_NAME, DATA_SUBDIRS, DATA_FILES } from '../constants.js';
  * Code change record (captured by Hook)
  */
 export interface CodeChangeRecord {
+  /** Unique ID: {timestamp}-{nanoid} */
+  id?: string;
   /** Session ID */
   sessionId: string;
   /** Agent type */
@@ -102,6 +106,10 @@ export class FileStorage implements StorageInterface {
     await fs.mkdir(this.reviewUnitsPath, { recursive: true });
     await fs.mkdir(this.configPath, { recursive: true });
     await fs.mkdir(this.hookDataPath, { recursive: true });
+    await fs.mkdir(path.join(this.hookDataPath, 'changes'), { recursive: true });
+    await fs.mkdir(path.join(this.hookDataPath, 'prompts'), { recursive: true });
+    await fs.mkdir(path.join(this.hookDataPath, 'logs'), { recursive: true });
+    await fs.mkdir(path.join(this.hookDataPath, 'reports'), { recursive: true });
 
     // Initialize files if they don't exist
     await this.initializeFile(path.join(this.dataPath, DATA_FILES.TODOS), '[]');
@@ -112,8 +120,6 @@ export class FileStorage implements StorageInterface {
     }));
     await this.initializeFile(path.join(this.sessionsPath, DATA_FILES.INDEX), '[]');
     await this.initializeFile(path.join(this.hookDataPath, 'sessions.json'), '{}');
-    await this.initializeFile(path.join(this.hookDataPath, 'changes.jsonl'), '');
-    await this.initializeFile(path.join(this.hookDataPath, 'prompts.jsonl'), '');
 
     this.initialized = true;
   }
@@ -125,6 +131,13 @@ export class FileStorage implements StorageInterface {
     } catch {
       return false;
     }
+  }
+
+  /**
+   * Get the hook data path for cleanup manager
+   */
+  getHookDataPath(): string {
+    return this.hookDataPath;
   }
 
   private async initializeFile(filePath: string, defaultContent: string): Promise<void> {
@@ -437,16 +450,50 @@ export class FileStorage implements StorageInterface {
   // ==================== Hook Data Operations ====================
 
   /**
+   * Generate a unique record ID
+   * Format: {timestamp}-{nanoid}
+   */
+  private generateRecordId(timestamp: number): string {
+    const nanoId = nanoid(8);
+    return `${timestamp}-${nanoId}`;
+  }
+
+  /**
+   * Get date string in YYYY-MM-DD format
+   */
+  private getDateString(timestamp: number): string {
+    const date = new Date(timestamp);
+    const year = String(date.getFullYear());
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  /**
+   * Get sharded file path for changes or prompts
+   */
+  private getShardedFilePath(type: 'changes' | 'prompts', timestamp: number): string {
+    const dateStr = this.getDateString(timestamp);
+    return path.join(this.hookDataPath, type, `${dateStr}.jsonl`);
+  }
+
+  /**
    * Append code change record (from Hook)
+   * Now writes to sharded files by date
    */
   async appendCodeChange(change: CodeChangeRecord): Promise<void> {
     await this.ensureInitialized();
 
-    const changesFile = path.join(this.hookDataPath, 'changes.jsonl');
+    // Generate ID if not present
+    const changeWithId: CodeChangeRecord = {
+      ...change,
+      id: change.id ?? this.generateRecordId(change.timestamp),
+    };
 
-    // Append to JSONL file
-    const line = JSON.stringify(change) + '\n';
-    await fs.appendFile(changesFile, line, 'utf-8');
+    // Write to sharded file
+    const filePath = this.getShardedFilePath('changes', change.timestamp);
+    const line = JSON.stringify(changeWithId) + '\n';
+    await fs.appendFile(filePath, line, 'utf-8');
   }
 
   /**
@@ -516,77 +563,96 @@ export class FileStorage implements StorageInterface {
   }
 
   /**
-   * Get all code changes for a session
+   * Get code changes by session ID
    */
   async getCodeChangesBySession(sessionId: string): Promise<CodeChangeRecord[]> {
     await this.ensureInitialized();
 
-    const changesFile = path.join(this.hookDataPath, 'changes.jsonl');
     const changes: CodeChangeRecord[] = [];
+    const changesDir = path.join(this.hookDataPath, 'changes');
 
     try {
-      const content = await fs.readFile(changesFile, 'utf-8');
-      const lines = content.trim().split('\n');
+      const files = await fs.readdir(changesDir);
+      
+      for (const file of files) {
+        if (!file.endsWith('.jsonl')) {
+          continue;
+        }
+        
+        const filePath = path.join(changesDir, file);
+        const content = await fs.readFile(filePath, 'utf-8');
+        const lines = content.trim().split('\n');
 
-      for (const line of lines) {
-        if (line.trim()) {
-          try {
-            const change = JSON.parse(line) as CodeChangeRecord;
-            if (change.sessionId === sessionId) {
-              changes.push(change);
+        for (const line of lines) {
+          if (line.trim()) {
+            try {
+              const change = JSON.parse(line) as CodeChangeRecord;
+              if (change.sessionId === sessionId) {
+                changes.push(change);
+              }
+            } catch {
+              // Skip invalid lines
             }
-          } catch {
-            // Skip invalid lines
           }
         }
       }
     } catch {
-      // File doesn't exist
+      // Directory doesn't exist
     }
 
     return changes;
   }
 
   /**
-   * Get all code change records
+   * Get recent code changes within a time window
+   * Reads from sharded files for better performance
    */
-  async getAllCodeChanges(): Promise<CodeChangeRecord[]> {
+  async getRecentCodeChanges(timeWindowDays: number): Promise<CodeChangeRecord[]> {
     await this.ensureInitialized();
-
-    const changesFile = path.join(this.hookDataPath, 'changes.jsonl');
-    const changes: CodeChangeRecord[] = [];
-
-    try {
-      const content = await fs.readFile(changesFile, 'utf-8');
-      const lines = content.trim().split('\n');
-
-      for (const line of lines) {
-        if (line.trim()) {
-          try {
-            changes.push(JSON.parse(line) as CodeChangeRecord);
-          } catch {
-            // Skip invalid lines
+    
+    const records: CodeChangeRecord[] = [];
+    const today = new Date();
+    
+    for (let i = 0; i < timeWindowDays; i++) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = this.getDateString(date.getTime());
+      
+      const filePath = path.join(this.hookDataPath, 'changes', `${dateStr}.jsonl`);
+      
+      try {
+        const content = await fs.readFile(filePath, 'utf-8');
+        const lines = content.trim().split('\n');
+        
+        for (const line of lines) {
+          if (line.trim()) {
+            try {
+              records.push(JSON.parse(line) as CodeChangeRecord);
+            } catch {
+              // Skip invalid lines
+            }
           }
         }
+      } catch {
+        // File doesn't exist, skip
       }
-    } catch {
-      // File doesn't exist
     }
-
-    return changes;
+    
+    return records;
   }
 
   // ==================== Prompt Record Operations ====================
 
   /**
    * Append a prompt record (from UserPromptSubmit hook)
+   * Now writes to sharded files by date
    */
   async appendPrompt(record: PromptRecord): Promise<void> {
     await this.ensureInitialized();
 
-    const promptsFile = path.join(this.hookDataPath, 'prompts.jsonl');
+    const filePath = this.getShardedFilePath('prompts', record.timestamp);
     const line = JSON.stringify(record) + '\n';
-    await fs.appendFile(promptsFile, line, 'utf-8');
+    await fs.appendFile(filePath, line, 'utf-8');
   }
 
   /**
@@ -596,40 +662,49 @@ export class FileStorage implements StorageInterface {
   async getLatestPromptBefore(sessionId: string, beforeTimestamp: number): Promise<string | undefined> {
     await this.ensureInitialized();
 
-    const promptsFile = path.join(this.hookDataPath, 'prompts.jsonl');
+    const promptsDir = path.join(this.hookDataPath, 'prompts');
 
     try {
-      const content = await fs.readFile(promptsFile, 'utf-8');
-      const lines = content.trim().split('\n');
-
+      const files = await fs.readdir(promptsDir);
+      
       let latestPrompt: string | undefined;
       let latestTimestamp = 0;
 
-      for (const line of lines) {
-        if (!line.trim()) {
+      for (const file of files) {
+        if (!file.endsWith('.jsonl')) {
           continue;
         }
+        
+        const filePath = path.join(promptsDir, file);
+        const content = await fs.readFile(filePath, 'utf-8');
+        const lines = content.trim().split('\n');
 
-        try {
-          const record = JSON.parse(line) as PromptRecord;
-
-          // Match session and find the latest prompt before the given timestamp
-          if (
-            record.sessionId === sessionId &&
-            record.timestamp <= beforeTimestamp &&
-            record.timestamp > latestTimestamp
-          ) {
-            latestTimestamp = record.timestamp;
-            latestPrompt = record.prompt;
+        for (const line of lines) {
+          if (!line.trim()) {
+            continue;
           }
-        } catch {
-          // Skip invalid lines
+
+          try {
+            const record = JSON.parse(line) as PromptRecord;
+
+            // Match session and find the latest prompt before the given timestamp
+            if (
+              record.sessionId === sessionId &&
+              record.timestamp <= beforeTimestamp &&
+              record.timestamp > latestTimestamp
+            ) {
+              latestTimestamp = record.timestamp;
+              latestPrompt = record.prompt;
+            }
+          } catch {
+            // Skip invalid lines
+          }
         }
       }
 
       return latestPrompt;
     } catch {
-      // File doesn't exist
+      // Directory doesn't exist
       return undefined;
     }
   }
@@ -640,32 +715,75 @@ export class FileStorage implements StorageInterface {
   async getPromptsBySession(sessionId: string): Promise<PromptRecord[]> {
     await this.ensureInitialized();
 
-    const promptsFile = path.join(this.hookDataPath, 'prompts.jsonl');
+    const promptsDir = path.join(this.hookDataPath, 'prompts');
     const prompts: PromptRecord[] = [];
 
     try {
-      const content = await fs.readFile(promptsFile, 'utf-8');
-      const lines = content.trim().split('\n');
-
-      for (const line of lines) {
-        if (!line.trim()) {
+      const files = await fs.readdir(promptsDir);
+      
+      for (const file of files) {
+        if (!file.endsWith('.jsonl')) {
           continue;
         }
+        
+        const filePath = path.join(promptsDir, file);
+        const content = await fs.readFile(filePath, 'utf-8');
+        const lines = content.trim().split('\n');
 
-        try {
-          const record = JSON.parse(line) as PromptRecord;
-          if (record.sessionId === sessionId) {
-            prompts.push(record);
+        for (const line of lines) {
+          if (!line.trim()) {
+            continue;
           }
-        } catch {
-          // Skip invalid lines
+
+          try {
+            const record = JSON.parse(line) as PromptRecord;
+            if (record.sessionId === sessionId) {
+              prompts.push(record);
+            }
+          } catch {
+            // Skip invalid lines
+          }
         }
       }
     } catch {
-      // File doesn't exist
+      // Directory doesn't exist
     }
 
     return prompts.sort((a, b) => a.timestamp - b.timestamp);
+  }
+
+  // ==================== Performance Log Operations ====================
+
+  /**
+   * Append performance log entry
+   */
+  async appendPerformanceLog(metrics: PerformanceMetrics): Promise<void> {
+    await this.ensureInitialized();
+
+    const logPath = path.join(this.hookDataPath, 'logs', 'performance.jsonl');
+
+    // Simplified log entry
+    const logEntry = {
+      timestamp: metrics.timestamp,
+      totalMs: metrics.totalMs,
+      warning: metrics.warning,
+      filtering: {
+        filePathCandidates: metrics.filtering.filePathCandidates,
+        timeWindowCandidates: metrics.filtering.timeWindowCandidates,
+        lengthCandidates: metrics.filtering.lengthCandidates,
+      },
+      similarity: {
+        levenshteinTotalMs: metrics.similarity.levenshteinTotalMs,
+        callCount: metrics.similarity.levenshteinCallCount,
+        avgMs: metrics.similarity.avgLevenshteinMs,
+      },
+      result: {
+        matched: metrics.result.matched,
+      },
+    };
+
+    const line = JSON.stringify(logEntry) + '\n';
+    await fs.appendFile(logPath, line, 'utf-8');
   }
 }
 

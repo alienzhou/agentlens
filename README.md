@@ -2,9 +2,9 @@
 
 > Code Review tool redesigned for the Vibe Coding era
 
-[![CI](https://github.com/alienzhou/agent-blame/actions/workflows/ci.yml/badge.svg)](https://github.com/alienzhou/agent-blame/actions)
+[![CI](https://github.com/vibe-x-ai/agent-blame/actions/workflows/ci.yml/badge.svg)](https://github.com/vibe-x-ai/agent-blame/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Status: MVP Development](https://img.shields.io/badge/Status-MVP%20Development-orange.svg)](https://github.com/alienzhou/agent-blame)
+[![Status: Beta](https://img.shields.io/badge/Status-Beta-blue.svg)](https://github.com/vibe-x-ai/agent-blame)
 
 ## 📋 Overview
 
@@ -14,6 +14,29 @@ Agent Blame is a Code Review tool designed specifically for the era of AI-assist
 - **Contributor Detection**: Identifies whether code was written by AI or humans using hunk-level similarity matching
 - **GitLens-Style Integration**: Displays contributor information directly in your code review workflow
 - **Multi-Agent Support**: Works with Cursor, Claude Code, and other AI coding assistants
+- **Performance Optimized**: 4-level filtering for efficient matching on large datasets
+
+## ✨ Key Features
+
+### 🎯 Contributor Detection
+- **4-Level Filtering**: File path → Time window → Content length → Levenshtein matching
+- **High Performance**: 100 records < 50ms, 500 records < 150ms
+- **Configurable Thresholds**: Customize AI/Human detection sensitivity
+
+### 📊 Performance Monitoring
+- **Real-time Tracking**: Monitor matching performance with detailed metrics
+- **Bottleneck Analysis**: Automatic detection of performance issues
+- **Developer Mode**: Enhanced debugging information in VS Code
+
+### 🗂️ Smart Storage
+- **Date-based Sharding**: Efficient JSONL files organized by date
+- **Auto Cleanup**: Configurable retention policy (default: 7 days)
+- **Prompt Tracking**: Link code changes to their triggering prompts
+
+### 🐛 Report Issue
+- **One-Click Reporting**: Report matching issues directly from VS Code
+- **Rich Context**: Includes candidates, performance metrics, and debug info
+- **User Feedback**: Collect expected results for improvement
 
 ## 🎯 Problem & Solution
 
@@ -40,7 +63,7 @@ Agent Blame uses a 4-layer architecture:
 ```
 ┌─────────────────────────────────────────────────────┐
 │  Layer 4: Product Delivery                         │
-│  (CLI Tool, VS Code Plugin, GitLens Integration)   │
+│  (CLI Tool, VS Code Extension, GitLens Integration)│
 ├─────────────────────────────────────────────────────┤
 │  Layer 3: Product Core                             │
 │  (Protocol Parsing, Rendering, State Management)   │
@@ -51,6 +74,25 @@ Agent Blame uses a 4-layer architecture:
 │  Layer 1: Tool Layer                               │
 │  (Hook System, Session Monitoring, Git Integration)│
 └─────────────────────────────────────────────────────┘
+```
+
+### Data Storage Structure
+
+```
+.agent-blame/data/hooks/
+├── changes/                    # Code change records (sharded by date)
+│   ├── 2026-02-10.jsonl
+│   ├── 2026-02-11.jsonl
+│   └── 2026-02-12.jsonl
+├── prompts/                    # User prompts (sharded by date)
+│   ├── 2026-02-10.jsonl
+│   └── 2026-02-11.jsonl
+├── logs/
+│   └── performance.jsonl       # Performance metrics
+├── reports/                    # Issue reports
+│   └── 2026-02-12/
+│       └── report-{id}.json
+└── sessions.json               # Session metadata
 ```
 
 ## 🚀 Quick Start
@@ -65,7 +107,7 @@ Agent Blame uses a 4-layer architecture:
 
 ```bash
 # Clone the repository
-git clone git@github.com:alienzhou/agent-blame.git
+git clone git@github.com:vibe-x-ai/agent-blame.git
 cd agent-blame
 
 # Install dependencies
@@ -86,7 +128,7 @@ agent-blame config --init
 
 This creates a `.agent-blame/` directory with:
 - `data/sessions/` - Session data
-- `data/review-units/` - Review unit data
+- `data/hooks/` - Hook captured data (sharded by date)
 - `data/todos.json` - TODO items
 - `config/` - Configuration files
 
@@ -146,32 +188,52 @@ agent-blame todos --format json
 
 This monorepo contains:
 
-- **@agent-blame/core** - Core data models, Git integration, contributor detection
-- **@vibe-x/agent-blame** - Agent blame system for AI Agent integration
-- **@vibe-x/agent-blame-cli** - Command-line interface
-- **@vibe-x/agent-blame-vscode** - VS Code extension (coming soon)
+| Package | Description | Status |
+|---------|-------------|--------|
+| **@agent-blame/core** | Core data models, Git integration, contributor detection, performance tracking | ✅ Stable |
+| **@agent-blame/hook** | Agent hook adapters (Cursor, Claude Code) | ✅ Stable |
+| **@agent-blame/cli** | Command-line interface | ✅ Stable |
+| **@agent-blame/vscode** | VS Code extension with blame annotations | ✅ Beta |
 
 ## 🔍 How It Works
 
 ### Contributor Detection
 
-Agent Blame uses **hunk-level Levenshtein similarity matching** to determine code authorship:
+Agent Blame uses **4-level filtering with Levenshtein similarity matching** to determine code authorship:
 
-1. **Capture**: Hook system captures code changes from AI Agents
-2. **Compare**: Compare Git hunks with captured Agent records
-3. **Classify**: Based on similarity thresholds:
-   - ≥ 90% similarity → **AI Generated**
-   - 70-90% similarity → **AI Generated (Human Modified)**
-   - < 70% similarity → **Human Contribution**
+```
+Level 1: File Path Filter     (100 records → 30 records)
+    ↓
+Level 2: Time Window Filter   (30 records → 15 records)
+    ↓
+Level 3: Content Length Filter (15 records → 5 records)
+    ↓
+Level 4: Levenshtein Matching  (5 candidates → best match)
+```
 
-### Data Collection
+**Classification Thresholds**:
+- ≥ 90% similarity → **AI Generated**
+- 70-90% similarity → **AI Generated (Human Modified)**
+- < 70% similarity → **Human Contribution**
 
-**Dual-Track Approach** (MVP):
-- **Track 1**: Hook capture (file edits, TODOs)
-- **Track 2**: Session file monitoring (operation history)
+### VS Code Extension Features
 
-**Future Enhancement**:
-- **Track 3**: Skill generation (protocol content - WHAT/WHY/HOW TO VERIFY)
+- **Line Blame**: Hover over any line to see contributor info
+- **Developer Mode**: Enable `agentBlame.developerMode` for detailed debug info
+- **Report Issue**: Click "🐛 Report Issue" to report matching problems
+- **Auto Cleanup**: Automatic cleanup of old data files
+
+### Configuration (VS Code)
+
+```json
+{
+  "agentBlame.matching.timeWindowDays": 3,
+  "agentBlame.matching.lengthTolerance": 0.5,
+  "agentBlame.autoCleanup.enabled": true,
+  "agentBlame.autoCleanup.retentionDays": 7,
+  "agentBlame.developerMode": false
+}
+```
 
 ## 🛠️ Development
 
@@ -180,14 +242,14 @@ Agent Blame uses **hunk-level Levenshtein similarity matching** to determine cod
 ```
 agent-blame/
 ├── packages/
-│   ├── core/          # Core library
-│   ├── hook/          # Hook system
+│   ├── core/          # Core library (detection, storage, performance)
+│   ├── hook/          # Hook system (agent adapters)
 │   ├── cli/           # CLI tool
-│   └── vscode/        # VS Code plugin
+│   └── vscode/        # VS Code extension
 ├── docs/              # Documentation
 │   └── v01-mvp/       # MVP documentation
 ├── .github/           # CI/CD workflows
-└── tests/             # Tests
+└── vitest.config.ts   # Test configuration
 ```
 
 ### Available Scripts
@@ -214,7 +276,7 @@ pnpm clean            # Remove build artifacts and node_modules
 ### Running Tests
 
 ```bash
-# Run all tests
+# Run all tests (9 test files, 167+ test cases)
 pnpm test:run
 
 # Run tests for specific package
@@ -223,6 +285,19 @@ pnpm --filter @agent-blame/core test
 # Generate coverage report
 pnpm test:coverage
 ```
+
+### Test Coverage
+
+| Test Category | Files | Test Cases |
+|---------------|-------|------------|
+| Sharded Storage | 1 | 22 |
+| Cleanup Manager | 1 | 26 |
+| 4-Level Filtering | 1 | 22 |
+| Performance Tracker | 1 | 23 |
+| Report Service | 1 | 34 |
+| Integration Tests | 1 | 12 |
+| Legacy Tests | 3 | 28 |
+| **Total** | **9** | **167** |
 
 ## 📚 Documentation
 
@@ -237,8 +312,11 @@ pnpm test:coverage
 
 - [x] **Phase 0**: Project infrastructure and tool layer
 - [x] **Phase 1**: Data layer validation (CLI tool)
-- [ ] **Phase 2**: Product core layer (VS Code plugin)
+- [x] **Phase 2**: Product core layer (VS Code extension)
+- [x] **Performance Optimization**: 4-level filtering, sharded storage
+- [x] **Report Issue**: One-click issue reporting with rich context
 - [ ] **Phase 3**: Product delivery layer (GitLens integration)
+- [ ] **Marketplace Release**: Publish to VS Code Marketplace
 
 See [docs/v01-mvp/04-task-list.md](./docs/v01-mvp/04-task-list.md) for detailed task breakdown.
 
@@ -252,6 +330,8 @@ We welcome contributions! Please:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
@@ -263,13 +343,15 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 - Uses [Commander.js](https://github.com/tj/commander.js) for CLI
 - Styled with [chalk](https://github.com/chalk/chalk) for terminal output
 - File watching with [chokidar](https://github.com/paulmillr/chokidar)
+- Similarity matching with [fast-levenshtein](https://github.com/hiddentao/fast-levenshtein)
 
 ## 📧 Contact
 
-- Author: [alienzhou](https://github.com/alienzhou)
-- Issues: [GitHub Issues](https://github.com/alienzhou/agent-blame/issues)
+- Organization: [vibe-x-ai](https://github.com/vibe-x-ai)
+- Repository: [agent-blame](https://github.com/vibe-x-ai/agent-blame)
+- Issues: [GitHub Issues](https://github.com/vibe-x-ai/agent-blame/issues)
 - Documentation: [docs/](./docs/)
 
 ---
 
-**Note**: This is MVP (v0.1). Core features are functional but the Skill system for protocol content generation will be available in future versions.
+**Note**: This is Beta version (v0.1). Core features including contributor detection, performance monitoring, and VS Code integration are functional. The Skill system for protocol content generation will be available in future versions.

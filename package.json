@@ -36,12 +36,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alienzhou/agent-blame.git"
+    "url": "git+https://github.com/vibe-x-ai/agent-blame.git"
   },
-  "author": "alienzhou",
+  "author": "vibe-x-ai",
+  "contributors": [
+    "zhouhongxuan"
+  ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/alienzhou/agent-blame/issues"
+    "url": "https://github.com/vibe-x-ai/agent-blame/issues"
   },
-  "homepage": "https://github.com/alienzhou/agent-blame#readme"
+  "homepage": "https://github.com/vibe-x-ai/agent-blame#readme"
 }

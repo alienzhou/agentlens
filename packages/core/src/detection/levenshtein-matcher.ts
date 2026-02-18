@@ -1,3 +1,5 @@
+import type { PerformanceTracker } from '../performance/performance-tracker.js';
+
 /**
  * Levenshtein distance-based similarity matcher
  *
@@ -8,31 +10,46 @@ export class LevenshteinMatcher {
   /**
    * Calculate similarity between two strings
    * Returns a value between 0 and 1, where 1 is identical
+   * 
+   * @param str1 - First string to compare
+   * @param str2 - Second string to compare
+   * @param tracker - Optional performance tracker for monitoring
    */
-  calculate(str1: string, str2: string): number {
+  calculate(str1: string, str2: string, tracker?: PerformanceTracker): number {
+    const startTime = typeof performance !== 'undefined' ? performance.now() : Date.now();
+    
+    let similarity: number;
+
     // Handle edge cases
     if (str1 === str2) {
-      return 1;
+      similarity = 1;
+    } else if (str1.length === 0 || str2.length === 0) {
+      similarity = 0;
+    } else {
+      // Normalize strings for comparison
+      const normalized1 = this.normalizeForComparison(str1);
+      const normalized2 = this.normalizeForComparison(str2);
+
+      if (normalized1 === normalized2) {
+        similarity = 1;
+      } else {
+        // Calculate Levenshtein distance
+        const distance = this.levenshteinDistance(normalized1, normalized2);
+        const maxLength = Math.max(normalized1.length, normalized2.length);
+
+        // Convert distance to similarity (0-1)
+        similarity = 1 - distance / maxLength;
+      }
     }
 
-    if (str1.length === 0 || str2.length === 0) {
-      return 0;
+    // Record performance if tracker is provided
+    if (tracker) {
+      const duration = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - startTime;
+      const contentLength = Math.max(str1.length, str2.length);
+      tracker.recordLevenshteinCall(duration, contentLength);
     }
 
-    // Normalize strings for comparison
-    const normalized1 = this.normalizeForComparison(str1);
-    const normalized2 = this.normalizeForComparison(str2);
-
-    if (normalized1 === normalized2) {
-      return 1;
-    }
-
-    // Calculate Levenshtein distance
-    const distance = this.levenshteinDistance(normalized1, normalized2);
-    const maxLength = Math.max(normalized1.length, normalized2.length);
-
-    // Convert distance to similarity (0-1)
-    return 1 - distance / maxLength;
+    return similarity;
   }
 
   /**

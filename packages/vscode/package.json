@@ -41,6 +41,44 @@
           "minimum": 1,
           "maximum": 30,
           "description": "Number of days to keep log files"
+        },
+        "agentBlame.matching.timeWindowDays": {
+          "type": "number",
+          "default": 3,
+          "minimum": 1,
+          "maximum": 30,
+          "description": "Time window for matching agent records (in days)"
+        },
+        "agentBlame.matching.lengthTolerance": {
+          "type": "number",
+          "default": 0.5,
+          "minimum": 0.1,
+          "maximum": 2.0,
+          "description": "Content length tolerance for filtering (0.5 = 50%)"
+        },
+        "agentBlame.developerMode": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable developer mode to show extra debug information"
+        },
+        "agentBlame.autoCleanup.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable automatic cleanup of old data files"
+        },
+        "agentBlame.autoCleanup.retentionDays": {
+          "type": "number",
+          "default": 7,
+          "minimum": 1,
+          "maximum": 90,
+          "description": "Number of days to retain data files (changes, prompts)"
+        },
+        "agentBlame.autoCleanup.checkIntervalHours": {
+          "type": "number",
+          "default": 24,
+          "minimum": 1,
+          "maximum": 168,
+          "description": "Interval between cleanup checks (in hours)"
         }
       }
     },
@@ -60,6 +98,18 @@
       {
         "command": "agent-blame.showStatus",
         "title": "Agent Blame: Show Agent Status"
+      },
+      {
+        "command": "agentBlame.reportIssue",
+        "title": "Agent Blame: Report Matching Issue"
+      },
+      {
+        "command": "agent-blame.cleanup",
+        "title": "Agent Blame: Cleanup Old Data"
+      },
+      {
+        "command": "agent-blame.cleanupStats",
+        "title": "Agent Blame: Show Data Statistics"
       }
     ],
     "viewsContainers": {
