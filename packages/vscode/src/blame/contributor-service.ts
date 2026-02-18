@@ -231,71 +231,55 @@ export class ContributorService {
   }
 
   /**
-   * Load agent records from changes.jsonl
+   * Load agent records from sharded changes files (changes/YYYY-MM-DD.jsonl)
+   * Falls back to legacy changes.jsonl for backward compatibility
    */
   private async loadAgentRecords(): Promise<ExtendedAgentRecord[]> {
-    const dataPath = path.join(this.workspaceRoot, DATA_DIR_NAME, 'data', 'hooks', 'changes.jsonl');
+    const changesDir = path.join(this.workspaceRoot, DATA_DIR_NAME, 'data', 'hooks', 'changes');
+    const legacyPath = path.join(this.workspaceRoot, DATA_DIR_NAME, 'data', 'hooks', 'changes.jsonl');
+    const records: ExtendedAgentRecord[] = [];
 
+    // Try to load from sharded files first (new format)
     try {
-      const content = await fs.readFile(dataPath, 'utf-8');
-      const lines = content.trim().split('\n');
-      const records: ExtendedAgentRecord[] = [];
+      const files = await fs.readdir(changesDir);
+      const jsonlFiles = files.filter(f => f.endsWith('.jsonl')).sort().reverse(); // Most recent first
+      
+      log.debug('Loading agent records from sharded files', {
+        changesDir: path.relative(this.workspaceRoot, changesDir),
+        fileCount: jsonlFiles.length,
+        files: jsonlFiles.slice(0, 5), // Log first 5 files
+      });
 
-      for (const line of lines) {
-        if (!line.trim()) {
-          continue;
-        }
-
+      for (const file of jsonlFiles) {
+        const filePath = path.join(changesDir, file);
         try {
-          const change = JSON.parse(line) as CodeChangeRecord;
-          if (!change.success || !change.newContent) {
-            continue;
-          }
-
-          // Calculate addedLines from oldContent and newContent
-          const addedLines = this.calculateAddedLines(change.oldContent || '', change.newContent);
-
-          // Get userPrompt for this specific change using timestamp-based lookup
-          const promptCacheKey = `${change.sessionId}-${String(change.timestamp)}`;
-          let userPrompt: string | undefined;
-
-          if (this.promptCache.has(promptCacheKey)) {
-            userPrompt = this.promptCache.get(promptCacheKey);
-          } else {
-            // Load from prompts.jsonl using timestamp-based matching
-            userPrompt = await this.loadUserPromptForChange(change.sessionId, change.timestamp);
-            this.promptCache.set(promptCacheKey, userPrompt);
-          }
-
-          // Convert to AgentRecord
-          const sessionSource: SessionSource = {
-            agent: change.agent,
-            sessionId: change.sessionId,
-            qaIndex: 1, // Default, as CodeChangeRecord doesn't have this
-            timestamp: change.timestamp,
-            metadata: {
-              userPrompt,
-            },
-          };
-
-          const record: ExtendedAgentRecord = {
-            id: `${change.sessionId}-${String(change.timestamp)}`,
-            sessionSource,
-            filePath: change.filePath,
-            content: change.newContent,
-            addedLines,
-            timestamp: change.timestamp,
-            toolName: change.toolName,
-          };
-
-          records.push(record);
+          const content = await fs.readFile(filePath, 'utf-8');
+          await this.parseChangeLines(content, records);
         } catch {
-          // Skip invalid lines
+          // Skip files that can't be read
         }
       }
 
-      log.debug('Agent records loaded from file', {
-        dataPath: path.relative(this.workspaceRoot, dataPath),
+      if (records.length > 0) {
+        log.debug('Agent records loaded from sharded files', {
+          totalRecords: records.length,
+          files: [...new Set(records.map(r => path.basename(r.filePath)))],
+          agents: [...new Set(records.map(r => r.sessionSource.agent))],
+        });
+        return records;
+      }
+    } catch {
+      // changesDir doesn't exist, try legacy path
+      log.debug('Sharded changes directory not found, trying legacy path');
+    }
+
+    // Fallback to legacy changes.jsonl
+    try {
+      const content = await fs.readFile(legacyPath, 'utf-8');
+      await this.parseChangeLines(content, records);
+
+      log.debug('Agent records loaded from legacy file', {
+        dataPath: path.relative(this.workspaceRoot, legacyPath),
         totalRecords: records.length,
         files: [...new Set(records.map(r => path.basename(r.filePath)))],
         agents: [...new Set(records.map(r => r.sessionSource.agent))],
@@ -303,12 +287,73 @@ export class ContributorService {
 
       return records;
     } catch (error) {
-      // File doesn't exist or can't be read
-      log.debug('No agent records file found', {
-        dataPath: path.relative(this.workspaceRoot, dataPath),
+      // Neither format exists
+      log.debug('No agent records found', {
+        changesDir: path.relative(this.workspaceRoot, changesDir),
+        legacyPath: path.relative(this.workspaceRoot, legacyPath),
         error: String(error),
       });
       return [];
+    }
+  }
+
+  /**
+   * Parse change lines from content and add to records array
+   */
+  private async parseChangeLines(content: string, records: ExtendedAgentRecord[]): Promise<void> {
+    const lines = content.trim().split('\n');
+
+    for (const line of lines) {
+      if (!line.trim()) {
+        continue;
+      }
+
+      try {
+        const change = JSON.parse(line) as CodeChangeRecord;
+        if (!change.success || !change.newContent) {
+          continue;
+        }
+
+        // Calculate addedLines from oldContent and newContent
+        const addedLines = this.calculateAddedLines(change.oldContent || '', change.newContent);
+
+        // Get userPrompt for this specific change using timestamp-based lookup
+        const promptCacheKey = `${change.sessionId}-${String(change.timestamp)}`;
+        let userPrompt: string | undefined;
+
+        if (this.promptCache.has(promptCacheKey)) {
+          userPrompt = this.promptCache.get(promptCacheKey);
+        } else {
+          // Load from prompts.jsonl using timestamp-based matching
+          userPrompt = await this.loadUserPromptForChange(change.sessionId, change.timestamp);
+          this.promptCache.set(promptCacheKey, userPrompt);
+        }
+
+        // Convert to AgentRecord
+        const sessionSource: SessionSource = {
+          agent: change.agent,
+          sessionId: change.sessionId,
+          qaIndex: 1, // Default, as CodeChangeRecord doesn't have this
+          timestamp: change.timestamp,
+          metadata: {
+            userPrompt,
+          },
+        };
+
+        const record: ExtendedAgentRecord = {
+          id: `${change.sessionId}-${String(change.timestamp)}`,
+          sessionSource,
+          filePath: change.filePath,
+          content: change.newContent,
+          addedLines,
+          timestamp: change.timestamp,
+          toolName: change.toolName,
+        };
+
+        records.push(record);
+      } catch {
+        // Skip invalid lines
+      }
     }
   }
 
@@ -503,8 +548,63 @@ export class ContributorService {
     changeTimestamp: number
   ): Promise<string | undefined> {
     try {
-      // Try to load from prompts.jsonl first (new format)
-      const promptsFile = path.join(
+      // Try to load from sharded prompts files first (new format: prompts/YYYY-MM-DD.jsonl)
+      const promptsDir = path.join(
+        this.workspaceRoot,
+        DATA_DIR_NAME,
+        'data',
+        'hooks',
+        'prompts'
+      );
+
+      try {
+        const files = await fs.readdir(promptsDir);
+        const jsonlFiles = files.filter(f => f.endsWith('.jsonl')).sort().reverse();
+
+        let latestPrompt: string | undefined;
+        let latestTimestamp = 0;
+
+        for (const file of jsonlFiles) {
+          const filePath = path.join(promptsDir, file);
+          try {
+            const content = await fs.readFile(filePath, 'utf-8');
+            const lines = content.trim().split('\n');
+
+            for (const line of lines) {
+              if (!line.trim()) {
+                continue;
+              }
+
+              try {
+                const record = JSON.parse(line) as { sessionId: string; prompt: string; timestamp: number };
+
+                // Match session and find the latest prompt before the change timestamp
+                if (
+                  record.sessionId === sessionId &&
+                  record.timestamp <= changeTimestamp &&
+                  record.timestamp > latestTimestamp
+                ) {
+                  latestTimestamp = record.timestamp;
+                  latestPrompt = record.prompt;
+                }
+              } catch {
+                // Skip invalid lines
+              }
+            }
+          } catch {
+            // Skip files that can't be read
+          }
+        }
+
+        if (latestPrompt) {
+          return latestPrompt;
+        }
+      } catch {
+        // prompts directory doesn't exist, try legacy path
+      }
+
+      // Fallback: Try legacy prompts.jsonl
+      const legacyPromptsFile = path.join(
         this.workspaceRoot,
         DATA_DIR_NAME,
         'data',
@@ -513,7 +613,7 @@ export class ContributorService {
       );
 
       try {
-        const content = await fs.readFile(promptsFile, 'utf-8');
+        const content = await fs.readFile(legacyPromptsFile, 'utf-8');
         const lines = content.trim().split('\n');
 
         let latestPrompt: string | undefined;

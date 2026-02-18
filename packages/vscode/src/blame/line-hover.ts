@@ -72,7 +72,10 @@ export class LineHoverProvider implements vscode.HoverProvider {
   ): Promise<vscode.Hover | null> {
     const blameInfo = await this.blameService.getBlameForLine(filePath, line);
     if (!blameInfo) {
-      return null;
+      // Git blame failed (file is new/untracked) - treat as uncommitted
+      const document = vscode.workspace.textDocuments.find((doc) => doc.fileName === filePath);
+      const lineText = document?.lineAt(line).text ?? '';
+      return this.provideUncommittedHover(filePath, lineText, line);
     }
 
     // Check if this is an uncommitted line
@@ -81,8 +84,10 @@ export class LineHoverProvider implements vscode.HoverProvider {
       blameInfo.commitHash.startsWith('^');
 
     if (isUncommitted) {
-      // This shouldn't happen if document.isDirty check worked, but handle it anyway
-      return null;
+      // Line is saved but not committed - use contributor detection
+      const document = vscode.workspace.textDocuments.find((doc) => doc.fileName === filePath);
+      const lineText = document?.lineAt(line).text ?? '';
+      return this.provideUncommittedHover(filePath, lineText, line);
     }
 
     // Format hover content
