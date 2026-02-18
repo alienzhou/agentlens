@@ -188,11 +188,13 @@
       "agentlens": [
         {
           "id": "agentlens.agents",
-          "name": "Connected Agents"
+          "name": "Connected Agents",
+          "icon": "$(plug)"
         },
         {
           "id": "agentlens.activity",
-          "name": "Recent Activity"
+          "name": "Recent Activity",
+          "icon": "$(history)"
         }
       ]
     },
